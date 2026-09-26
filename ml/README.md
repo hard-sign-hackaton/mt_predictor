@@ -57,6 +57,25 @@ The model dump is loaded from `delay_service/artifacts/delay_model.joblib`.
 Override its location using `DELAY_MODEL_PATH`. Server settings can be supplied
 with `GRPC_HOST`, `GRPC_PORT`, and `GRPC_MAX_WORKERS`.
 
+### Docker
+
+The build context is the directory holding `requirements.txt`:
+
+```bash
+docker build -t mt-predictor-grpc .
+docker run --rm -p 50051:50051 mt-predictor-grpc
+```
+
+The image installs the CPU-only PyTorch wheel, runs as an unprivileged user, and
+serves the checked-in model on port 50051. Build for NVIDIA with:
+
+```bash
+docker build -t mt-predictor-grpc \
+  --build-arg TORCH_INDEX_URL=https://download.pytorch.org/whl/cu128 \
+  --build-arg TORCH_SUFFIX=+cu128 .
+docker run --rm --gpus all -e MODEL_DEVICE=cuda -p 50051:50051 mt-predictor-grpc
+```
+
 The Protobuf service is `delay_service.v1.DelayPredictionService`:
 
 - `Predict(PredictRequest) returns (PredictionResponse)`
@@ -133,4 +152,5 @@ From the repository root:
 - `delay_service/` — service, model code, Protobuf contract/bindings, and model.
 - `tests/` — feature, model, and live in-process gRPC tests.
 - `requirements.txt` — runtime and training dependencies.
+- `Dockerfile`, `.dockerignore` — container image for the gRPC service.
 - `.gitignore` — excludes local environments, caches, and copied dataset files.
