@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package delay_service.v1;
+
+import "google/protobuf/timestamp.proto";
+
+message TelemetryPoint {
+  google.protobuf.Timestamp event_time = 1;
+  bool location_valid = 2;
+  optional double lon = 3;
+  optional double lat = 4;
+  optional double alt = 5;
+  optional double speed = 6;
+  optional double heading = 7;
+  optional int64 tr_id = 8;
+}
+
+message PredictionPoint {
+  string sample_id = 1;
+  int64 tr_id = 2;
+  google.protobuf.Timestamp T = 3;
+  optional int64 target_stop_id = 4;
+  google.protobuf.Timestamp target_time_begin = 5;
+  double cur_dev_s = 6;
+}
+
+message PredictRequest {
+  PredictionPoint point = 1;
+  repeated TelemetryPoint telemetry = 2;
+}
+
+message BatchPredictRequest {
+  repeated PredictionPoint points = 1;
+  repeated TelemetryPoint telemetry = 2;
+}
+
+message PredictionResponse {
+  string sample_id = 1;
+  double prediction = 2;
+  string unit = 3;
+}
+
+message BatchPredictionResponse {
+  repeated PredictionResponse predictions = 1;
+}
+
+service DelayPredictionService {
+  rpc Predict(PredictRequest) returns (PredictionResponse);
+  rpc PredictBatch(BatchPredictRequest) returns (BatchPredictionResponse);
+}

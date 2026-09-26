@@ -1,0 +1,9 @@
+catboost>=1.2.8,<2
+grpcio>=1.84,<2
+grpcio-tools>=1.84,<2
+joblib>=1.4,<2
+numpy>=2.0,<3
+pandas>=2.2,<4
+protobuf>=7.35.1,<8
+scikit-learn>=1.5,<2
+torch>=2.9,<3
