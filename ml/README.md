@@ -55,7 +55,9 @@ On Linux or macOS:
 
 The model dump is loaded from `delay_service/artifacts/delay_model.joblib`.
 Override its location using `DELAY_MODEL_PATH`. Server settings can be supplied
-with `GRPC_HOST`, `GRPC_PORT`, and `GRPC_MAX_WORKERS`.
+with `GRPC_HOST`, `GRPC_PORT`, and `GRPC_MAX_WORKERS`. Each server process loads
+one immutable model version at startup and is otherwise stateless, so it can be
+run as a replica behind a gRPC-capable load balancer.
 
 ### Docker
 
@@ -125,19 +127,46 @@ with grpc.insecure_channel("localhost:50051") as channel:
 
 Use TLS credentials when connecting across an untrusted network.
 
-## Retrain and regenerate submission (optional)
+## Retrain and publish a model version (optional)
 
 Training requires the original dataset layout (`train/`, `test/`, `validate/`,
 and `labels/`) alongside this repository, or pass its location with
 `--data-dir`. The trained ensemble and validation `submission.csv` are written
-to the paths specified by the command:
+to the paths specified by the command. If `--model-out` is omitted, training
+publishes a timestamped artifact under `delay_service/artifacts/versions/`.
+Training uses the labeled training split; test labels are only used for
+evaluation. For retraining with new labels, build an updated cumulative dataset
+with a fresh vehicle-disjoint test split, then train and evaluate a new version:
 
 ```powershell
 .\.venv\Scripts\python.exe -m delay_service.train --data-dir "C:\path\to\dataset" --device auto
 ```
 
 Use `--device cuda` to require NVIDIA CUDA or `--device cpu` to force CPU.
-Training compares on the labeled test set; it does not fit on test labels.
+To select an explicit immutable version path, pass `--model-out`, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m delay_service.train --data-dir "C:\path\to\dataset" --model-out "C:\models\delay_model-v2.joblib"
+```
+
+Artifact publication uses a temporary file and atomic replacement, so a failed
+write cannot leave a truncated model at the published path. The running server
+does not hot-reload artifacts: validate the new version, then roll it out by
+restarting/replacing replicas with `DELAY_MODEL_PATH` set to that version. Keep
+the previous artifact available for rollback. Training is an offline full
+retrain on accumulated labeled data, not online learning from prediction
+requests.
+
+## Horizontal scaling
+
+The Docker image above includes the bundled model. To deploy a new model
+version, mount the artifact into each replica and set `DELAY_MODEL_PATH`. Run
+multiple replicas behind an external gRPC load balancer; give each replica
+enough CPU/RAM, and avoid overcommitting a shared GPU. `PredictBatch` supports
+up to 1,000 forecast points per request, and `GRPC_MAX_WORKERS` controls the
+per-process request worker pool. Benchmark the target hardware to choose replica
+and worker counts; increasing threads alone does not guarantee higher
+throughput.
 
 ## Tests
 

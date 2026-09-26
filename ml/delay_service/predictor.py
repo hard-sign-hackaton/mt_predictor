@@ -48,6 +48,7 @@ class DelayPredictor:
             raise ValueError(f"Sequence schema does not match {self.model_path}")
         if bundle.get("sequence_length") != DEFAULT_SEQUENCE_LENGTH:
             raise ValueError(f"Sequence length does not match {self.model_path}")
+        self.model_version = str(bundle.get("model_version", self.model_path.stem))
         self.catboost_model = bundle["catboost_model"]
         self.transformer_artifact: SequenceModelArtifact = bundle[
             "transformer_model"
