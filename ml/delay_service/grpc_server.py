@@ -123,11 +123,12 @@ def serve(host: str = "0.0.0.0", port: int = 50051) -> None:
         raise RuntimeError(f"Could not bind gRPC server to {host}:{port}")
     server.start()
     LOGGER.info(
-        "gRPC server listening on %s:%s; model_version=%s; "
+        "gRPC server listening on %s:%s; model_version=%s; Transformer backend=%s; "
         "Transformer inference device=%s (trained on %s)",
         host,
         bound_port,
         predictor.model_version,
+        predictor.transformer_backend,
         predictor.device,
         predictor.training_device,
     )
