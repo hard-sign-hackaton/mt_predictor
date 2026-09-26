@@ -1,0 +1,328 @@
+{
+  "assignment_count": 311,
+  "binding_count": 56,
+  "geometry_quality_counts": {
+    "gps_repeated": 20,
+    "gps_single": 5,
+    "stops_only": 6
+  },
+  "patterns": [
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 21,
+      "max_gps_jump_m": 176.4,
+      "median_stop_to_gps_m": 7.0,
+      "occurrence_count": 21,
+      "polyline_point_count": 147,
+      "route_pattern_id": "route_pattern_0fb0f312098c"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 2,
+      "max_gps_jump_m": 1207.6,
+      "median_stop_to_gps_m": 10.0,
+      "occurrence_count": 4,
+      "polyline_point_count": 129,
+      "route_pattern_id": "route_pattern_14a31b486db8"
+    },
+    {
+      "best_stop_coverage": 0.9333,
+      "geometry_quality": "stops_only",
+      "good_gps_occurrence_count": 0,
+      "max_gps_jump_m": 5095.8,
+      "median_stop_to_gps_m": 27.0,
+      "occurrence_count": 8,
+      "polyline_point_count": 33,
+      "route_pattern_id": "route_pattern_1e2366da6e91"
+    },
+    {
+      "best_stop_coverage": 0.6486,
+      "geometry_quality": "gps_single",
+      "good_gps_occurrence_count": 1,
+      "max_gps_jump_m": 244.6,
+      "median_stop_to_gps_m": 25.1,
+      "occurrence_count": 2,
+      "polyline_point_count": 42,
+      "route_pattern_id": "route_pattern_1fbff68becd0"
+    },
+    {
+      "best_stop_coverage": 0.6486,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 2,
+      "max_gps_jump_m": 222.7,
+      "median_stop_to_gps_m": 22.5,
+      "occurrence_count": 4,
+      "polyline_point_count": 83,
+      "route_pattern_id": "route_pattern_289254115bf3"
+    },
+    {
+      "best_stop_coverage": 0.9753,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 4,
+      "max_gps_jump_m": 1378.3,
+      "median_stop_to_gps_m": 12.5,
+      "occurrence_count": 16,
+      "polyline_point_count": 123,
+      "route_pattern_id": "route_pattern_2d0893e17053"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 9,
+      "max_gps_jump_m": 164.6,
+      "median_stop_to_gps_m": 6.6,
+      "occurrence_count": 9,
+      "polyline_point_count": 43,
+      "route_pattern_id": "route_pattern_2eb4770b69a4"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 3,
+      "max_gps_jump_m": 177.6,
+      "median_stop_to_gps_m": 7.7,
+      "occurrence_count": 3,
+      "polyline_point_count": 105,
+      "route_pattern_id": "route_pattern_32496aad6eea"
+    },
+    {
+      "best_stop_coverage": 0.8947,
+      "geometry_quality": "gps_single",
+      "good_gps_occurrence_count": 1,
+      "max_gps_jump_m": 190.9,
+      "median_stop_to_gps_m": 13.4,
+      "occurrence_count": 2,
+      "polyline_point_count": 43,
+      "route_pattern_id": "route_pattern_40b8ff7108ff"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 12,
+      "max_gps_jump_m": 171.1,
+      "median_stop_to_gps_m": 11.5,
+      "occurrence_count": 12,
+      "polyline_point_count": 45,
+      "route_pattern_id": "route_pattern_45e07cd14aa2"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_single",
+      "good_gps_occurrence_count": 1,
+      "max_gps_jump_m": 159.2,
+      "median_stop_to_gps_m": 10.7,
+      "occurrence_count": 1,
+      "polyline_point_count": 20,
+      "route_pattern_id": "route_pattern_60b8436a1607"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 5,
+      "max_gps_jump_m": 231.4,
+      "median_stop_to_gps_m": 8.1,
+      "occurrence_count": 6,
+      "polyline_point_count": 66,
+      "route_pattern_id": "route_pattern_62997c05c515"
+    },
+    {
+      "best_stop_coverage": 0.9333,
+      "geometry_quality": "stops_only",
+      "good_gps_occurrence_count": 0,
+      "max_gps_jump_m": 5089.5,
+      "median_stop_to_gps_m": 34.3,
+      "occurrence_count": 16,
+      "polyline_point_count": 33,
+      "route_pattern_id": "route_pattern_6ab24fc0a7ae"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 14,
+      "max_gps_jump_m": 175.0,
+      "median_stop_to_gps_m": 9.8,
+      "occurrence_count": 14,
+      "polyline_point_count": 38,
+      "route_pattern_id": "route_pattern_70a2e0131e38"
+    },
+    {
+      "best_stop_coverage": 0.9412,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 9,
+      "max_gps_jump_m": 275.1,
+      "median_stop_to_gps_m": 8.5,
+      "occurrence_count": 12,
+      "polyline_point_count": 70,
+      "route_pattern_id": "route_pattern_772dfd9efd61"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 32,
+      "max_gps_jump_m": 162.2,
+      "median_stop_to_gps_m": 5.5,
+      "occurrence_count": 32,
+      "polyline_point_count": 53,
+      "route_pattern_id": "route_pattern_79c42a04dc6f"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 24,
+      "max_gps_jump_m": 182.8,
+      "median_stop_to_gps_m": 7.7,
+      "occurrence_count": 24,
+      "polyline_point_count": 92,
+      "route_pattern_id": "route_pattern_7b842499f4e8"
+    },
+    {
+      "best_stop_coverage": 0.0,
+      "geometry_quality": "stops_only",
+      "good_gps_occurrence_count": 0,
+      "max_gps_jump_m": 0.0,
+      "median_stop_to_gps_m": null,
+      "occurrence_count": 2,
+      "polyline_point_count": 81,
+      "route_pattern_id": "route_pattern_856a0aa811e8"
+    },
+    {
+      "best_stop_coverage": 0.0,
+      "geometry_quality": "stops_only",
+      "good_gps_occurrence_count": 0,
+      "max_gps_jump_m": 0.0,
+      "median_stop_to_gps_m": null,
+      "occurrence_count": 1,
+      "polyline_point_count": 81,
+      "route_pattern_id": "route_pattern_87a037bcedbe"
+    },
+    {
+      "best_stop_coverage": 0.9753,
+      "geometry_quality": "stops_only",
+      "good_gps_occurrence_count": 0,
+      "max_gps_jump_m": 7787.9,
+      "median_stop_to_gps_m": 6.9,
+      "occurrence_count": 2,
+      "polyline_point_count": 487,
+      "route_pattern_id": "route_pattern_90cac7e829c9"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 10,
+      "max_gps_jump_m": 182.1,
+      "median_stop_to_gps_m": 3.4,
+      "occurrence_count": 10,
+      "polyline_point_count": 359,
+      "route_pattern_id": "route_pattern_91e6858f197e"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 3,
+      "max_gps_jump_m": 171.8,
+      "median_stop_to_gps_m": 10.8,
+      "occurrence_count": 3,
+      "polyline_point_count": 39,
+      "route_pattern_id": "route_pattern_ad368331d97f"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 36,
+      "max_gps_jump_m": 181.8,
+      "median_stop_to_gps_m": 8.3,
+      "occurrence_count": 36,
+      "polyline_point_count": 79,
+      "route_pattern_id": "route_pattern_ad52c4e5cab6"
+    },
+    {
+      "best_stop_coverage": 0.0,
+      "geometry_quality": "stops_only",
+      "good_gps_occurrence_count": 0,
+      "max_gps_jump_m": 0.0,
+      "median_stop_to_gps_m": null,
+      "occurrence_count": 6,
+      "polyline_point_count": 52,
+      "route_pattern_id": "route_pattern_b06bbbf003b0"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 36,
+      "max_gps_jump_m": 195.9,
+      "median_stop_to_gps_m": 5.8,
+      "occurrence_count": 39,
+      "polyline_point_count": 154,
+      "route_pattern_id": "route_pattern_b543180b1e18"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_single",
+      "good_gps_occurrence_count": 1,
+      "max_gps_jump_m": 1194.6,
+      "median_stop_to_gps_m": 9.8,
+      "occurrence_count": 2,
+      "polyline_point_count": 68,
+      "route_pattern_id": "route_pattern_b939145479ed"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 2,
+      "max_gps_jump_m": 157.0,
+      "median_stop_to_gps_m": 5.7,
+      "occurrence_count": 2,
+      "polyline_point_count": 44,
+      "route_pattern_id": "route_pattern_ddec7d9768df"
+    },
+    {
+      "best_stop_coverage": 1.0,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 10,
+      "max_gps_jump_m": 224.4,
+      "median_stop_to_gps_m": 7.7,
+      "occurrence_count": 12,
+      "polyline_point_count": 142,
+      "route_pattern_id": "route_pattern_e0267f3c6ac4"
+    },
+    {
+      "best_stop_coverage": 0.7308,
+      "geometry_quality": "gps_single",
+      "good_gps_occurrence_count": 1,
+      "max_gps_jump_m": 177.0,
+      "median_stop_to_gps_m": 18.5,
+      "occurrence_count": 2,
+      "polyline_point_count": 45,
+      "route_pattern_id": "route_pattern_e1c6f850c8b2"
+    },
+    {
+      "best_stop_coverage": 0.8947,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 2,
+      "max_gps_jump_m": 190.1,
+      "median_stop_to_gps_m": 13.3,
+      "occurrence_count": 4,
+      "polyline_point_count": 96,
+      "route_pattern_id": "route_pattern_ed125cf0eef4"
+    },
+    {
+      "best_stop_coverage": 0.7308,
+      "geometry_quality": "gps_repeated",
+      "good_gps_occurrence_count": 2,
+      "max_gps_jump_m": 185.6,
+      "median_stop_to_gps_m": 18.1,
+      "occurrence_count": 4,
+      "polyline_point_count": 111,
+      "route_pattern_id": "route_pattern_f3a26bc8e42b"
+    }
+  ],
+  "physical_stop_count": 847,
+  "real_binding_count": 30,
+  "real_with_schedule_count": 13,
+  "real_without_schedule_count": 17,
+  "route_pattern_count": 31,
+  "schema_version": 1,
+  "traffic_files_test_validate_identical": true
+}

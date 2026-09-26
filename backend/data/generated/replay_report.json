@@ -1,0 +1,165 @@
+{
+  "input_rows": 105945,
+  "applied_rows": 96303,
+  "ignored_older_rows": 9642,
+  "real_bindings": 30,
+  "real_with_schedule": 13,
+  "real_without_schedule": 17,
+  "status_counts": {
+    "invalid_location": 16260,
+    "matched": 53737,
+    "no_active_pattern": 13665,
+    "no_schedule": 11031,
+    "off_route": 1610
+  },
+  "geometry_quality_counts": {
+    "gps_repeated": 42993,
+    "gps_single": 6600,
+    "stops_only": 5754
+  },
+  "examples": [
+    {
+      "status": "no_schedule",
+      "unit_id": 979637,
+      "tr_id": 130576
+    },
+    {
+      "status": "no_active_pattern",
+      "unit_id": 896671,
+      "tr_id": 130072
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 896671,
+      "tr_id": 130072
+    },
+    {
+      "status": "no_active_pattern",
+      "unit_id": 1099984,
+      "tr_id": 133957
+    },
+    {
+      "status": "no_schedule",
+      "unit_id": 987268,
+      "tr_id": 131954
+    },
+    {
+      "status": "no_active_pattern",
+      "unit_id": 913870,
+      "tr_id": 122613
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 1155033,
+      "tr_id": 135511
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 1099984,
+      "tr_id": 133957
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 786201,
+      "tr_id": 122658
+    },
+    {
+      "status": "no_active_pattern",
+      "unit_id": 786201,
+      "tr_id": 122658
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 894032,
+      "tr_id": 129964
+    },
+    {
+      "status": "no_schedule",
+      "unit_id": 1155033,
+      "tr_id": 135511
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 910085,
+      "tr_id": 130389
+    },
+    {
+      "status": "no_schedule",
+      "unit_id": 910085,
+      "tr_id": 130389
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 979637,
+      "tr_id": 130576
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 893159,
+      "tr_id": 122048
+    },
+    {
+      "status": "no_active_pattern",
+      "unit_id": 893159,
+      "tr_id": 122048
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 913870,
+      "tr_id": 122613
+    },
+    {
+      "status": "no_active_pattern",
+      "unit_id": 894032,
+      "tr_id": 129964
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 987268,
+      "tr_id": 131954
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 984922,
+      "tr_id": 131542
+    },
+    {
+      "status": "matched",
+      "unit_id": 894032,
+      "tr_id": 129964,
+      "route_pattern_id": "route_pattern_45e07cd14aa2",
+      "occurrence_id": "occ_129964_000",
+      "previous_stop_id": "stop_92749b74d792",
+      "previous_stop_address": "Коломенская ул., д.1",
+      "next_stop_id": "stop_3594b8784d90",
+      "next_stop_address": "Коломенская ул., д.1",
+      "next_action_item_id": 53700336298,
+      "distance_to_route_m": 5,
+      "geometry_quality": "gps_repeated"
+    },
+    {
+      "status": "invalid_location",
+      "unit_id": 985940,
+      "tr_id": 131672
+    },
+    {
+      "status": "no_active_pattern",
+      "unit_id": 985940,
+      "tr_id": 131672
+    },
+    {
+      "status": "matched",
+      "unit_id": 893159,
+      "tr_id": 122048,
+      "route_pattern_id": "route_pattern_90cac7e829c9",
+      "occurrence_id": "occ_122048_000",
+      "previous_stop_id": "stop_e6fa1c24c678",
+      "previous_stop_address": "Ореховый бульв., д.24, к.2",
+      "next_stop_id": "stop_e865739066a2",
+      "next_stop_address": "Ореховый бульв., д.47Г",
+      "next_action_item_id": 53699018677,
+      "distance_to_route_m": 9.8,
+      "geometry_quality": "stops_only"
+    }
+  ]
+}
