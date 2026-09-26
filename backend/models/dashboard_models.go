@@ -29,6 +29,6 @@ type BusTelemetry struct {
 type Incident struct {
 	ID             int64
 	PredictedDelay float64
-	Level          byte
+	Level          int
 	Descrption     string
 }
