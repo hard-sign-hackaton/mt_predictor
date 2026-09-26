@@ -156,6 +156,7 @@ func TestServerHandlesConcurrentVehicles(t *testing.T) {
 	const perVehicle = 20
 
 	var wg sync.WaitGroup
+	connections := make(chan net.Conn, len(vehicles))
 	for _, vehicle := range vehicles {
 		wg.Add(1)
 		go func(vehicle uint32) {
@@ -164,7 +165,6 @@ func TestServerHandlesConcurrentVehicles(t *testing.T) {
 			if !assert.NoError(t, err) {
 				return
 			}
-			defer conn.Close()
 			frame := BuildFrame(vehicle, ServiceGenericControls, MsgConnRequest, 1, BuildHandshakeBody(vehicle))
 			if _, err := conn.Write(frame); !assert.NoError(t, err) {
 				return
@@ -174,6 +174,9 @@ func TestServerHandlesConcurrentVehicles(t *testing.T) {
 					return
 				}
 			}
+			// Соединение остаётся открытым, пока тест не получит все уже
+			// записанные пакеты: так проверка не зависит от поведения TCP reset.
+			connections <- conn
 		}(vehicle)
 	}
 	wg.Wait()
@@ -182,6 +185,10 @@ func TestServerHandlesConcurrentVehicles(t *testing.T) {
 	for range len(vehicles) * perVehicle {
 		point := awaitPoint(t, points)
 		seen[point.VehicleID]++
+	}
+	close(connections)
+	for conn := range connections {
+		_ = conn.Close()
 	}
 	for _, vehicle := range vehicles {
 		assert.Equal(t, perVehicle, seen[vehicle], "vehicle %d", vehicle)
@@ -276,11 +283,12 @@ func TestServerHandlesReconnect(t *testing.T) {
 }
 
 func TestServerClosesIdleConnection(t *testing.T) {
-	addr, _, srv := testServer(t, func(o *Options) { o.IdleTimeout = 80 * time.Millisecond })
+	addr, points, srv := testServer(t, func(o *Options) { o.IdleTimeout = 80 * time.Millisecond })
 	conn := dial(t, addr)
 
 	const vehicle = uint32(129964)
 	writeAll(t, conn, navFrame(vehicle, 1, testNav(0)))
+	awaitPoint(t, points)
 
 	require.Eventually(t, func() bool {
 		return srv.Stats().ActiveConnections == 0
@@ -289,6 +297,7 @@ func TestServerClosesIdleConnection(t *testing.T) {
 	// The receiver itself keeps listening.
 	conn2 := dial(t, addr)
 	writeAll(t, conn2, navFrame(vehicle, 2, testNav(1)))
+	awaitPoint(t, points)
 	assert.GreaterOrEqual(t, srv.Stats().TelemetryPoints, int64(1))
 }
 

@@ -9,6 +9,7 @@ type MatchStatus string
 
 const (
 	MatchMatched         MatchStatus = "matched"
+	MatchMatchedSpatial  MatchStatus = "matched_spatial"
 	MatchUnmappedUnit    MatchStatus = "unmapped_unit"
 	MatchNoSchedule      MatchStatus = "no_schedule"
 	MatchNoActivePattern MatchStatus = "no_active_pattern"
@@ -126,6 +127,68 @@ func (m *Matcher) Match(telemetry Telemetry) MatchResult {
 	return result
 }
 
+// MatchLive сначала выполняет строгое сопоставление по времени расписания.
+// Если календарный период демонстрационного расписания уже прошёл, метод
+// выбирает среди паттернов известного TRID ближайшую геометрию. Такой результат
+// получает отдельный статус matched_spatial и не выдаётся за временной match.
+func (m *Matcher) MatchLive(telemetry Telemetry) MatchResult {
+	result := m.Match(telemetry)
+	if result.Status != MatchNoActivePattern {
+		return result
+	}
+	return m.matchSpatial(telemetry, result.TRID)
+}
+
+func (m *Matcher) matchSpatial(telemetry Telemetry, trID int64) MatchResult {
+	result := MatchResult{Status: MatchNoActivePattern, UnitID: telemetry.UnitID, TRID: trID}
+	bestDistance := math.Inf(1)
+	var best RouteAssignment
+	var bestPattern RoutePattern
+	seenPatterns := make(map[string]struct{})
+	for _, assignment := range m.catalog.AssignmentsForTR(trID) {
+		if _, exists := seenPatterns[assignment.RoutePatternID]; exists {
+			continue
+		}
+		seenPatterns[assignment.RoutePatternID] = struct{}{}
+		pattern, ok := m.catalog.Pattern(assignment.RoutePatternID)
+		if !ok {
+			continue
+		}
+		distance := distanceToPolyline(telemetry.Lon, telemetry.Lat, pattern.Polyline)
+		if distance < bestDistance {
+			bestDistance, best, bestPattern = distance, assignment, pattern
+		}
+	}
+	if math.IsInf(bestDistance, 1) {
+		return result
+	}
+	result.RoutePatternID = best.RoutePatternID
+	result.OccurrenceID = best.OccurrenceID
+	result.GeometryQuality = bestPattern.GeometryQuality
+	result.DistanceToRouteM = math.Round(bestDistance*10) / 10
+	if bestDistance > maxRouteDistance {
+		result.Status = MatchOffRoute
+		return result
+	}
+	segment := nearestScheduleSegment(telemetry, best.Events)
+	if segment < 0 || segment+1 >= len(best.Events) {
+		result.Status = MatchOffRoute
+		return result
+	}
+	previous, next := best.Events[segment], best.Events[segment+1]
+	result.Status = MatchMatchedSpatial
+	result.PreviousStopID = previous.StopID
+	result.NextStopID = next.StopID
+	result.NextActionItemID = next.ActionItemID
+	if stop, ok := m.catalog.stopByID[previous.StopID]; ok {
+		result.PreviousStopAddress = stop.Address
+	}
+	if stop, ok := m.catalog.stopByID[next.StopID]; ok {
+		result.NextStopAddress = stop.Address
+	}
+	return result
+}
+
 func nearestScheduleSegment(telemetry Telemetry, events []ScheduleEvent) int {
 	bestScore, best := math.Inf(1), -1
 	for index := 0; index+1 < len(events); index++ {
@@ -140,8 +203,8 @@ func nearestScheduleSegment(telemetry Telemetry, events []ScheduleEvent) int {
 			}
 			score += delta / 180 * 100
 		}
-		// Planned time is a weak tie-breaker; position remains primary because the
-		// vehicle may already be delayed.
+		// Плановое время используется только как дополнительный критерий:
+		// координата важнее, поскольку ТС уже может идти с задержкой.
 		midpoint := a.PlannedAt.Add(b.PlannedAt.Sub(a.PlannedAt) / 2)
 		score += math.Min(math.Abs(telemetry.EventTime.Sub(midpoint).Minutes()), 60) * 0.5
 		if score < bestScore {
@@ -188,8 +251,8 @@ func segmentBearing(aLon, aLat, bLon, bLat float64) float64 {
 	return degrees
 }
 
-// LiveState accepts historical packets for downstream history, but never lets
-// them rewind the marker and current match displayed by the dashboard.
+// LiveState допускает исторические пакеты для дальнейшего хранения истории,
+// но не позволяет им откатывать маркер и текущее сопоставление на dashboard.
 type LiveState struct {
 	matcher *Matcher
 	latest  map[uint32]Telemetry

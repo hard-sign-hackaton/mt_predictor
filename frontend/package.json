@@ -12,17 +12,20 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "typescript": "latest",
+    "leaflet": "^1.9.4",
     "react": "latest",
     "react-dom": "latest",
-    "react-router-dom": "latest"
+    "react-leaflet": "^5.0.0",
+    "react-router-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
   },
   "devDependencies": {
     "@eslint/js": "latest",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@testing-library/user-event": "latest",
+    "@types/leaflet": "^1.9.22",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",

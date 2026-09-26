@@ -13,13 +13,11 @@ import (
 	"time"
 )
 
-// TelemetryPoint is one decoded navigation record taken from a realtime frame.
-// It is the unit the receiver hands to the rest of the backend.
+// TelemetryPoint — одна декодированная навигационная запись из live-фрейма.
+// Приёмник передаёт её остальному backend без выдуманных маршрутных данных.
 type TelemetryPoint struct {
-	// VehicleID is the NDTP peer address, that is the terminal's unitId.
-	//
-	// The project maps tr_id to unit_id directly, so this is also the tr_id
-	// used to look up the schedule and to call the ML service.
+	// VehicleID — NPL.peerAddress, то есть unit_id бортового терминала.
+	// Это не tr_id: связь с расписанием отдельно берётся из каталога привязок.
 	VehicleID  uint32
 	Nav        NavCell
 	ReceivedAt time.Time

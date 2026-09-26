@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+      - "9201:9201"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_BACKEND_PROXY: http://backend:8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  feeder:
+    build:
+      context: ./backend
+    command:
+      - /app/ndtpfeeder
+      - -addr
+      - backend:9201
+      - -file
+      - /dataset/validate/traffic.csv
+      - -vehicles
+      - "8"
+      - -speed
+      - "50"
+      - -loop
+    volumes:
+      - ../../dataset:/dataset:ro
+    depends_on:
+      - backend
+    restart: on-failure
+
+  official-emulator:
+    image: ndtp-telemetry-emulator:1.0
+    platform: linux/amd64
+    profiles: ["official-emulator"]
+    ports:
+      - "18080:18080"
+    depends_on:
+      - backend

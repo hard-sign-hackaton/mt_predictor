@@ -87,6 +87,20 @@ func TestMatchFailureStates(t *testing.T) {
 	}
 }
 
+func TestMatchLiveFallsBackToSpatialPattern(t *testing.T) {
+	matcher := NewMatcher(testCatalog(t))
+	result := matcher.MatchLive(Telemetry{
+		UnitID: 100, Lon: 37.605, Lat: 55.70, Speed: 20, Heading: 90,
+		EventTime: time.Date(2026, 9, 27, 10, 5, 0, 0, time.UTC), Valid: true,
+	})
+	if result.Status != MatchMatchedSpatial || result.RoutePatternID != "route_pattern_test" {
+		t.Fatalf("неожиданный spatial match: %+v", result)
+	}
+	if result.PreviousStopID != "a" || result.NextStopID != "b" {
+		t.Fatalf("неверно определён участок: %+v", result)
+	}
+}
+
 func TestLiveStateDoesNotRewindOnOlderEvent(t *testing.T) {
 	state := NewLiveState(NewMatcher(testCatalog(t)))
 	newer := Telemetry{UnitID: 100, Lon: 37.615, Lat: 55.70, Valid: true, EventTime: time.Date(2026, 1, 6, 10, 15, 0, 0, time.UTC)}
@@ -111,6 +125,26 @@ func TestDashboardInitConvertsGeneratedCatalog(t *testing.T) {
 	}
 	if result.Routes[0].ID != "route_pattern_test" || result.Occurrences[0].Calls[1].ActionItemID != 2 {
 		t.Fatalf("route catalog was converted incorrectly: %+v", result)
+	}
+}
+
+func TestDashboardInitHidesSyntheticTrainingData(t *testing.T) {
+	catalog := testCatalog(t)
+	catalog.VehicleBindings = append(catalog.VehicleBindings, VehicleBinding{
+		UnitID: 999, TRID: 999, HasSchedule: true, Synthetic: true,
+	})
+	catalog.Stops = append(catalog.Stops, Stop{StopID: "synthetic", Lon: 37.9, Lat: 55.9})
+	catalog.RoutePatterns = append(catalog.RoutePatterns, RoutePattern{
+		RoutePatternID: "route_pattern_synthetic", StopIDs: []string{"synthetic"},
+		Polyline: []Point{{37.9, 55.9}}, GeometryQuality: "stops_only",
+	})
+	catalog.Assignments = append(catalog.Assignments, RouteAssignment{
+		OccurrenceID: "occ_synthetic", TRID: 999, RoutePatternID: "route_pattern_synthetic",
+	})
+
+	result := catalog.DashboardInit("catalog-test", models.RiskThresholds{})
+	if len(result.Routes) != 1 || len(result.Occurrences) != 1 || len(result.VehicleBindings) != 2 || len(result.Stops) != 3 {
+		t.Fatalf("синтетические данные попали в live-каталог: %+v", result)
 	}
 }
 

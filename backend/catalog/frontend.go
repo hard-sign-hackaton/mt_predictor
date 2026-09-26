@@ -6,6 +6,28 @@ import "mt_predictor/models"
 // данные для frontend. Метод не вычисляет маршруты заново, поэтому его можно
 // вызывать один раз при установлении соединения dashboard с backend.
 func (c *Catalog) DashboardInit(catalogVersion string, thresholds models.RiskThresholds) models.DashboardInit {
+	realTRIDs := make(map[int64]struct{})
+	for _, binding := range c.VehicleBindings {
+		if !binding.Synthetic {
+			realTRIDs[binding.TRID] = struct{}{}
+		}
+	}
+	realPatternIDs := make(map[string]struct{})
+	for _, assignment := range c.Assignments {
+		if _, real := realTRIDs[assignment.TRID]; real {
+			realPatternIDs[assignment.RoutePatternID] = struct{}{}
+		}
+	}
+	usedStopIDs := make(map[string]struct{})
+	for _, pattern := range c.RoutePatterns {
+		if _, real := realPatternIDs[pattern.RoutePatternID]; !real {
+			continue
+		}
+		for _, stopID := range pattern.StopIDs {
+			usedStopIDs[stopID] = struct{}{}
+		}
+	}
+
 	result := models.DashboardInit{
 		SchemaVersion:   "1",
 		CatalogVersion:  catalogVersion,
@@ -17,11 +39,17 @@ func (c *Catalog) DashboardInit(catalogVersion string, thresholds models.RiskThr
 	}
 
 	for _, stop := range c.Stops {
+		if _, used := usedStopIDs[stop.StopID]; !used {
+			continue
+		}
 		result.Stops = append(result.Stops, models.Stop{
 			ID: stop.StopID, Position: models.GeoPoint{Lon: stop.Lon, Lat: stop.Lat}, Address: stop.Address,
 		})
 	}
 	for _, pattern := range c.RoutePatterns {
+		if _, real := realPatternIDs[pattern.RoutePatternID]; !real {
+			continue
+		}
 		polyline := make([]models.GeoPoint, 0, len(pattern.Polyline))
 		for _, point := range pattern.Polyline {
 			polyline = append(polyline, models.GeoPoint{Lon: point[0], Lat: point[1]})
@@ -48,6 +76,9 @@ func (c *Catalog) DashboardInit(catalogVersion string, thresholds models.RiskThr
 		})
 	}
 	for _, assignment := range c.Assignments {
+		if _, real := realTRIDs[assignment.TRID]; !real {
+			continue
+		}
 		calls := make([]models.StopCall, 0, len(assignment.Events))
 		for _, event := range assignment.Events {
 			calls = append(calls, models.StopCall{
@@ -60,6 +91,9 @@ func (c *Catalog) DashboardInit(catalogVersion string, thresholds models.RiskThr
 		})
 	}
 	for _, binding := range c.VehicleBindings {
+		if binding.Synthetic {
+			continue
+		}
 		result.VehicleBindings = append(result.VehicleBindings, models.VehicleBinding{
 			UnitID: binding.UnitID, TRID: binding.TRID, HasSchedule: binding.HasSchedule, Synthetic: binding.Synthetic,
 		})

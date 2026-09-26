@@ -115,6 +115,7 @@ export interface DashboardInit {
 export type TelemetryFreshness = 'live' | 'stale'
 export type MatchStatus =
   | 'matched'
+  | 'matched_spatial'
   | 'unmapped_unit'
   | 'invalid_location'
   | 'no_schedule'
@@ -154,6 +155,8 @@ export interface VehicleState {
   nextActionItemId?: number
   distanceToRouteMeters?: number
   geometryQuality?: GeometryQuality
+  /** Текущая задержка; отсутствие поля означает, что backend её не рассчитал. */
+  currentDelaySeconds?: number
 }
 
 export interface DelayPrediction {
@@ -206,6 +209,15 @@ export interface DashboardSnapshot {
   vehicles: VehicleState[]
   predictions: DelayPrediction[]
   incidents: Incident[]
+}
+
+export interface MapSnapshot {
+  /** Позиция потока событий, которой соответствует снимок. */
+  version: number
+  /** Время формирования снимка на backend. */
+  createdAt: string
+  /** Последнее известное состояние каждого принятого ТС. */
+  vehicles: VehicleState[]
 }
 
 export type LiveEvent =

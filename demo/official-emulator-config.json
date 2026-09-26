@@ -1,0 +1,36 @@
+{
+  "targetHost": "backend",
+  "targetPort": 9201,
+  "units": [
+    {
+      "unitId": 990000101,
+      "intervalMs": 1000,
+      "autoGenerate": true,
+      "cells": []
+    },
+    {
+      "unitId": 990000307,
+      "intervalMs": 1000,
+      "autoGenerate": true,
+      "cells": []
+    },
+    {
+      "unitId": 990000509,
+      "intervalMs": 1000,
+      "autoGenerate": true,
+      "cells": []
+    },
+    {
+      "unitId": 990000711,
+      "intervalMs": 1000,
+      "autoGenerate": true,
+      "cells": []
+    },
+    {
+      "unitId": 990000913,
+      "intervalMs": 1000,
+      "autoGenerate": true,
+      "cells": []
+    }
+  ]
+}

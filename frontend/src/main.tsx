@@ -2,7 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { App } from './App'
-import { DashboardProvider } from './store'
+import { LiveMapProvider } from './live/LiveMapProvider'
+import 'leaflet/dist/leaflet.css'
 import './styles.css'
 
-createRoot(document.getElementById('root')!).render(<StrictMode><BrowserRouter><DashboardProvider><App /></DashboardProvider></BrowserRouter></StrictMode>)
+createRoot(document.getElementById('root')!).render(<StrictMode><BrowserRouter><LiveMapProvider><App /></LiveMapProvider></BrowserRouter></StrictMode>)

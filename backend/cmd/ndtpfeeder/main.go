@@ -167,15 +167,10 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 	}
 	defer conn.Close()
 
-	if deadline, ok := ctx.Deadline(); ok {
-		_ = conn.SetDeadline(deadline)
-	} else {
-		_ = conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
-	}
-
 	// The emulator handshakes, waits, then streams realtime packets.
 	handshake := ndtp.BuildFrame(unit, ndtp.ServiceGenericControls, ndtp.MsgConnRequest, 1,
 		ndtp.BuildHandshakeBody(unit))
+	refreshWriteDeadline(ctx, conn)
 	if _, err := conn.Write(handshake); err != nil {
 		return fmt.Errorf("vehicle %d handshake: %w", unit, err)
 	}
@@ -199,6 +194,7 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 		body := ndtp.AppendCell(nil, ndtp.CellNav00, 0, ndtp.EncodeNavCell(nav))
 		body = ndtp.AppendCell(body, ndtp.CellUsi08, 0, make([]byte, 6))
 		frame := ndtp.BuildFrame(unit, ndtp.ServiceNavData, ndtp.MsgRealtime, requestID, body)
+		refreshWriteDeadline(ctx, conn)
 		if _, err := conn.Write(frame); err != nil {
 			return fmt.Errorf("vehicle %d write: %w", unit, err)
 		}
@@ -206,6 +202,17 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 	}
 	cfg.Logger.Info("vehicle replayed", "vehicle", unit, "points", len(track))
 	return nil
+}
+
+// refreshWriteDeadline ограничивает одну TCP-запись, а не весь replay.
+// При масштабе 1x одно соединение живёт часами, поэтому единый deadline,
+// установленный при подключении, ошибочно обрывал бы его через 30 секунд.
+func refreshWriteDeadline(ctx context.Context, conn net.Conn) {
+	if deadline, ok := ctx.Deadline(); ok {
+		_ = conn.SetWriteDeadline(deadline)
+		return
+	}
+	_ = conn.SetWriteDeadline(time.Now().Add(30 * time.Second))
 }
 
 // replayInstant maps a dataset offset onto the simulated live clock.

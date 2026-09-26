@@ -18,6 +18,9 @@ type MatchStatus string
 const (
 	// MatchMatched — ТС, активный паттерн и участок маршрута определены.
 	MatchMatched MatchStatus = "matched"
+	// MatchMatchedSpatial — историческое расписание не активно, поэтому паттерн
+	// выбран только по известному TRID и расстоянию до геометрии маршрута.
+	MatchMatchedSpatial MatchStatus = "matched_spatial"
 	// MatchUnmappedUnit — unit_id отсутствует в VehicleBindings.
 	MatchUnmappedUnit MatchStatus = "unmapped_unit"
 	// MatchInvalidLocation — признак валидности координат NDTP равен false.
@@ -36,6 +39,17 @@ type StopReference struct {
 	ID string `json:"id"`
 	// Address дублируется, чтобы событие было читаемо до обращения к справочнику.
 	Address string `json:"address"`
+}
+
+// MapSnapshot содержит только изменяемые данные рабочей карты. Статические
+// маршруты и остановки frontend получает отдельно через DashboardInit.
+type MapSnapshot struct {
+	// Version — позиция потока событий, которой соответствует снимок.
+	Version uint64 `json:"version"`
+	// CreatedAt — время формирования снимка на backend.
+	CreatedAt time.Time `json:"createdAt"`
+	// Vehicles — последние известные состояния ТС, отсортированные по UnitID.
+	Vehicles []VehicleState `json:"vehicles"`
 }
 
 // VehicleState — нормализованная телеметрия, дополненная map matching. ML-полей
@@ -75,6 +89,9 @@ type VehicleState struct {
 	DistanceToRouteMeters *float64 `json:"distanceToRouteMeters,omitempty"`
 	// GeometryQuality присутствует после выбора паттерна маршрута.
 	GeometryQuality *GeometryQuality `json:"geometryQuality,omitempty"`
+	// CurrentDelaySeconds появится после подключения расчёта задержки. Отсутствие
+	// значения означает «нет данных» и не должно трактоваться как нулевая задержка.
+	CurrentDelaySeconds *float64 `json:"currentDelaySeconds,omitempty"`
 }
 
 // DelayPrediction содержит гарантированные факты и необязательные дополнения.

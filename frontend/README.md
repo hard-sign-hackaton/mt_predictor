@@ -1,10 +1,11 @@
-# MT Predictor — Dispatcher BI Mock
+# MT Predictor — live-карта
 
-Функциональный desktop-прототип диспетчерской панели. Данные и live-обновления замоканы, действия сохраняются локально в браузере.
+React-клиент рабочей карты. Он получает статический каталог и live-телеметрию от backend; моковые инциденты и `localStorage` больше не используются.
 
 ## Запуск
 
 ```bash
+cd ..
 docker compose up --build
 ```
 
@@ -13,9 +14,10 @@ docker compose up --build
 ## Проверки
 
 ```bash
-docker compose run --rm dashboard npm run lint
-docker compose run --rm dashboard npm test
-docker compose run --rm dashboard npm run build
+cd ..
+docker compose build frontend
+docker compose run --rm frontend \
+  sh -c 'npm run lint && npm test && npm run build'
 ```
 
-Кнопка «Сбросить демо» в верхней панели очищает сохранённое состояние.
+Полная схема запуска, проверка официального эмулятора и описание API находятся в корневом [`README.md`](../README.md).
