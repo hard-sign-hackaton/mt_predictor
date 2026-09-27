@@ -1,0 +1,12 @@
+services:
+  route-builder:
+    build: .
+    volumes:
+      - ../../../dataset:/dataset:ro
+      - ../backend/data/generated:/output
+    command:
+      - build
+      - --dataset-dir
+      - /dataset
+      - --output-dir
+      - /output
