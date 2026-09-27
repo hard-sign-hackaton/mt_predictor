@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+// ReplayReport — сводный отчёт прогона телеметрического CSV через сопоставитель.
+// IgnoredOlderRows показывает, сколько записей было отброшено как запоздалые.
 type ReplayReport struct {
 	InputRows             int                 `json:"input_rows"`
 	AppliedRows           int                 `json:"applied_rows"`
@@ -23,6 +25,9 @@ type ReplayReport struct {
 	Examples              []MatchResult       `json:"examples"`
 }
 
+// ReplayCSV читает traffic.csv, сопоставляет каждую запись с каталогом и
+// возвращает статистику по статусам, качеству геометрии и нескольким примерам.
+// Метод предназначен для офлайн-проверки и не влияет на живое состояние.
 func ReplayCSV(catalog *Catalog, path string) (ReplayReport, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -102,6 +107,7 @@ func ReplayCSV(catalog *Catalog, path string) (ReplayReport, error) {
 	return report, nil
 }
 
+// WriteReplayReport сохраняет отчёт в JSON с отступами для ревью результатов.
 func WriteReplayReport(report ReplayReport, path string) error {
 	data, err := json.MarshalIndent(report, "", "  ")
 	if err != nil {

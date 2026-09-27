@@ -68,6 +68,8 @@ func availableActions(incident models.Incident) []models.IncidentActionOption {
 	return result
 }
 
+// IncidentActions возвращает доступные оператору действия по инциденту вместе с
+// историей уже выполненных. Второй результат показывает, что инцидент найден.
 func (r *Runtime) IncidentActions(ctx context.Context, incidentID string) (models.IncidentActions, bool, error) {
 	incident, ok, err := r.Incident(ctx, incidentID)
 	if err != nil || !ok {
@@ -86,6 +88,7 @@ func (r *Runtime) IncidentActions(ctx context.Context, incidentID string) (model
 	return models.IncidentActions{Available: availableActions(incident), History: history}, true, nil
 }
 
+// CreateOperatorAction регистрирует действие оператора и добавляет его в архив.
 func (r *Runtime) CreateOperatorAction(ctx context.Context, incidentID, code string, now time.Time) (models.OperatorAction, error) {
 	incident, ok, err := r.Incident(ctx, incidentID)
 	if err != nil {
@@ -120,6 +123,8 @@ func (r *Runtime) CreateOperatorAction(ctx context.Context, incidentID, code str
 	return action, nil
 }
 
+// SetIncidentRepository подключает хранилище и переносит в него незакрытые
+// инциденты, накопленные в памяти. Вызывается один раз при старте.
 func (r *Runtime) SetIncidentRepository(ctx context.Context, repository IncidentRepository) error {
 	incidents, err := repository.LoadUnresolved(ctx)
 	if err != nil {
@@ -313,6 +318,8 @@ func (r *Runtime) AwaitOtherTargets(unitID uint32, keepActionItemID int64, now t
 	return nil
 }
 
+// ResolveArrival закрывает инцидент по факту прибытия: сравнивает фактическую
+// задержку с порогом и записывает результат в хранилище.
 func (r *Runtime) ResolveArrival(unitID uint32, actionItemID int64, arrivalAt time.Time, actualDelay, threshold float64, now time.Time) error {
 	key := targetKey(unitID, actionItemID)
 	r.mu.Lock()
@@ -353,6 +360,7 @@ func targetKey(unitID uint32, actionItemID int64) string {
 	return fmt.Sprintf("%d:%d", unitID, actionItemID)
 }
 
+// Incident возвращает один инцидент из хранилища, а без него — из архива в памяти.
 func (r *Runtime) Incident(ctx context.Context, id string) (models.Incident, bool, error) {
 	r.mu.RLock()
 	repository := r.repository
@@ -364,6 +372,8 @@ func (r *Runtime) Incident(ctx context.Context, id string) (models.Incident, boo
 	return cached, ok, nil
 }
 
+// IncidentHistory отдаёт страницу закрытых инцидентов, при заданном outcome —
+// только соответствующие результаты.
 func (r *Runtime) IncidentHistory(ctx context.Context, outcome *models.IncidentOutcome, limit, offset int) (models.IncidentHistoryPage, error) {
 	r.mu.RLock()
 	repository := r.repository
@@ -415,12 +425,15 @@ func (r *Runtime) snapshotVehiclesLocked(now time.Time) []models.VehicleState {
 	return vehicles
 }
 
+// Snapshot возвращает текущий снимок карты с временем формирования.
 func (r *Runtime) Snapshot(now time.Time) models.MapSnapshot {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return models.MapSnapshot{Version: r.version, CreatedAt: now, Vehicles: r.snapshotVehiclesLocked(now)}
 }
 
+// DashboardSnapshot возвращает состояние, из которого dashboard восстанавливает
+// карту, прогнозы и открытые инциденты.
 func (r *Runtime) DashboardSnapshot(now time.Time) models.DashboardSnapshot {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -450,6 +463,8 @@ func (r *Runtime) DashboardSnapshot(now time.Time) models.DashboardSnapshot {
 	}
 }
 
+// Subscribe возвращает канал live-событий и функцию отписки. Канал буферизован и
+// пропускает события, если читатель не успевает.
 func (r *Runtime) Subscribe() (<-chan models.LiveEvent, func()) {
 	r.mu.Lock()
 	r.nextSubID++

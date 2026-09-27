@@ -5,16 +5,24 @@ import (
 	"time"
 )
 
+// MatchStatus — объясняет, удалось ли связать телеметрию с маршрутом и рейсом.
 type MatchStatus string
 
 const (
-	MatchMatched         MatchStatus = "matched"
-	MatchMatchedSpatial  MatchStatus = "matched_spatial"
-	MatchUnmappedUnit    MatchStatus = "unmapped_unit"
-	MatchNoSchedule      MatchStatus = "no_schedule"
+	// MatchMatched — ТС, активный паттерн и участок маршрута определены по времени.
+	MatchMatched MatchStatus = "matched"
+	// MatchMatchedSpatial — по времени рейс не выбран, паттерн подобран по расстоянию.
+	MatchMatchedSpatial MatchStatus = "matched_spatial"
+	// MatchUnmappedUnit — unit_id отсутствует в таблице соответствий.
+	MatchUnmappedUnit MatchStatus = "unmapped_unit"
+	// MatchNoSchedule — tr_id известен, но расписания для него нет.
+	MatchNoSchedule MatchStatus = "no_schedule"
+	// MatchNoActivePattern — расписание есть, но момент времени не попал ни в один рейс.
 	MatchNoActivePattern MatchStatus = "no_active_pattern"
+	// MatchInvalidLocation — координаты помечены непригодными либо нечисловые.
 	MatchInvalidLocation MatchStatus = "invalid_location"
-	MatchOffRoute        MatchStatus = "off_route"
+	// MatchOffRoute — точка дальше допустимого коридора маршрута.
+	MatchOffRoute MatchStatus = "off_route"
 )
 
 const (
@@ -24,6 +32,8 @@ const (
 	latScale         = 111200.0
 )
 
+// Telemetry — нормализованная навигационная запись перед сопоставлением.
+// EventTime задаёт порядок записей, ReceiveTime идёт на диагностику задержек.
 type Telemetry struct {
 	UnitID      uint32
 	Lon         float64
@@ -36,6 +46,8 @@ type Telemetry struct {
 	Historical  bool
 }
 
+// MatchResult — результат сопоставления одной телеметрической записи.
+// Пустые строковые поля означают «не определено», а не нулевой идентификатор.
 type MatchResult struct {
 	Status              MatchStatus `json:"status"`
 	UnitID              uint32      `json:"unit_id"`
@@ -56,10 +68,15 @@ type MatchResult struct {
 	NextPlannedAt        time.Time `json:"-"`
 }
 
+// Matcher сопоставляет телеметрию с расписанием и геометрией маршрута.
+// Экземпляр не хранит изменяемого состояния и безопасен для конкурентного чтения.
 type Matcher struct{ catalog *Catalog }
 
+// NewMatcher создаёт сопоставитель поверх загруженного каталога.
 func NewMatcher(catalog *Catalog) *Matcher { return &Matcher{catalog: catalog} }
 
+// Match сопоставляет запись с рейсом по времени и расстоянию до линии маршрута.
+// Каталог не изменяется, состояние между вызовами не накапливается.
 func (m *Matcher) Match(telemetry Telemetry) MatchResult {
 	result := MatchResult{Status: MatchUnmappedUnit, UnitID: telemetry.UnitID}
 	trID, exists := m.catalog.TRIDForUnit(telemetry.UnitID)
@@ -272,10 +289,13 @@ type LiveState struct {
 	matches map[uint32]MatchResult
 }
 
+// NewLiveState создаёт накопитель последней телеметрии по каждому unit_id.
 func NewLiveState(matcher *Matcher) *LiveState {
 	return &LiveState{matcher: matcher, latest: map[uint32]Telemetry{}, matches: map[uint32]MatchResult{}}
 }
 
+// Apply сопоставляет запись и сохраняет её как последнюю для этого ТС.
+// Второе значение false означает, что пакет старше уже сохранённого и отброшен.
 func (s *LiveState) Apply(telemetry Telemetry) (MatchResult, bool) {
 	if current, exists := s.latest[telemetry.UnitID]; exists && telemetry.EventTime.Before(current.EventTime) {
 		return s.matches[telemetry.UnitID], false

@@ -7,39 +7,41 @@ import (
 	"io"
 )
 
-// Fixed frame geometry, all little-endian and packed (no alignment padding).
+// Геометрия кадра фиксирована, все поля little-endian, структуры без выравнивания.
 const (
-	nplSize = 15 // [signature:2][dataSize:2][flags:2][crc:2][type:1][peer:4][requestId:2]
-	nphSize = 10 // [serviceId:2][type:2][flags:2][requestId:4]
+	nplSize = 15 // [сигнатура:2][dataSize:2][флаги:2][crc:2][тип:1][peer:4][requestId:2]
+	nphSize = 10 // [serviceId:2][тип:2][флаги:2][requestId:4]
 
-	// handshakeBodySize is the length of an NPH_SGC_CONN_REQUEST body.
+	// handshakeBodySize — длина тела NPH_SGC_CONN_REQUEST.
 	handshakeBodySize = 18
 
-	// Signature is the NPL magic that starts every frame.
+	// Signature — сигнатура NPL, с которой начинается каждый кадр.
 	Signature uint16 = 0x7E7E
-	// signatureByte is the first byte of Signature, used when scanning.
+	// signatureByte — первый байт Signature, используется при сканировании.
 	signatureByte = 0x7E
-	// TypeNPH is the NPL frame type for an NPH frame.
+	// TypeNPH — тип кадра NPL для кадра NPH.
 	TypeNPH byte = 0x02
 
-	// ServiceGenericControls / ServiceNavData are NPH service identifiers.
+	// ServiceGenericControls и ServiceNavData — идентификаторы сервисов NPH.
 	ServiceGenericControls uint16 = 0
 	ServiceNavData         uint16 = 1
 
-	// MsgConnRequest / MsgRealtime are NPH message types.
+	// MsgConnRequest и MsgRealtime — типы сообщений NPH.
 	MsgConnRequest uint16 = 100
 	MsgRealtime    uint16 = 101
 
 	protoVersionHigh uint16 = 6
 	protoVersionLow  uint16 = 2
 
-	// maxDataSize bounds dataSize so a corrupt length cannot make the reader
-	// allocate without limit. 65535 is the maxPacketSize the emulator declares.
+	// maxDataSize ограничивает dataSize, чтобы испорченная длина не заставила
+	// читателя выделять память без предела. 65535 — объявленный эмулятором
+	// максимальный размер пакета.
 	maxDataSize = 65535
 )
 
-// Frame is a decoded NPL header plus the NPH header that follows it. Body is
-// not copied and stays valid only until the next read on the same Reader.
+// Frame — декодированный заголовок NPL вместе со следующим за ним заголовком NPH.
+// Поле Body не копируется и действительно только до следующего чтения на том же
+// Reader.
 type Frame struct {
 	Peer        uint32
 	ServiceID   uint16
@@ -49,29 +51,23 @@ type Frame struct {
 	Body        []byte
 }
 
-// IsHandshake reports whether the frame is an NPH_SGC_CONN_REQUEST.
+// IsHandshake сообщает, что кадр является NPH_SGC_CONN_REQUEST.
 func (f Frame) IsHandshake() bool {
 	return f.ServiceID == ServiceGenericControls && f.MessageType == MsgConnRequest
 }
 
-// IsRealtime reports whether the frame carries telemetry.
+// IsRealtime сообщает, что кадр несёт телеметрию.
 func (f Frame) IsRealtime() bool {
 	return f.ServiceID == ServiceNavData && f.MessageType == MsgRealtime
 }
 
-// FrameError describes a frame that could not be parsed.
-//
-// A frame whose CRC does not match is not an error: it is returned with
-// CRCValid false, because the navigation data may still be usable. FrameError
-// is reserved for a stream that ended or a body that could not be read in full.
-// The reader stays synchronised after one, so callers should log it and read
-// again.
+// FrameError описывает кадр, который не удалось разобрать.
 type FrameError struct {
 	Reason string
-	// Err is the underlying cause, if any (io.EOF, io.ErrUnexpectedEOF, ...).
+	// Err — исходная причина, если она есть: io.EOF, io.ErrUnexpectedEOF и тому подобное.
 	Err error
-	// Offset is the number of bytes consumed from the connection, including
-	// bytes discarded while resynchronising.
+	// Offset — число байт, прочитанных из соединения, включая байты, отброшенные
+	// при повторной синхронизации.
 	Offset int64
 }
 
@@ -81,31 +77,31 @@ func (e *FrameError) Error() string {
 
 func (e *FrameError) Unwrap() error { return e.Err }
 
-// HeaderReader reads NDTP frames from a stream. It is not safe for concurrent
-// use; give each connection its own.
+// HeaderReader читает кадры NDTP из потока. Небезопасен при конкурентном
+// использовании, поэтому каждому соединению нужен свой экземпляр.
 type HeaderReader struct {
 	br       *bufio.Reader
 	consumed int64
 	resyncs  int64
 }
 
-// NewHeaderReader wraps r. Read deadlines are the caller's responsibility; the
-// NDTP connection is long-lived, so prefer setting a deadline only while a
-// frame is expected.
+// NewHeaderReader оборачивает r. Дедлайны чтения остаются на стороне вызывающего
+// кода: соединение NDTP долгоживущее, поэтому дедлайн лучше ставить
+// только на время ожидания кадра.
 func NewHeaderReader(r io.Reader) *HeaderReader {
 	return &HeaderReader{br: bufio.NewReaderSize(r, 4096)}
 }
 
-// NextFrame reads the next frame.
+// NextFrame читает следующий кадр.
 //
-// The reader skips leading garbage and recovers from a false 0x7E7E candidate
-// on its own, so a desynchronised stream heals without the caller doing
-// anything. Two conditions are still returned as *FrameError and are always
-// recoverable by calling again: the stream ended, or the declared body could
-// not be read in full.
+// Читатель сам пропускает мусор в начале и восстанавливается после ложной
+// последовательности 0x7E7E, поэтому рассинхронизированный поток
+// восстанавливается без участия вызывающего кода. Два случая всё же
+// возвращаются как *FrameError и всегда разрешаются повторным вызовом: поток
+// оборвался либо заявленное тело не удалось прочитать целиком.
 //
-// A frame whose CRC does not match is not an error. It is returned with
-// CRCValid false so the caller can count it and decide.
+// Кадр с несовпавшей CRC ошибкой не считается: он возвращается с CRCValid
+// false, чтобы вызывающий код мог его посчитать и решить сам.
 func (h *HeaderReader) NextFrame() (Frame, error) {
 	for {
 		header, err := h.peekHeader()
@@ -145,9 +141,9 @@ func (h *HeaderReader) NextFrame() (Frame, error) {
 	}
 }
 
-// peekHeader advances to the next 0x7E7E signature and returns the NPL header
-// bytes without consuming them, so a candidate that turns out not to be a real
-// frame header costs only its two signature bytes.
+// peekHeader продвигается до следующей сигнатуры 0x7E7E и возвращает байты
+// заголовка NPL, не потребляя их, поэтому кандидат, оказавшийся не
+// заголовком кадра, стоит всего двух байт сигнатуры.
 func (h *HeaderReader) peekHeader() ([]byte, error) {
 	for {
 		window, err := h.br.Peek(2)
@@ -155,8 +151,8 @@ func (h *HeaderReader) peekHeader() ([]byte, error) {
 			return nil, err
 		}
 		if window[0] == signatureByte && window[1] == signatureByte {
-			// bufio.Peek does not advance, so the bytes stay available for the
-			// Discard that follows once the header has been validated.
+			// bufio.Peek не продвигает позицию, поэтому байты остаются
+			// доступными для Discard после проверки заголовка.
 			return h.br.Peek(nplSize)
 		}
 		if _, err := h.br.Discard(1); err != nil {
@@ -166,8 +162,8 @@ func (h *HeaderReader) peekHeader() ([]byte, error) {
 	}
 }
 
-// skipCandidate abandons a 0x7E7E that did not validate as a frame header and
-// resumes scanning after it.
+// skipCandidate отбрасывает 0x7E7E, не прошедшую проверку как заголовок
+// кадра, и продолжает сканирование после неё.
 func (h *HeaderReader) skipCandidate() {
 	if err := h.discard(2); err == nil {
 		h.consumed += 2
@@ -186,14 +182,13 @@ func (h *HeaderReader) discard(n int) error {
 	return nil
 }
 
-// Resyncs reports how many false 0x7E7E candidates have been abandoned. A
-// non-zero, growing count means the stream is carrying noise.
+// Resyncs сообщает, сколько ложных последовательностей 0x7E7E было отброшено.
 func (h *HeaderReader) Resyncs() int64 { return h.resyncs }
 
 func (h *HeaderReader) frameError(err error) error {
 	return &FrameError{Reason: err.Error(), Err: err, Offset: h.consumed}
 }
 
-// BytesRead reports how many bytes have been consumed from the connection,
-// including bytes discarded while resynchronising.
+// BytesRead сообщает, сколько байт прочитано из соединения, включая байты,
+// отброшенные при повторной синхронизации.
 func (h *HeaderReader) BytesRead() int64 { return h.consumed }

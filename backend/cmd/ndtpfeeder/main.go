@@ -1,17 +1,17 @@
-// Command ndtpfeeder replays a decoded telemetry CSV (traffic.csv) back onto
-// the wire as NDTP packets.
+// Команда ndtpfeeder отправляет декодированную телеметрию из CSV (traffic.csv)
+// обратно на провод пакетами NDTP.
 //
-// The Docker emulator only produces random telemetry around Moscow, which is
-// enough to prove the receiver works but not enough to exercise a real
-// trajectory. The feeder closes that gap without a second ingestion path: it
-// speaks the same protocol over the same TCP socket as the emulator, so the
-// backend cannot tell the difference.
+// Docker-эмулятор выдаёт только случайную телеметрию вокруг Москвы: этого
+// достаточно, чтобы убедиться в работе приёмника, но недостаточно, чтобы
+// прогнать настоящую траекторию. Фидер закрывает этот пробел без второго пути
+// приёма данных: он говорит тем же протоколом через тот же TCP-сокет, что и
+// эмулятор, поэтому backend не может их отличить.
 //
-// Timestamps in the dataset are naive Moscow wall clock. The feeder re-bases
-// them onto the current time, preserving the gaps between consecutive points,
-// so a replayed stream looks like a live one to the receiver.
+// Время в наборе данных записано как наивное московское. Фидер переносит его
+// на текущее, сохраняя промежутки между соседними точками, чтобы
+// воспроизведённый поток выглядел для приёмника как живой.
 //
-// Usage:
+// Использование:
 //
 //	ndtpfeeder -addr 127.0.0.1:9201 -file ../../dataset/validate/traffic.csv
 //	ndtpfeeder -addr 127.0.0.1:9201 -file traffic.csv -speed 120 -vehicles 11
@@ -88,16 +88,15 @@ type runConfig struct {
 	Logger        *slog.Logger
 }
 
-// signalContext cancels on Ctrl-C so a long replay stops cleanly.
+// signalContext отменяет контекст по Ctrl-C, чтобы длинный прогон завершался чисто.
 func signalContext() (context.Context, context.CancelFunc) {
 	return signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 }
 
 // sample is one CSV telemetry row, ready to be encoded.
 type sample struct {
-	// offset is the delay relative to the first point of the vehicle.
-	offset time.Duration
-	// sourceTime сохраняет event_time CSV для строгого сопоставления с расписанием.
+	// offset — задержка относительно первой точки данного транспортного средства.
+	offset     time.Duration
 	sourceTime time.Time
 	nav        ndtp.NavCell
 }
@@ -141,8 +140,8 @@ func run(cfg runConfig) error {
 	}
 }
 
-// replay opens one connection per vehicle, exactly like the emulator does, and
-// paces every vehicle against the same wall clock.
+// replay открывает по соединению на каждое ТС, как эмулятор, и
+// привязывает все ТС к общим часам.
 func replay(ctx context.Context, cfg runConfig, tracks map[uint32][]sample) error {
 	units := make([]uint32, 0, len(tracks))
 	for unit := range tracks {
@@ -173,7 +172,7 @@ func replay(ctx context.Context, cfg runConfig, tracks map[uint32][]sample) erro
 	return <-errCh
 }
 
-// feedVehicle handshakes and then streams one vehicle's track.
+// feedVehicle здоровается, затем передаёт трек одного ТС.
 func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint32, track []sample) error {
 	conn, err := net.DialTimeout("tcp", cfg.Addr, 5*time.Second)
 	if err != nil {
@@ -181,7 +180,7 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 	}
 	defer conn.Close()
 
-	// The emulator handshakes, waits, then streams realtime packets.
+	// Эмулятор сначала здоровается, затем ждёт и передаёт realtime-пакеты.
 	handshake := ndtp.BuildFrame(unit, ndtp.ServiceGenericControls, ndtp.MsgConnRequest, 1,
 		ndtp.BuildHandshakeBody(unit))
 	refreshWriteDeadline(ctx, conn)
@@ -236,29 +235,28 @@ func refreshWriteDeadline(ctx context.Context, conn net.Conn) {
 
 // replayInstant maps a dataset offset onto the simulated live clock.
 //
-// The device timestamp has to advance with the replayed timeline. Stamping every
-// point with time.Now() collapses a whole track onto a single instant whenever
-// the replay is compressed, and the receiver then cannot tell consecutive points
-// apart, which matters because both the anti-leakage window and the schedule
-// lookup key off the device clock.
+// Время на устройстве должно двигаться вместе с воспроизводимой шкалой. Если
+// ставить каждой точке time.Now(), весь трек схлопнется в один момент
+// при сжатом прогоне, и приёмник перестанет различать соседние точки, а это
+// важно, потому что и окно против утечки, и поиск по расписанию
+// опираются на часы устройства.
 func replayInstant(start time.Time, offset time.Duration, speed float64) time.Time {
 	if speed <= 0 {
-		// Unpaced: points go out as fast as the socket accepts them, so
-		// simulated time barely advances and the wall clock is the best stamp.
+		// Без пауз: точки уходят так быстро, как принимает сокет, поэтому
+		// смоделированное время почти не идёт, и лучшая отметка — реальные часы.
 		return time.Now()
 	}
-	// speed is a plain multiplier, so 60 means sixty times faster than real time
-	// and a two minute gap becomes two seconds.
+	// speed — простой множитель, то есть 60 означает в шестьдесят раз быстрее
+	// реального времени, и двухминутный разрыв становится двумя секундами.
 	//
-	// The division has to happen in floating point. Dividing one Duration by
-	// another is integer division and yields a bare count, which as a Duration
-	// would be nanoseconds: 2s/60 would come out as 0ns and every point would be
-	// scheduled at the start of the replay.
+	// Деление обязано идти в плавающей точке. Деление одного Duration на
+	// другой даёт целое число: как Duration это были бы наносекунды,
+	// то есть 2s/60 дало бы 0ns и каждая точка попала бы в начало прогона.
 	return start.Add(time.Duration(float64(offset) / speed))
 }
 
-// waitUntil blocks until the sample's scheduled send time and returns that
-// instant, which becomes the point's device timestamp.
+// waitUntil ждёт запланированное время отправки и возвращает этот самый
+// момент, который становится отметкой времени точки на устройстве.
 func waitUntil(ctx context.Context, start time.Time, offset time.Duration, speed float64) (time.Time, error) {
 	if speed <= 0 {
 		return time.Now(), ctx.Err()
@@ -278,7 +276,7 @@ func waitUntil(ctx context.Context, start time.Time, offset time.Duration, speed
 	}
 }
 
-// loadTracks reads traffic.csv and groups it per unit, ordered by time.
+// loadTracks читает traffic.csv и группирует строки по ТС, упорядочивая по времени.
 func loadTracks(path string, wantVehicles, limit int, logger *slog.Logger) (map[uint32][]sample, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -294,7 +292,7 @@ func loadTracks(path string, wantVehicles, limit int, logger *slog.Logger) (map[
 	}
 	columns := indexColumns(header)
 
-	// unitId -> raw rows. Collected first because the CSV interleaves vehicles.
+	// unitId -> исходные строки. Сначала собираются целиком, потому что CSV перемешивает ТС.
 	rowsByUnit := make(map[uint32][]row)
 	seen := 0
 
@@ -347,19 +345,19 @@ func loadTracks(path string, wantVehicles, limit int, logger *slog.Logger) (map[
 	return tracks, nil
 }
 
-// minTrackPoints is the smallest number of points worth replaying. The dataset
-// contains vehicles with a single row, which have no trajectory at all: there is
-// nothing to interpolate, nothing to predict ahead of, and nothing to show on a
-// map.
+// minTrackPoints — наименьшее число точек, ради которого стоит запускать прогон.
+// В наборе есть ТС с единственной строкой, у которых нет траектории вовсе:
+// нечего интерполировать, нечего прогнозировать и нечего показывать
+// на карте.
 const minTrackPoints = 2
 
-// pickVehicles chooses which units to replay, richest track first.
+// pickVehicles выбирает ТС для прогона, начиная с самым длинными треками.
 //
-// Ordering by point count rather than by ID matters: the dataset's seven
-// one-row vehicles (663271, 664030, 668372, 794446, 890371, 1112060, 1120670)
-// all sort below the real fleet, so picking the lowest IDs yields vehicles that
-// emit a single packet and vanish. Ordering is total, so the selection is
-// reproducible.
+// Сортировка по числу точек, а не по ID, важна: семь
+// ТС с одной строкой (663271, 664030, 668372, 794446, 890371, 1112060, 1120670)
+// при сортировке оказываются ниже основного парка, поэтому выбор наименьших ID
+// дал бы ТС, которые отправят один пакет и исчезнут. Сортировка полная, поэтому
+// выбор воспроизводим.
 func pickVehicles(rowsByUnit map[uint32][]row, want int) (units, skipped []uint32) {
 	type ranked struct {
 		unit   uint32
@@ -431,8 +429,8 @@ func parseUint32(columns map[string]int, record []string, name string) (uint32, 
 	return uint32(value), nil
 }
 
-// eventTimeLayout accepts both the nanosecond and the whole-second forms found
-// in the dataset.
+// eventTimeLayout принимает и наносекундную, и целосекундную формы, встречающиеся
+// в наборе данных.
 const eventTimeLayout = "2006-01-02 15:04:05.999999999"
 
 func parseTime(columns map[string]int, record []string, name string) (time.Time, error) {
@@ -440,9 +438,9 @@ func parseTime(columns map[string]int, record []string, name string) (time.Time,
 	if err != nil {
 		return time.Time{}, err
 	}
-	// The dataset stores naive Moscow wall clock. Only differences between
-	// timestamps matter here, so any consistent zone works and UTC avoids
-	// depending on a tz database being installed.
+	// Набор хранит наивное московское время. Здесь важны только разности между
+	// метками времени, поэтому подойдёт любая согласованная зона, а UTC избавляет
+	// от зависимости от установленной базы часовых поясов.
 	at, err := time.ParseInLocation(eventTimeLayout, raw, time.UTC)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("column %q value %q: %w", name, raw, err)
@@ -478,9 +476,9 @@ func parseNav(columns map[string]int, record []string) (ndtp.NavCell, error) {
 		return nav, err
 	}
 
-	// A row is only a position when the dataset says the fix is valid. Rows
-	// with location_valid=False often still carry stale or zeroed coordinates,
-	// and sending them as valid would poison the map matching downstream.
+	// Строка является координатой только когда набор считает фикс достоверным.
+	// У строк с location_valid=False координаты часто устаревшие или нулевые,
+	// и отправка их как достоверных испортила бы сопоставление по карте.
 	positioned := valid && lonOK && latOK
 	if positioned {
 		nav.Longitude, nav.Latitude = lon, lat
@@ -497,11 +495,11 @@ func parseNav(columns map[string]int, record []string) (ndtp.NavCell, error) {
 	return nav, nil
 }
 
-// clampAltitude drops the dataset's sentinel values.
+// clampAltitude отбрасывает служебные значения из набора данных.
 //
-// The alt column reaches 65505 m, which is the 16-bit field wrapping, not an
-// altitude. Moscow sits near 150 m, so anything beyond a few kilometres is
-// treated as absent.
+// Колонка alt доходит до 65505 м: это переполнение 16-битного поля, а не
+// высота. Москва лежит около 150 м, поэтому всё, что дальше нескольких километров,
+// считается отсутствующим.
 func clampAltitude(alt float64) float64 {
 	const maxPlausible = 3000
 	if math.IsNaN(alt) || alt < -500 || alt > maxPlausible {

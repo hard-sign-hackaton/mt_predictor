@@ -16,8 +16,11 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
+// Store — хранилище инцидентов и действий оператора в PostgreSQL.
 type Store struct{ pool *pgxpool.Pool }
 
+// Open подключается к базе, проверяет соединение и применяет встроенные миграции
+// по алфавиту.
 func Open(ctx context.Context, databaseURL string) (*Store, error) {
 	pool, err := pgxpool.New(ctx, databaseURL)
 	if err != nil {
@@ -50,8 +53,11 @@ func Open(ctx context.Context, databaseURL string) (*Store, error) {
 	return &Store{pool: pool}, nil
 }
 
+// Close закрывает пул соединений.
 func (s *Store) Close() { s.pool.Close() }
 
+// Save вставляет инцидент, а по тому же id обновляет изменяемые поля прогноза,
+// статуса и результата.
 func (s *Store) Save(ctx context.Context, i models.Incident) error {
 	_, err := s.pool.Exec(ctx, `INSERT INTO incidents (
 id,unit_id,tr_id,route_pattern_id,occurrence_id,prediction_id,target_action_item_id,target_stop_id,target_stop_address,target_planned_at,
@@ -88,6 +94,8 @@ func scanIncident(row scanner) (models.Incident, error) {
 	return i, err
 }
 
+// LoadUnresolved возвращает активные инциденты в порядке создания: они нужны после
+// перезапуска, чтобы восстановить наблюдение.
 func (s *Store) LoadUnresolved(ctx context.Context) ([]models.Incident, error) {
 	rows, err := s.pool.Query(ctx, `SELECT `+columns+` FROM incidents WHERE status IN ('active','awaiting_result') ORDER BY created_at`)
 	if err != nil {
@@ -105,6 +113,7 @@ func (s *Store) LoadUnresolved(ctx context.Context) ([]models.Incident, error) {
 	return result, rows.Err()
 }
 
+// Get возвращает инцидент по id; второй результат показывает, что строка найдена.
 func (s *Store) Get(ctx context.Context, id string) (models.Incident, bool, error) {
 	i, err := scanIncident(s.pool.QueryRow(ctx, `SELECT `+columns+` FROM incidents WHERE id=$1`, id))
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -113,6 +122,8 @@ func (s *Store) Get(ctx context.Context, id string) (models.Incident, bool, erro
 	return i, err == nil, err
 }
 
+// History отдаёт страницу закрытых инцидентов от новых к старым, с общим числом
+// записей. При заданном outcome отбираются только соответствующие результаты.
 func (s *Store) History(ctx context.Context, outcome *models.IncidentOutcome, limit, offset int) (models.IncidentHistoryPage, error) {
 	where, args := "status='resolved'", []any{}
 	if outcome != nil {
@@ -141,6 +152,8 @@ func (s *Store) History(ctx context.Context, outcome *models.IncidentOutcome, li
 	return models.IncidentHistoryPage{Items: items, Total: total, Limit: limit, Offset: offset}, rows.Err()
 }
 
+// SaveAction сохраняет действие оператора. Повторная вставка с тем же id обновляет
+// запись через ON CONFLICT.
 func (s *Store) SaveAction(ctx context.Context, action models.OperatorAction) error {
 	_, err := s.pool.Exec(ctx, `INSERT INTO operator_actions
 (id,incident_id,unit_id,route_pattern_id,action_code,label,recipient,message,status,created_at,consumed_at)
@@ -149,6 +162,7 @@ VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, action.ID, action.IncidentID, acti
 	return err
 }
 
+// Actions возвращает действия оператора по инциденту от новых к старым.
 func (s *Store) Actions(ctx context.Context, incidentID string) ([]models.OperatorAction, error) {
 	rows, err := s.pool.Query(ctx, `SELECT id::text,incident_id::text,unit_id,route_pattern_id,action_code,label,recipient,message,status,created_at,consumed_at
 FROM operator_actions WHERE incident_id=$1 ORDER BY created_at DESC`, incidentID)
