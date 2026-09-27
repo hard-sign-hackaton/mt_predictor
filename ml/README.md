@@ -1,75 +1,62 @@
-# MT Predictor
+# Predictor
 
-Standalone gRPC service for predicting transit stop delays. This repository
-contains the service source, generated Protobuf/gRPC bindings, tests, dependency
-manifest, and a ready-to-use CatBoost + Transformer model dump. Training data
-is intentionally not included.
+Автономный gRPC-сервис для прогнозирования задержек транспорта на остановках. В репозитории находятся исходный код сервиса, сгенерированные привязки Protobuf/gRPC, тесты, манифест зависимостей и готовый дамп модели CatBoost + Transformer. Данные для обучения в репозиторий намеренно не включены.
 
-The checked-in model is about 1.2 MB. It was trained with CUDA, but its weights
-are stored independently of the GPU and can be loaded on CPU. Inference uses
-CUDA automatically when available; Apple MPS is not currently implemented, so
-Apple Silicon runs the Transformer on CPU.
+Размер сохранённой модели — около 1,2 МБ. Она обучалась с CUDA, но её веса не привязаны к GPU и могут загружаться на CPU. Если CUDA доступна, инференс автоматически использует её. Поддержка Apple MPS пока не реализована, поэтому на Apple Silicon Transformer работает на CPU.
 
-## Install
+## Установка
 
-Create an environment from the repository root:
+Создайте виртуальное окружение из корня репозитория:
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-On Linux or macOS:
+В Linux или macOS:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-### Optional NVIDIA CUDA
+### Дополнительно: NVIDIA CUDA
 
-For Windows with a CUDA 12.8-compatible NVIDIA driver, replace the CPU/default
-PyTorch wheel with the CUDA build:
+В Windows с драйвером NVIDIA, совместимым с CUDA 12.8, замените версию PyTorch по умолчанию (для CPU) на сборку с CUDA:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install --force-reinstall --index-url https://download.pytorch.org/whl/cu128 "torch>=2.9,<3"
 .\.venv\Scripts\python.exe -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
 ```
 
-The gRPC service works without an NVIDIA GPU. It falls back to CPU. Set
-`MODEL_DEVICE=cuda` to require CUDA, or `MODEL_DEVICE=cpu` to force CPU.
+gRPC-сервис работает и без GPU NVIDIA — в этом случае он использует CPU. Установите `MODEL_DEVICE=cuda`, чтобы потребовать CUDA, или `MODEL_DEVICE=cpu`, чтобы принудительно использовать CPU.
 
-## Run gRPC server
+## Запуск gRPC-сервера
 
-From the repository root:
+Из корня репозитория:
 
 ```powershell
 .\.venv\Scripts\python.exe -m delay_service.grpc_server --host 0.0.0.0 --port 50051
 ```
 
-On Linux or macOS:
+В Linux или macOS:
 
 ```bash
 .venv/bin/python -m delay_service.grpc_server --host 0.0.0.0 --port 50051
 ```
 
-The model dump is loaded from `delay_service/artifacts/delay_model.joblib`.
-Override its location using `DELAY_MODEL_PATH`. Server settings can be supplied
-with `GRPC_HOST`, `GRPC_PORT`, and `GRPC_MAX_WORKERS`. Each server process loads
-one immutable model version at startup and is otherwise stateless, so it can be
-run as a replica behind a gRPC-capable load balancer.
+Дамп модели загружается из `delay_service/artifacts/delay_model.joblib`. Путь можно изменить с помощью `DELAY_MODEL_PATH`. Настройки сервера задаются переменными `GRPC_HOST`, `GRPC_PORT` и `GRPC_MAX_WORKERS`. Каждый процесс сервера при запуске загружает одну неизменяемую версию модели и затем не хранит состояние запросов, поэтому его можно запускать как реплику за балансировщиком нагрузки с поддержкой gRPC.
 
 ### Docker
 
-The build context is the directory holding `requirements.txt`:
+Контекст сборки — каталог, в котором находится `requirements.txt`:
 
 ```bash
 docker build -t mt-predictor-grpc .
 docker run --rm -p 50051:50051 mt-predictor-grpc
 ```
 
-The image installs the CPU-only PyTorch wheel, runs as an unprivileged user, and
-serves the checked-in model on port 50051. Build for NVIDIA with:
+В образ устанавливается версия PyTorch только для CPU. Контейнер запускается от непривилегированного пользователя и обслуживает включённую в репозиторий модель на порту 50051. Для сборки с поддержкой NVIDIA используйте:
 
 ```bash
 docker build -t mt-predictor-grpc \
@@ -78,76 +65,53 @@ docker build -t mt-predictor-grpc \
 docker run --rm --gpus all -e MODEL_DEVICE=cuda -p 50051:50051 mt-predictor-grpc
 ```
 
-## ONNX inference optimization (optional)
+## Оптимизация инференса с ONNX (необязательно)
 
-The standard PyTorch path remains the default. To export the Transformer portion
-of a trained artifact as a dynamic-batch ONNX model, install the optional tools
-and export beside the model:
+По умолчанию используется стандартный путь PyTorch. Чтобы экспортировать часть обученной модели Transformer в формат ONNX с поддержкой динамического размера пакета, установите дополнительные инструменты и выполните экспорт рядом с моделью:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements-onnx.txt
 .\.venv\Scripts\python.exe -m delay_service.optimize --model-path delay_service\artifacts\delay_model.joblib
 ```
 
-The exporter checks the ONNX graph and reports prediction parity against
-PyTorch. Enable the ONNX Runtime CPU backend when launching the server:
+Экспортёр проверяет граф ONNX и сообщает, совпадают ли прогнозы с PyTorch. Чтобы при запуске сервера включить CPU-бэкенд ONNX Runtime:
 
 ```powershell
 $env:TRANSFORMER_BACKEND = "onnx"
 .\.venv\Scripts\python.exe -m delay_service.grpc_server
 ```
 
-By default, the ONNX sidecar is expected at the same path as the model bundle
-with the `.onnx` extension. Override it with `TRANSFORMER_ONNX_PATH`. ONNX
-Runtime uses one intra-op thread by default for low single-request latency;
-`ONNX_INTRA_OP_THREADS` and `ONNX_INTER_OP_THREADS` can be tuned for the target
-batch size and CPU.
+По умолчанию дополнительный файл ONNX ожидается рядом с файлом модели и имеет расширение `.onnx`. Путь можно изменить переменной `TRANSFORMER_ONNX_PATH`. Для снижения задержки одиночного запроса ONNX Runtime по умолчанию использует один внутрипоточный поток. Значения `ONNX_INTRA_OP_THREADS` и `ONNX_INTER_OP_THREADS` можно настроить с учётом размера пакета и характеристик CPU.
 
-The Docker image can include ONNX Runtime with
-`--build-arg INSTALL_ONNX_RUNTIME=1`. Build with the already-exported model
-sidecar in the context and enable the backend at runtime:
+В Docker-образ можно включить ONNX Runtime с помощью `--build-arg INSTALL_ONNX_RUNTIME=1`. Соберите образ, включив уже экспортированный дополнительный файл модели в контекст сборки, и активируйте бэкенд при запуске:
 
 ```powershell
 docker build -t mt-predictor-grpc --build-arg INSTALL_ONNX_RUNTIME=1 .
 docker run --rm -p 50051:50051 -e TRANSFORMER_BACKEND=onnx mt-predictor-grpc
 ```
 
-Alternatively, mount the matching `.onnx` sidecar beside the model bundle and
-set `TRANSFORMER_ONNX_PATH`. Dynamic INT8 export is available with
-`--quantize-int8`; it produces an `.int8.onnx` sidecar. INT8 is experimental:
-compare its MAE and per-row errors on a held-out labeled dataset before using
-it. It is not the default because local measurements showed little latency
-benefit for small batches.
+Вместо этого можно подключить соответствующий дополнительный файл `.onnx` рядом с моделью и задать `TRANSFORMER_ONNX_PATH`. Также доступен динамический экспорт INT8 с параметром `--quantize-int8`; в результате создаётся дополнительный файл `.int8.onnx`. INT8 — экспериментальный режим: прежде чем использовать его, сравните MAE и ошибки по отдельным строкам на отложенной размеченной выборке. По умолчанию этот режим не включён: локальные измерения показали незначительный выигрыш по задержке для небольших пакетов.
 
-TensorRT is not currently wired into the service. It requires a compatible
-NVIDIA/Linux TensorRT runtime and a TensorRT-enabled ONNX Runtime provider; the
-current ONNX backend deliberately selects CPUExecutionProvider only.
+TensorRT пока не подключён к сервису. Для него нужна совместимая среда TensorRT в NVIDIA/Linux и провайдер ONNX Runtime с поддержкой TensorRT. Текущий бэкенд ONNX намеренно выбирает только `CPUExecutionProvider`.
 
-Local microbenchmark (this workspace, synthetic requests with 32 telemetry
-records; predictor time only, excluding gRPC/network), median latency:
+Локальный микробенчмарк (это рабочее окружение, синтетические запросы с 32 записями телеметрии; измерено только время предиктора, без gRPC и сети), медианная задержка:
 
-| Backend | 1 prediction | 16 predictions | 64 predictions |
+| Бэкенд | 1 прогноз | 16 прогнозов | 64 прогноза |
 |---|---:|---:|---:|
-| PyTorch CPU | 8.08 ms | 17.62 ms | 43.38 ms |
-| ONNX Runtime FP32 CPU | 6.91 ms | 16.30 ms | 44.84 ms |
-| ONNX Runtime INT8 CPU | 6.86 ms | 16.26 ms | 44.83 ms |
+| PyTorch CPU | 8.08 мс | 17.62 мс | 43.38 мс |
+| ONNX Runtime FP32 CPU | 6.91 мс | 16.30 мс | 44.84 мс |
+| ONNX Runtime INT8 CPU | 6.86 мс | 16.26 мс | 44.83 мс |
 
-On the labeled test split, FP32 ONNX matched the PyTorch CPU MAE (53.2738 sec);
-INT8 MAE was 53.3436 sec, but its per-row prediction delta reached 15.05 sec.
-These results suggest using FP32 ONNX for latency-sensitive single predictions
-on this CPU, while keeping PyTorch for larger batches unless hardware-specific
-benchmarks show otherwise. They are local measurements, not an SLA.
+На размеченной тестовой выборке MAE FP32 ONNX совпала с MAE PyTorch CPU (53.2738 с). MAE INT8 составила 53.3436 с, но максимальное изменение прогноза для отдельной строки достигло 15.05 с. Эти результаты позволяют рекомендовать FP32 ONNX для одиночных прогнозов с низкой задержкой на этом CPU, а для крупных пакетов — PyTorch, если только бенчмарки на целевом оборудовании не покажут обратное. Это локальные измерения, а не гарантия уровня обслуживания (SLA).
 
-The Protobuf service is `delay_service.v1.DelayPredictionService`:
+Контракт сервиса Protobuf: `delay_service.v1.DelayPredictionService`:
 
 - `Predict(PredictRequest) returns (PredictionResponse)`
 - `PredictBatch(BatchPredictRequest) returns (BatchPredictionResponse)`
 
-The contract is in [`delay_service/proto/delay_service.proto`](delay_service/proto/delay_service.proto).
-Send telemetry records with their `tr_id`; records later than the forecast time
-`T` are ignored.
+Контракт описан в [`delay_service/proto/delay_service.proto`](delay_service/proto/delay_service.proto). Передавайте записи телеметрии вместе с их `tr_id`. Записи, время которых позже времени прогноза `T`, игнорируются.
 
-## Client example
+## Пример клиента
 
 ```python
 from datetime import datetime, timezone
@@ -185,62 +149,41 @@ with grpc.insecure_channel("localhost:50051") as channel:
     print(response.sample_id, response.prediction, response.unit)
 ```
 
-Use TLS credentials when connecting across an untrusted network.
+При подключении через недоверенную сеть используйте учётные данные TLS.
 
-## Retrain and publish a model version (optional)
+## Дообучение и публикация версии модели (необязательно)
 
-Training requires the original dataset layout (`train/`, `test/`, `validate/`,
-and `labels/`) alongside this repository, or pass its location with
-`--data-dir`. The trained ensemble and validation `submission.csv` are written
-to the paths specified by the command. If `--model-out` is omitted, training
-publishes a timestamped artifact under `delay_service/artifacts/versions/`.
-Training uses the labeled training split; test labels are only used for
-evaluation. For retraining with new labels, build an updated cumulative dataset
-with a fresh vehicle-disjoint test split, then train and evaluate a new version:
+Для обучения нужна исходная структура набора данных (`train/`, `test/`, `validate/` и `labels/`) рядом с этим репозиторием либо укажите расположение с помощью `--data-dir`. Обученная ансамблевая модель и файл `submission.csv` с результатами проверки записываются по путям, заданным командой. Если параметр `--model-out` не указан, обученная версия публикуется в файл с временной меткой в `delay_service/artifacts/versions/`. Для обучения используется размеченная обучающая выборка; метки тестовой выборки применяются только для оценки. Чтобы дообучить модель на новых метках, соберите обновлённый накопительный набор данных с новой тестовой выборкой, в которой транспортные средства не пересекаются с обучающей, а затем обучите и оцените новую версию:
 
 ```powershell
 .\.venv\Scripts\python.exe -m delay_service.train --data-dir "C:\path\to\dataset" --device auto
 ```
 
-Use `--device cuda` to require NVIDIA CUDA or `--device cpu` to force CPU.
-To select an explicit immutable version path, pass `--model-out`, for example:
+Задайте `--device cuda`, чтобы потребовать NVIDIA CUDA, или `--device cpu`, чтобы принудительно использовать CPU. Чтобы выбрать явный путь неизменяемой версии, укажите `--model-out`, например:
 
 ```powershell
 .\.venv\Scripts\python.exe -m delay_service.train --data-dir "C:\path\to\dataset" --model-out "C:\models\delay_model-v2.joblib"
 ```
 
-Artifact publication uses a temporary file and atomic replacement, so a failed
-write cannot leave a truncated model at the published path. The running server
-does not hot-reload artifacts: validate the new version, then roll it out by
-restarting/replacing replicas with `DELAY_MODEL_PATH` set to that version. Keep
-the previous artifact available for rollback. Training is an offline full
-retrain on accumulated labeled data, not online learning from prediction
-requests.
+При публикации артефакт записывается во временный файл и заменяется атомарно, поэтому неудачная запись не оставит по опубликованному пути повреждённую модель. Работающий сервер не загружает новые артефакты автоматически: проверьте новую версию, затем разверните её, перезапустив или заменив реплики с `DELAY_MODEL_PATH`, указывающим на эту версию. Сохраните предыдущий артефакт для отката. Обучение — это полное офлайн-переобучение на накопленных размеченных данных, а не обучение в реальном времени на запросах прогноза.
 
-## Horizontal scaling
+## Горизонтальное масштабирование
 
-The Docker image above includes the bundled model. To deploy a new model
-version, mount the artifact into each replica and set `DELAY_MODEL_PATH`. Run
-multiple replicas behind an external gRPC load balancer; give each replica
-enough CPU/RAM, and avoid overcommitting a shared GPU. `PredictBatch` supports
-up to 1,000 forecast points per request, and `GRPC_MAX_WORKERS` controls the
-per-process request worker pool. Benchmark the target hardware to choose replica
-and worker counts; increasing threads alone does not guarantee higher
-throughput.
+Описанный выше Docker-образ содержит встроенную модель. Чтобы развернуть новую версию, подключите артефакт к каждой реплике и задайте `DELAY_MODEL_PATH`. Запустите несколько реплик за внешним gRPC-балансировщиком нагрузки; выделите каждой реплике достаточно CPU и RAM и не перегружайте общую GPU. `PredictBatch` поддерживает до 1 000 точек прогноза в одном запросе, а `GRPC_MAX_WORKERS` задаёт размер пула обработчиков запросов на процесс. Подбирайте число реплик и обработчиков тестированием на целевом оборудовании: простое увеличение числа потоков не гарантирует более высокой пропускной способности.
 
-## Tests
+## Тесты
 
-From the repository root:
+Из корня репозитория:
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
 
-## Files
+## Файлы
 
-- `delay_service/` — service, model code, Protobuf contract/bindings, and model.
-- `tests/` — feature, model, and live in-process gRPC tests.
-- `requirements.txt` — runtime and training dependencies.
-- `requirements-onnx.txt` — optional ONNX exporter and CPU runtime.
-- `Dockerfile`, `.dockerignore` — container image for the gRPC service.
-- `.gitignore` — excludes local environments, caches, and copied dataset files.
+- `delay_service/` — сервис, код модели, контракт и привязки Protobuf, а также модель.
+- `tests/` — тесты признаков, модели и локального gRPC-сервера в процессе.
+- `requirements.txt` — зависимости сервиса и обучения.
+- `requirements-onnx.txt` — дополнительные средства экспорта ONNX и CPU-среда выполнения.
+- `Dockerfile`, `.dockerignore` — файлы контейнерного образа gRPC-сервиса.
+- `.gitignore` — исключает локальные окружения, кэш и копии файлов наборов данных.
