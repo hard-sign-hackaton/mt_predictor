@@ -178,6 +178,9 @@ export interface DelayPrediction {
   confidence?: number
   /** Необязательное объяснение backend/ML; frontend не должен его придумывать. */
   reason?: string
+  reasonCode?: string
+  evidence?: Record<string, number>
+  scenarioId?: string
   /** Необязательно, пока ML фактически не передаёт значение. */
   modelVersion?: string
 }
@@ -197,6 +200,10 @@ export interface Incident {
   targetStop: StopReference
   /** Входное значение для расчёта критичности на frontend. */
   predictedDelaySeconds: number
+  reasonCode?: string
+  reason?: string
+  evidence?: Record<string, number>
+  scenarioId?: string
   predictionTime: string
   createdAt: string
   updatedAt: string

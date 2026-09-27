@@ -21,6 +21,12 @@ function formatTime(value: string) {
 
 function formatDelay(value?: number) {
   if (value === undefined) return 'Нет данных'
+  if (Math.abs(value) < 60) {
+    const seconds = Math.round(Math.abs(value))
+    if (value > 0) return `Задержка ${seconds} с`
+    if (value < 0) return `Опережение ${seconds} с`
+    return 'По расписанию'
+  }
   const minutes = Math.round(Math.abs(value) / 60)
   if (value > 0) return `Задержка ${minutes} мин`
   if (value < 0) return `Опережение ${minutes} мин`

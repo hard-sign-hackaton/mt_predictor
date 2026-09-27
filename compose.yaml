@@ -14,6 +14,15 @@ services:
   backend:
     build:
       context: ./backend
+    command:
+      - /app/mt-backend
+      - -ndtp-addr
+      - :9201
+      - -http-addr
+      - :8080
+      - -catalog
+      - /app/data/generated/route_catalog.json
+      - -enable-mock-scenarios
     ports:
       - "8080:8080"
       - "9201:9201"
@@ -32,6 +41,27 @@ services:
       - backend
 
   feeder:
+    profiles: ["mock"]
+    build:
+      context: ./backend
+    command:
+      - /app/ndtpfeeder
+      - -addr
+      - backend:9201
+      - -file
+      - /dataset/mock_telemetry.csv
+      - -speed
+      - "2"
+      - -timestamp-mode
+      - source
+    volumes:
+      - ./backend/data/mock_telemetry.csv:/dataset/mock_telemetry.csv:ro
+    depends_on:
+      - backend
+    restart: on-failure
+
+  historical-feeder:
+    profiles: ["historical-replay"]
     build:
       context: ./backend
     command:
@@ -47,10 +77,10 @@ services:
       - -timestamp-mode
       - source
     volumes:
-      - ../../dataset:/dataset:ro
+      - ../validate:/dataset/validate:ro
     depends_on:
       - backend
-    restart: on-failure
+    restart: unless-stopped
 
   official-emulator:
     image: ndtp-telemetry-emulator:1.0

@@ -102,6 +102,8 @@ func (r *Runtime) ApplyPrediction(prediction models.DelayPrediction, incidentThr
 			RoutePatternID: prediction.RoutePatternID, PredictionID: prediction.ID,
 			TargetActionItemID: prediction.TargetActionItemID, TargetStop: prediction.TargetStop,
 			PredictedDelaySeconds: prediction.PredictedDelaySeconds, PredictionTime: prediction.PredictionTime,
+			ReasonCode: prediction.ReasonCode, Reason: prediction.Reason,
+			Evidence: prediction.Evidence, ScenarioID: prediction.ScenarioID,
 			CreatedAt: createdAt, UpdatedAt: now,
 		}
 		r.incidents[key] = incident

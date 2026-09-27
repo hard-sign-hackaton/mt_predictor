@@ -12,7 +12,7 @@ import (
 
 func TestMapEndpointsReturnOnlyMapContract(t *testing.T) {
 	runtime := &Runtime{ttl: time.Minute, vehicles: make(map[uint32]models.VehicleState), subscribers: make(map[uint64]chan models.LiveEvent)}
-	handler := NewAPI(models.DashboardInit{SchemaVersion: "1", CatalogVersion: "test"}, runtime)
+	handler := NewAPI(models.DashboardInit{SchemaVersion: "1", CatalogVersion: "test"}, runtime, false, 120)
 
 	for _, path := range []string{"/api/v1/map/init", "/api/v1/map/snapshot", "/api/v1/dashboard/snapshot", "/health"} {
 		request := httptest.NewRequest(http.MethodGet, path, nil)

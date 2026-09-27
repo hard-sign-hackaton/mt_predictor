@@ -163,6 +163,24 @@ func TestLoadTracksReplaysEveryVehicleWhenUnlimited(t *testing.T) {
 	assert.Len(t, tracks, 1, "-vehicles 0 means every replayable vehicle, not every unit")
 }
 
+func TestMockTelemetryFixtureIsMovingRouteSegment(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "mock_telemetry.csv")
+	tracks, err := loadTracks(path, 0, 0, quietLogger())
+	require.NoError(t, err)
+	require.Len(t, tracks, 1)
+
+	track := tracks[1099984]
+	require.GreaterOrEqual(t, len(track), 50)
+	assert.GreaterOrEqual(t, track[len(track)-1].offset, 14*time.Minute)
+	for _, point := range track {
+		assert.GreaterOrEqual(t, float64(point.nav.SpeedAvg), 10.0)
+		assert.True(t, point.nav.Flags.Valid)
+	}
+	assert.True(t, track[len(track)-1].sourceTime.After(track[0].sourceTime))
+	assert.LessOrEqual(t, track[len(track)-1].sourceTime,
+		time.Date(2026, 1, 6, 6, 43, 17, 0, time.UTC))
+}
+
 func TestLoadTracksRejectsMissingColumns(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "bad.csv")
 	require.NoError(t, os.WriteFile(path, []byte("packet_id,tr_id\n1,2\n"), 0o600))
@@ -454,6 +472,11 @@ func TestSourceTimestampModePreservesDatasetEventTime(t *testing.T) {
 func TestSourceTimestampModeRejectsLoop(t *testing.T) {
 	err := run(runConfig{TimestampMode: "source", Loop: true, Logger: quietLogger()})
 	require.EqualError(t, err, "timestamp-mode=source cannot be combined with loop: event_time must stay monotonic")
+}
+
+func TestHoldLastRequiresSourceTimestampMode(t *testing.T) {
+	err := run(runConfig{TimestampMode: "rebased", HoldLast: true, Logger: quietLogger()})
+	require.EqualError(t, err, "hold-last requires timestamp-mode=source and cannot be combined with loop")
 }
 
 func TestReplayReportsDialFailure(t *testing.T) {

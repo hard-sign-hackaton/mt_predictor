@@ -121,6 +121,12 @@ type DelayPrediction struct {
 	Confidence *float64 `json:"confidence,omitempty"`
 	// Reason необязателен и должен приходить от backend/ML, а не вычисляться frontend.
 	Reason *string `json:"reason,omitempty"`
+	// ReasonCode — машинно-читаемая причина из диагностического слоя.
+	ReasonCode string `json:"reasonCode,omitempty"`
+	// Evidence — наблюдаемые признаки, на которых основана диагностика.
+	Evidence map[string]float64 `json:"evidence,omitempty"`
+	// ScenarioID связывает демонстрационный прогноз с тестовым сценарием.
+	ScenarioID string `json:"scenarioId,omitempty"`
 	// ModelVersion необязателен, пока версия не появилась в контракте ML.
 	ModelVersion *string `json:"modelVersion,omitempty"`
 }

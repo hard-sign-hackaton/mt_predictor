@@ -43,10 +43,11 @@ func main() {
 	var (
 		addr          = flag.String("addr", "127.0.0.1:9201", "NDTP receiver address")
 		file          = flag.String("file", "", "path to traffic.csv (required)")
-		speed         = flag.Float64("speed", 60, "replay rate multiplier; 0 sends as fast as possible")
+		speed         = flag.Float64("speed", 1, "replay rate multiplier; 0 sends as fast as possible")
 		vehicles      = flag.Int("vehicles", 11, "how many vehicles to replay; 0 replays every vehicle with a real trajectory")
 		limit         = flag.Int("limit", 0, "stop after this many points per vehicle; 0 replays everything")
 		loop          = flag.Bool("loop", false, "restart the replay when it ends")
+		holdLast      = flag.Bool("hold-last", false, "keep sending the last point to preserve live freshness")
 		timestampMode = flag.String("timestamp-mode", "rebased", "device timestamp: rebased or source")
 		verbose       = flag.Bool("v", false, "log every point")
 	)
@@ -69,6 +70,7 @@ func main() {
 		Vehicles:      *vehicles,
 		Limit:         *limit,
 		Loop:          *loop,
+		HoldLast:      *holdLast,
 		TimestampMode: *timestampMode,
 		Logger:        logger,
 	}); err != nil {
@@ -84,6 +86,7 @@ type runConfig struct {
 	Vehicles      int
 	Limit         int
 	Loop          bool
+	HoldLast      bool
 	TimestampMode string
 	Logger        *slog.Logger
 }
@@ -111,6 +114,9 @@ func run(cfg runConfig) error {
 	}
 	if cfg.TimestampMode == "source" && cfg.Loop {
 		return errors.New("timestamp-mode=source cannot be combined with loop: event_time must stay monotonic")
+	}
+	if cfg.HoldLast && (cfg.Loop || cfg.TimestampMode != "source") {
+		return errors.New("hold-last requires timestamp-mode=source and cannot be combined with loop")
 	}
 	tracks, err := loadTracks(cfg.File, cfg.Vehicles, cfg.Limit, cfg.Logger)
 	if err != nil {
@@ -195,11 +201,7 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 	}
 
 	requestID := uint32(1)
-	for _, s := range track {
-		sentAt, err := waitUntil(ctx, start, s.offset, cfg.Speed)
-		if err != nil {
-			return err
-		}
+	sendSample := func(s sample, sentAt time.Time) error {
 		requestID++
 		nav := s.nav
 		if cfg.TimestampMode == "source" {
@@ -209,7 +211,6 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 			// Обычный replay выглядит как текущий live-поток.
 			nav.Timestamp = sentAt
 		}
-
 		body := ndtp.AppendCell(nil, ndtp.CellNav00, 0, ndtp.EncodeNavCell(nav))
 		body = ndtp.AppendCell(body, ndtp.CellUsi08, 0, make([]byte, 6))
 		frame := ndtp.BuildFrame(unit, ndtp.ServiceNavData, ndtp.MsgRealtime, requestID, body)
@@ -218,6 +219,31 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 			return fmt.Errorf("vehicle %d write: %w", unit, err)
 		}
 		cfg.Logger.Debug("sent point", "vehicle", unit, "speed", nav.SpeedAvg, "valid", nav.Flags.Valid)
+		return nil
+	}
+	for _, s := range track {
+		sentAt, err := waitUntil(ctx, start, s.offset, cfg.Speed)
+		if err != nil {
+			return err
+		}
+		if err := sendSample(s, sentAt); err != nil {
+			return err
+		}
+	}
+	if cfg.HoldLast && len(track) > 0 {
+		cfg.Logger.Info("holding last telemetry point", "vehicle", unit, "interval", 5*time.Second)
+		for {
+			timer := time.NewTimer(5 * time.Second)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				return ctx.Err()
+			case <-timer.C:
+			}
+			if err := sendSample(track[len(track)-1], time.Now()); err != nil {
+				return err
+			}
+		}
 	}
 	cfg.Logger.Info("vehicle replayed", "vehicle", unit, "points", len(track))
 	return nil

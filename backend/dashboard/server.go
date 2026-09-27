@@ -11,20 +11,36 @@ import (
 
 // API обслуживает статический каталог, текущий снимок и SSE-поток карты.
 type API struct {
-	init    models.DashboardInit
-	runtime *Runtime
+	init                models.DashboardInit
+	runtime             *Runtime
+	enableMockScenarios bool
+	incidentThreshold   float64
 }
 
 // NewAPI создаёт HTTP handler без запуска отдельного listener.
-func NewAPI(init models.DashboardInit, runtime *Runtime) http.Handler {
-	api := &API{init: init, runtime: runtime}
+func NewAPI(
+	init models.DashboardInit,
+	runtime *Runtime,
+	enableMockScenarios bool,
+	incidentThreshold float64,
+) http.Handler {
+	if incidentThreshold <= 0 {
+		incidentThreshold = 120
+	}
+	api := &API{
+		init: init, runtime: runtime, enableMockScenarios: enableMockScenarios,
+		incidentThreshold: incidentThreshold,
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/map/init", api.handleInit)
 	mux.HandleFunc("GET /api/v1/map/snapshot", api.handleSnapshot)
 	mux.HandleFunc("GET /api/v1/dashboard/snapshot", api.handleDashboardSnapshot)
 	mux.HandleFunc("GET /api/v1/map/events", api.handleEvents)
 	mux.HandleFunc("GET /health", api.handleHealth)
-	return withCORS(mux)
+	if enableMockScenarios {
+		mux.HandleFunc("POST /api/v1/demo/scenarios", api.handleMockScenarios)
+	}
+	return withCORS(mux, enableMockScenarios)
 }
 
 func (a *API) handleInit(response http.ResponseWriter, _ *http.Request) {
@@ -100,10 +116,14 @@ func writeJSON(response http.ResponseWriter, status int, value any) {
 	_ = json.NewEncoder(response).Encode(value)
 }
 
-func withCORS(next http.Handler) http.Handler {
+func withCORS(next http.Handler, allowMockIngest bool) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		response.Header().Set("Access-Control-Allow-Origin", "*")
-		response.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		methods := "GET, OPTIONS"
+		if allowMockIngest {
+			methods = "GET, POST, OPTIONS"
+		}
+		response.Header().Set("Access-Control-Allow-Methods", methods)
 		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Last-Event-ID")
 		if request.Method == http.MethodOptions {
 			response.WriteHeader(http.StatusNoContent)

@@ -38,6 +38,13 @@ type Incident struct {
 	TargetStop StopReference `json:"targetStop"`
 	// PredictedDelaySeconds — прогноз задержки; положительное значение означает опоздание.
 	PredictedDelaySeconds float64 `json:"predictedDelaySeconds"`
+	// ReasonCode и Reason — explainable diagnostics, когда они доступны.
+	ReasonCode string `json:"reasonCode,omitempty"`
+	Reason     *string `json:"reason,omitempty"`
+	// Evidence — числовые наблюдения, на которых основана причина.
+	Evidence map[string]float64 `json:"evidence,omitempty"`
+	// ScenarioID помечает демонстрационные данные, не полученные от реального ТС.
+	ScenarioID string `json:"scenarioId,omitempty"`
 	// PredictionTime — момент T, на который рассчитан связанный прогноз.
 	PredictionTime time.Time `json:"predictionTime"`
 	// CreatedAt — время первого обнаружения непрерывного инцидента backend-сервисом.

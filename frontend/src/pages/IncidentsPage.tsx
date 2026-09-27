@@ -31,7 +31,24 @@ function horizonMinutes(prediction?: DelayPrediction) {
 }
 
 function searchable(incident: Incident) {
-  return `${incident.id} ${incident.unitId} ${incident.trId} ${incident.routePatternId} ${incident.targetStop.id} ${incident.targetStop.address}`.toLowerCase()
+  return `${incident.id} ${incident.unitId} ${incident.trId} ${incident.routePatternId} ${incident.targetStop.id} ${incident.targetStop.address} ${incident.reasonCode ?? ''} ${incident.reason ?? ''}`.toLowerCase()
+}
+
+const evidenceLabels: Record<string, string> = {
+  door_open_duration_s: 'Двери открыты, с',
+  stationary_duration_s: 'Стоянка, с',
+  speed_mean_5m_kmh: 'Средняя скорость за 5 мин, км/ч',
+  congestion_index: 'Индекс загруженности',
+  last_gps_age_s: 'Возраст GPS-точки',
+  valid_gps_points_5m: 'Валидные GPS-точки за 5 мин',
+  route_deviation_m: 'Отклонение от маршрута',
+}
+
+function formatEvidence(evidence?: Record<string, number>) {
+  if (!evidence) return ''
+  return Object.entries(evidence)
+    .map(([key, value]) => `${evidenceLabels[key] ?? key}: ${value}`)
+    .join(' · ')
 }
 
 export function IncidentsPage() {
@@ -52,7 +69,7 @@ export function IncidentsPage() {
 
   return <main className="incidents-page">
     <header className="incidents-heading">
-      <div><h1>Инциденты прогнозируемых задержек</h1><p>Только активные прогнозы первой остановки в горизонте 10–15 минут. Управляющие действия пока отключены.</p></div>
+      <div><h1>Инциденты прогнозируемых задержек</h1><p>Только активные прогнозы первой остановки в горизонте 10–15 минут. Причина показывается, только если её удалось обосновать входными сигналами.</p></div>
       <div><strong>{incidents.length}</strong><span>активных</span><small>{connection === 'live' ? 'LIVE' : connection}</small></div>
     </header>
 
@@ -69,7 +86,7 @@ export function IncidentsPage() {
 
     <section className="incidents-table-wrap">
       <table className="incidents-table">
-        <thead><tr><th>Критичность</th><th>Транспорт</th><th>Маршрутный контекст</th><th>Целевая остановка</th><th>Прогноз</th><th>Горизонт / план</th><th>Обновлено</th></tr></thead>
+        <thead><tr><th>Критичность</th><th>Транспорт</th><th>Маршрутный контекст</th><th>Целевая остановка</th><th>Причина</th><th>Прогноз</th><th>Горизонт / план</th><th>Обновлено</th></tr></thead>
         <tbody>{rows.map((incident) => {
           const prediction = predictionsByID.get(incident.predictionId)
           const risk = riskFromDelaySeconds(incident.predictedDelaySeconds, catalog.riskThresholds)
@@ -78,6 +95,7 @@ export function IncidentsPage() {
             <td><strong>ТС {incident.unitId}</strong><small>tr_id {incident.trId}</small></td>
             <td><strong>{incident.routePatternId.replace('route_pattern_', 'pattern ')}</strong><small>вычисленный паттерн, не официальный номер</small></td>
             <td><strong>{incident.targetStop.address || 'Адрес не указан'}</strong><small>stop {incident.targetStop.id} · action {incident.targetActionItemId}</small></td>
+            <td><strong>{incident.reason || 'Не определена по доступным сигналам'}</strong><small>{incident.scenarioId ? `Тестовый сценарий: ${incident.scenarioId}` : incident.reasonCode || 'Недостаточно данных'}</small>{formatEvidence(incident.evidence) && <small>{formatEvidence(incident.evidence)}</small>}</td>
             <td><strong className="incident-delay">{formatDelay(incident.predictedDelaySeconds)}</strong><small>прогноз задержки</small></td>
             <td><strong>{horizonMinutes(prediction)}</strong><small>{prediction ? `план ${formatDateTime(prediction.targetPlannedAt)}` : 'план недоступен'}</small></td>
             <td><strong>{formatDateTime(incident.updatedAt)}</strong><small>создан {formatDateTime(incident.createdAt)}</small></td>

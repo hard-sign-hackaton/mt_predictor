@@ -1,0 +1,149 @@
+{
+  "scenarios": [
+    {
+      "scenarioId": "door-hold-01",
+      "unitId": 990000101,
+      "trId": 99000101,
+      "routePatternId": "mock-route-door-hold",
+      "targetActionItemId": 9900101,
+      "targetStop": {
+        "id": "mock-stop-101",
+        "address": "Тестовая остановка «Площадь»"
+      },
+      "predictionTime": "2026-06-10T08:00:00Z",
+      "targetPlannedAt": "2026-06-10T08:12:00Z",
+      "currentDelaySeconds": 75,
+      "predictedDelaySeconds": 300,
+      "expectedReasonCode": "door_hold_delay",
+      "evidence": {
+        "door_open_duration_s": 142,
+        "stationary_duration_s": 150,
+        "speed_mean_5m_kmh": 1.2
+      }
+    },
+    {
+      "scenarioId": "traffic-slowdown-01",
+      "unitId": 990000102,
+      "trId": 99000102,
+      "routePatternId": "mock-route-traffic",
+      "targetActionItemId": 9900102,
+      "targetStop": {
+        "id": "mock-stop-102",
+        "address": "Тестовая остановка «Улица Центральная»"
+      },
+      "predictionTime": "2026-06-10T08:01:00Z",
+      "targetPlannedAt": "2026-06-10T08:13:00Z",
+      "currentDelaySeconds": 150,
+      "predictedDelaySeconds": 480,
+      "expectedReasonCode": "traffic_slowdown",
+      "evidence": {
+        "speed_mean_5m_kmh": 11.4,
+        "congestion_index": 0.84,
+        "stationary_duration_s": 18
+      }
+    },
+    {
+      "scenarioId": "gps-quality-01",
+      "unitId": 990000103,
+      "trId": 99000103,
+      "routePatternId": "mock-route-gps",
+      "targetActionItemId": 9900103,
+      "targetStop": {
+        "id": "mock-stop-103",
+        "address": "Тестовая остановка «Вокзал»"
+      },
+      "predictionTime": "2026-06-10T08:02:00Z",
+      "targetPlannedAt": "2026-06-10T08:14:00Z",
+      "currentDelaySeconds": 30,
+      "predictedDelaySeconds": 180,
+      "expectedReasonCode": "poor_gps_quality",
+      "evidence": {
+        "last_gps_age_s": 165,
+        "valid_gps_points_5m": 1,
+        "speed_mean_5m_kmh": 17
+      }
+    },
+    {
+      "scenarioId": "route-deviation-01",
+      "unitId": 990000104,
+      "trId": 99000104,
+      "routePatternId": "mock-route-deviation",
+      "targetActionItemId": 9900104,
+      "targetStop": {
+        "id": "mock-stop-104",
+        "address": "Тестовая остановка «Парк»"
+      },
+      "predictionTime": "2026-06-10T08:03:00Z",
+      "targetPlannedAt": "2026-06-10T08:15:00Z",
+      "currentDelaySeconds": 95,
+      "predictedDelaySeconds": 360,
+      "expectedReasonCode": "route_deviation",
+      "evidence": {
+        "route_deviation_m": 185,
+        "speed_mean_5m_kmh": 22
+      }
+    },
+    {
+      "scenarioId": "long-stop-01",
+      "unitId": 990000105,
+      "trId": 99000105,
+      "routePatternId": "mock-route-stop",
+      "targetActionItemId": 9900105,
+      "targetStop": {
+        "id": "mock-stop-105",
+        "address": "Тестовая остановка «Школа»"
+      },
+      "predictionTime": "2026-06-10T08:04:00Z",
+      "targetPlannedAt": "2026-06-10T08:16:00Z",
+      "currentDelaySeconds": 65,
+      "predictedDelaySeconds": 240,
+      "expectedReasonCode": "stop_dwell",
+      "evidence": {
+        "stationary_duration_s": 188,
+        "door_open_duration_s": 22,
+        "speed_mean_5m_kmh": 3.5
+      }
+    },
+    {
+      "scenarioId": "schedule-slippage-01",
+      "unitId": 990000106,
+      "trId": 99000106,
+      "routePatternId": "mock-route-schedule",
+      "targetActionItemId": 9900106,
+      "targetStop": {
+        "id": "mock-stop-106",
+        "address": "Тестовая остановка «Бульвар»"
+      },
+      "predictionTime": "2026-06-10T08:05:00Z",
+      "targetPlannedAt": "2026-06-10T08:17:00Z",
+      "currentDelaySeconds": 225,
+      "predictedDelaySeconds": 420,
+      "expectedReasonCode": "schedule_slippage",
+      "evidence": {
+        "speed_mean_5m_kmh": 20,
+        "route_deviation_m": 18
+      }
+    },
+    {
+      "scenarioId": "normal-control-01",
+      "unitId": 990000107,
+      "trId": 99000107,
+      "routePatternId": "mock-route-control",
+      "targetActionItemId": 9900107,
+      "targetStop": {
+        "id": "mock-stop-107",
+        "address": "Тестовая остановка «Контрольная»"
+      },
+      "predictionTime": "2026-06-10T08:06:00Z",
+      "targetPlannedAt": "2026-06-10T08:18:00Z",
+      "currentDelaySeconds": -20,
+      "predictedDelaySeconds": -35,
+      "expectedReasonCode": "insufficient_evidence",
+      "evidence": {
+        "speed_mean_5m_kmh": 24,
+        "route_deviation_m": 12,
+        "valid_gps_points_5m": 10
+      }
+    }
+  ]
+}

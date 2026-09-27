@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Build context is this directory (the one holding requirements.txt).
 #   docker build -t mt-predictor-grpc .
 #   docker run --rm -p 50051:50051 mt-predictor-grpc
