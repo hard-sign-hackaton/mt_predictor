@@ -1,0 +1,1450 @@
+openapi: 3.0.3
+
+info:
+  title: MT Predictor Backend API
+  version: "1.0.0"
+  description: |
+    HTTP и SSE контракт backend диспетчерской карты.
+
+    Контур принимает бинарный NDTP-поток, сопоставляет `unit_id` с вычисленным
+    паттерном маршрута, считает задержку через ML по gRPC, открывает инциденты
+    при прогнозе строго больше порога и хранит историю вместе с сообщениями
+    диспетчера.
+
+    Два снимка отдаются параллельно: `map/snapshot` содержит только изменяемое
+    состояние карты, `dashboard/snapshot` добавляет прогнозы и очередь
+    инцидентов. Оба восстанавливают состояние после переподключения, а
+    `map/events` доставляет изменения потоком.
+
+    Отсутствующее поле означает «данных нет» и не трактуется как нулевое
+    значение: задержка без измерения не равна нулевой задержке. Критичность
+    задержки не хранится в ответах, frontend выводит её из `riskThresholds`.
+
+servers:
+  - url: http://localhost:8080
+    description: Локальный контур Compose
+
+security: []
+
+tags:
+  - name: Служебные
+    description: Состояние сервиса
+  - name: Карта
+    description: Статический каталог, снимки и live-поток
+  - name: Инциденты
+    description: Жизненный цикл инцидентов и реакция диспетчера
+  - name: Демо
+    description: Контролируемые сценарии диагностики
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      tags: [Служебные]
+      summary: Состояние сервиса
+      description: |
+        Версия каталога, позиция потока событий и количество актуальных ТС,
+        прогнозов и инцидентов.
+      responses:
+        "200":
+          description: Сервис работает
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+
+  /api/v1/map/init:
+    get:
+      operationId: getMapInit
+      tags: [Карта]
+      summary: Статический каталог маршрутов
+      description: |
+        Остановки, вычисленные паттерны, рейсы и привязки `unit_id -> trId`,
+        загруженные один раз при старте backend. Повторно запрашиваются только
+        при изменении `catalogVersion`.
+      responses:
+        "200":
+          description: Каталог
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardInit"
+
+  /api/v1/map/snapshot:
+    get:
+      operationId: getMapSnapshot
+      tags: [Карта]
+      summary: Изменяемое состояние карты
+      description: |
+        Последнее согласованное состояние всех принятых ТС. Статические маршруты
+        и остановки здесь не повторяются, они приходят через `/api/v1/map/init`.
+      responses:
+        "200":
+          description: Снимок карты
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MapSnapshot"
+
+  /api/v1/dashboard/snapshot:
+    get:
+      operationId: getDashboardSnapshot
+      tags: [Карта]
+      summary: Снимок карты, прогнозов и инцидентов
+      description: |
+        Состояние, из которого dashboard восстанавливается при запуске или
+        переподключении.
+      responses:
+        "200":
+          description: Снимок dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSnapshot"
+
+  /api/v1/map/events:
+    get:
+      operationId: streamMapEvents
+      tags: [Карта]
+      summary: Live-поток карты
+      description: |
+        Server-Sent Events. Первым всегда приходит полный снимок dashboard,
+        дальше идут только изменения. Раз в 15 секунд backend отправляет
+        heartbeat-комментарий `: heartbeat`.
+
+        Имена событий совпадают с типом полезной нагрузки: `snapshot`
+        содержит `DashboardSnapshot`, `vehicle_updated` — `LiveEvent` с
+        заполненным `vehicle`, `prediction_updated` — с `prediction`,
+        `incident_updated` — с `incident`.
+
+        `eventId` уникален в пределах потока, а `sequence` растёт монотонно:
+        по разрыву sequence клиент запрашивает новый снимок. Полезная нагрузка
+        лежит в поле `data` в виде JSON.
+      responses:
+        "200":
+          description: Открытый SSE-поток
+          content:
+            text/event-stream:
+              schema:
+                description: |
+                  Поток состоит из кадров: в сыром виде кадр — строка
+                  `event: <имя>` + `data: <json>`, а разобранное содержимое поля
+                  `data` — один из объектов `LiveEventFrame`.
+                oneOf:
+                  - $ref: "#/components/schemas/SseFrame"
+                  - $ref: "#/components/schemas/LiveEventFrame"
+              examples:
+                snapshot:
+                  summary: Первый кадр потока
+                  value: |
+                    event: snapshot
+                    data: {"version":42,"createdAt":"2026-09-28T10:00:00Z","vehicles":[],"predictions":[],"incidents":[]}
+
+                vehicleUpdated:
+                  summary: Изменилось состояние ТС
+                  value: |
+                    event: vehicle_updated
+                    data: {"eventId":"e-1042","sequence":1043,"type":"vehicle_updated","occurredAt":"2026-09-28T10:00:12Z","vehicle":{"unitId":663271,"trId":101,"position":{"lon":37.6176,"lat":55.7558},"speedKmh":24.5,"headingDegrees":120,"eventTime":"2026-09-28T10:00:11Z","receivedAt":"2026-09-28T10:00:11.4Z","historical":false,"freshness":"live","matchStatus":"matched"}}
+
+                incidentUpdated:
+                  summary: Изменилась очередь инцидентов
+                  value: |
+                    event: incident_updated
+                    data: {"eventId":"e-1043","sequence":1044,"type":"incident_updated","occurredAt":"2026-09-28T10:00:15Z","incident":{"id":"inc-7","eventType":"new","status":"active","unitId":663271,"trId":101,"routePatternId":"pat-3f9c","occurrenceID":"occ-2026-09-28-am","predictionId":"inc-7","targetActionItemId":8812,"targetStop":{"id":"stop-114","address":"Тверская, 1"},"predictedDelaySeconds":245,"predictionTime":"2026-09-28T10:00:15Z","targetPlannedAt":"2026-09-28T10:14:40Z","firstPredictedDelaySeconds":245,"createdAt":"2026-09-28T10:00:15Z","updatedAt":"2026-09-28T10:00:15Z"}}
+
+                heartbeat:
+                  summary: Heartbeat-комментарий
+                  value: |
+                    : heartbeat
+
+  /api/v1/incidents/history:
+    get:
+      operationId: listIncidentHistory
+      tags: [Инциденты]
+      summary: История закрытых инцидентов
+      description: |
+        Страница журнала от новых записей к старым. `total` отражает размер
+        выборки до применения `limit` и `offset`.
+      parameters:
+        - name: outcome
+          in: query
+          required: false
+          description: Фильтр по подтверждению прогноза. `all` и пустое значение равнозначны.
+          schema:
+            $ref: "#/components/schemas/IncidentOutcomeFilter"
+        - name: limit
+          in: query
+          required: false
+          description: Размер страницы. Значения вне диапазона 1..200 приводятся к границам.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: offset
+          in: query
+          required: false
+          description: Смещение от начала выборки. Отрицательное значение считается нулевым.
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Страница истории
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncidentHistoryPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/incidents/{id}:
+    get:
+      operationId: getIncident
+      tags: [Инциденты]
+      summary: Карточка инцидента
+      description: |
+        Инцидент в любом состоянии: активный, ожидающий результата, закрытый
+        или снятый. Без подключённого хранилища доступны только текущие
+        записи в памяти процесса.
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200":
+          description: Инцидент
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/incidents/{id}/actions:
+    get:
+      operationId: listIncidentActions
+      tags: [Инциденты]
+      summary: Доступные и выполненные действия
+      description: |
+        Допустимые сейчас реакции с учётом причины инцидента и ранее созданные
+        действия по нему.
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      responses:
+        "200":
+          description: Доступные действия и история
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncidentActions"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      operationId: createIncidentAction
+      tags: [Инциденты]
+      summary: Отправить сообщение диспетчера
+      description: |
+        Создаёт запись об исходящем сообщении и ставит её в очередь доставки.
+        `code` должен совпадать с одним из значений `available`; иначе backend
+        отвечает 409. Тело ограничено 4096 байт, неизвестные поля отклоняются.
+      parameters:
+        - $ref: "#/components/parameters/IncidentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [actionCode]
+              properties:
+                actionCode:
+                  type: string
+                  minLength: 1
+                  description: Код разрешённого действия из списка `available`.
+                  example: contact_driver
+      responses:
+        "201":
+          description: Сообщение поставлено в очередь
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperatorAction"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Действие сейчас недоступно для этого инцидента
+          content:
+            text/plain:
+              schema:
+                type: string
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/demo/scenarios:
+    post:
+      operationId: createDemoScenarios
+      tags: [Демо]
+      summary: Загрузить контролируемые сценарии
+      description: |
+        Принимает до 32 сценариев общим объёмом до 1 МиБ. Сценарий содержит
+        реальную входную последовательность телеметрии, а не готовый прогноз:
+        координаты восстанавливаются назад от текущего положения ТС по скорости
+        и курсу, поэтому история согласована по времени и движению. Причина и
+        числовые подтверждения вычисляются backend-правилами, а не приходят в
+        теле.
+
+        Ресурс доступен только при запуске backend с `-enable-mock-scenarios`
+        и предназначен для демонстрации.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MockScenarioBatch"
+      responses:
+        "200":
+          description: Сценарии приняты
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  scenarios:
+                    type: integer
+                    description: Сколько сценариев загружено.
+                    example: 5
+        "400":
+          description: Сценарии не прошли проверку
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Демо-сценарии отключены
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  parameters:
+    IncidentId:
+      name: id
+      in: path
+      required: true
+      description: Стабильный идентификатор инцидента, общий для событий `new`, `updated` и `closed`.
+      schema:
+        type: string
+      example: inc-7
+
+  responses:
+    BadRequest:
+      description: Запрос не прошёл проверку
+      content:
+        text/plain:
+          schema:
+            type: string
+    NotFound:
+      description: Инцидент не найден
+      content:
+        text/plain:
+          schema:
+            type: string
+    InternalError:
+      description: Внутренняя ошибка сервиса
+      content:
+        text/plain:
+          schema:
+            type: string
+
+  schemas:
+    Health:
+      type: object
+      required:
+        - status
+        - catalogVersion
+        - streamVersion
+        - vehicles
+        - predictions
+        - incidents
+      properties:
+        status:
+          type: string
+          example: ok
+        catalogVersion:
+          type: string
+          description: Версия загруженного каталога маршрутов.
+          example: catalog-2026-09-28T09:58:12Z
+        streamVersion:
+          type: integer
+          format: int64
+          description: Позиция потока событий, соответствующая текущему снимку.
+          example: 1044
+        vehicles:
+          type: integer
+          description: Сколько ТС сейчас видно на карте.
+          example: 8
+        predictions:
+          type: integer
+          example: 5
+        incidents:
+          type: integer
+          example: 1
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Текст ошибки на русском языке.
+          example: replaySpeed должен быть от 0 до 1000
+
+    GeoPoint:
+      type: object
+      description: |
+        Координата WGS84 в десятичных градусах. Экранные x/y не передаются:
+        проекцию выполняет картографический компонент frontend.
+      required: [lon, lat]
+      properties:
+        lon:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          example: 37.6176
+        lat:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          example: 55.7558
+
+    Stop:
+      type: object
+      description: |
+        Стабильная справочная остановка. Она отделена от `StopCall`, поскольку
+        одной остановке соответствует много плановых событий прибытия.
+      required: [id, position, address]
+      properties:
+        id:
+          type: string
+          description: Детерминированно вычисляется из округлённых координат WGS84.
+          example: stop-114
+        position:
+          $ref: "#/components/schemas/GeoPoint"
+        address:
+          type: string
+          description: Берётся из `building_address`, может быть пустым.
+          example: Тверская, 1
+
+    StopReference:
+      type: object
+      description: Компактное представление остановки в потоковых данных.
+      required: [id, address]
+      properties:
+        id:
+          type: string
+          description: Ссылается на `DashboardInit.stops`.
+          example: stop-114
+        address:
+          type: string
+          description: |
+            Дублируется, чтобы событие было читаемо до обращения к справочнику.
+          example: Тверская, 1
+
+    StopCall:
+      type: object
+      description: |
+        Одно плановое прибытие в рейсе. `actionItemId` соответствует
+        `target_stop_id` в предоставленных точках прогнозирования.
+      required: [actionItemId, stopId, plannedAt]
+      properties:
+        actionItemId:
+          type: integer
+          format: int64
+          description: Берётся из `schedule*.csv.tt_action_item_id`.
+          example: 8812
+        stopId:
+          type: string
+          example: stop-114
+        plannedAt:
+          type: string
+          format: date-time
+          description: "`schedule*.csv.time_begin`, интерпретированный как UTC."
+          example: "2026-09-28T10:14:40Z"
+
+    GeometryQuality:
+      type: string
+      description: Как была получена линия маршрута.
+      enum:
+        - gps_repeated
+        - gps_single
+        - stops_only
+      example: gps_repeated
+
+    RouteGeometryQuality:
+      type: object
+      description: Числовые показатели качества вычисленной линии маршрута.
+      required:
+        - occurrenceCount
+        - goodGpsOccurrenceCount
+        - bestStopCoverage
+        - maxGpsJumpMeters
+      properties:
+        occurrenceCount:
+          type: integer
+          description: Сколько рейсов расписания отнесено к паттерну.
+          example: 12
+        goodGpsOccurrenceCount:
+          type: integer
+          description: Сколько рейсов имеют пригодное GPS-покрытие.
+          example: 9
+        bestStopCoverage:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+          description: Доля остановок, покрытых лучшим проходом.
+          example: 0.94
+        medianStopToGpsMeters:
+          type: number
+          format: double
+          description: Медианное расстояние от остановки до GPS-точки. Отсутствует, если пригодного прохода не было.
+          example: 38.2
+        maxGpsJumpMeters:
+          type: number
+          format: double
+          description: Максимальный разрыв между соседними точками выбранного прохода.
+          example: 412.7
+
+    FrequentGeoPoint:
+      type: object
+      description: Повторяющаяся GPS-ячейка размером 25 метров.
+      required: [position, occurrenceCount]
+      properties:
+        position:
+          allOf:
+            - $ref: "#/components/schemas/GeoPoint"
+          description: Медианная наблюдаемая координата внутри ячейки.
+        occurrenceCount:
+          type: integer
+          description: Число различных проходов через ячейку.
+          example: 17
+
+    RoutePattern:
+      type: object
+      description: |
+        Повторяющийся упорядоченный путь, вычисленный по расписанию и GPS. Его
+        `id` нельзя показывать как официальный номер московского маршрута.
+      required:
+        - id
+        - stopIds
+        - polyline
+        - frequentPoints
+        - geometryQuality
+        - quality
+      properties:
+        id:
+          type: string
+          description: Детерминированный хеш канонической последовательности остановок.
+          example: pat-3f9c
+        officialRouteId:
+          type: string
+          description: Отсутствует до подключения внешнего справочника маршрутов.
+          example: "42"
+        officialRouteName:
+          type: string
+          description: Человекочитаемое направление из открытого GTFS.
+          example: Проспект Вернадского — Юго-Западная
+        officialMatchQuality:
+          type: string
+          description: Сообщает, подтверждено ли сопоставление или оно вероятное.
+          example: probable
+        stopIds:
+          type: array
+          description: Один канонический круг без повторных дневных проходов.
+          items:
+            type: string
+          example: ["stop-114", "stop-115", "stop-116"]
+        polyline:
+          type: array
+          description: Упрощённый GPS-проход либо линия только по остановкам.
+          items:
+            $ref: "#/components/schemas/GeoPoint"
+        frequentPoints:
+          type: array
+          description: Повторяющиеся GPS-точки для диагностики.
+          items:
+            $ref: "#/components/schemas/FrequentGeoPoint"
+        geometryQuality:
+          allOf:
+            - $ref: "#/components/schemas/GeometryQuality"
+          description: Сообщает UI степень достоверности линии.
+        quality:
+          $ref: "#/components/schemas/RouteGeometryQuality"
+
+    RouteOccurrence:
+      type: object
+      description: |
+        Один ограниченный временем рейс. У одного `trId` может быть несколько
+        паттернов и много рейсов в течение дня.
+      required: [id, trId, routePatternId, startsAt, endsAt, calls]
+      properties:
+        id:
+          type: string
+          description: Однозначно идентифицирует вычисленный рейс с датой.
+          example: occ-2026-09-28-am
+        trId:
+          type: integer
+          format: int64
+          description: Идентификатор сущности из файлов расписания и ML.
+          example: 101
+        routePatternId:
+          type: string
+          description: Выбирает статическую геометрию и порядок остановок.
+          example: pat-3f9c
+        startsAt:
+          type: string
+          format: date-time
+          description: Время первого планового прибытия в рейсе.
+          example: "2026-09-28T05:10:00Z"
+        endsAt:
+          type: string
+          format: date-time
+          description: Время последнего планового прибытия в рейсе.
+          example: "2026-09-28T13:40:00Z"
+        calls:
+          type: array
+          description: События остановок в порядке движения.
+          items:
+            $ref: "#/components/schemas/StopCall"
+
+    VehicleBinding:
+      type: object
+      description: |
+        Связь протокольного и расписанийного идентификаторов, даже если в
+        предоставленных данных они соответствуют один к одному.
+      required: [unitId, trId, hasSchedule, synthetic]
+      properties:
+        unitId:
+          type: integer
+          format: int64
+          description: "`NPL.peerAddress` или `traffic.csv.unit_id` конкретного ТС."
+          example: 663271
+        trId:
+          type: integer
+          format: int64
+          example: 101
+        hasSchedule:
+          type: boolean
+          description: "`false` означает, что для ТС нет расписания и сопоставление с маршрутом невозможно."
+          example: true
+        synthetic:
+          type: boolean
+          description: Отмечает сгенерированные train-примеры, которые live-интерфейс должен скрывать.
+          example: false
+
+    RiskThresholds:
+      type: object
+      description: Пороги, по которым frontend выводит OK, WATCH и HIGH.
+      required: [watchDelaySeconds, highDelaySeconds]
+      properties:
+        watchDelaySeconds:
+          type: number
+          format: double
+          description: Включительная нижняя граница WATCH в секундах.
+          example: 180
+        highDelaySeconds:
+          type: number
+          format: double
+          description: Включительная нижняя граница HIGH в секундах.
+          example: 420
+
+    DashboardInit:
+      type: object
+      description: Статические справочные данные, общие для всех подключённых клиентов.
+      required:
+        - schemaVersion
+        - catalogVersion
+        - stops
+        - routes
+        - occurrences
+        - vehicleBindings
+        - riskThresholds
+      properties:
+        schemaVersion:
+          type: string
+          description: Версия JSON-контракта.
+          example: "1"
+        catalogVersion:
+          type: string
+          description: Меняется при изменении расписаний или вычисленной геометрии.
+          example: catalog-2026-09-28T09:58:12Z
+        stops:
+          type: array
+          description: Дедуплицированные физические остановочные точки.
+          items:
+            $ref: "#/components/schemas/Stop"
+        routes:
+          type: array
+          description: Вычисленные паттерны, а не официальные номера маршрутов.
+          items:
+            $ref: "#/components/schemas/RoutePattern"
+        occurrences:
+          type: array
+          description: Рейсы с датами, нужные для выбора активного паттерна.
+          items:
+            $ref: "#/components/schemas/RouteOccurrence"
+        vehicleBindings:
+          type: array
+          items:
+            $ref: "#/components/schemas/VehicleBinding"
+        riskThresholds:
+          $ref: "#/components/schemas/RiskThresholds"
+
+    TelemetryFreshness:
+      type: string
+      description: Вычисляется backend по времени события и настроенному TTL.
+      enum: [live, stale]
+      example: live
+
+    MatchStatus:
+      type: string
+      description: Объясняет наличие или отсутствие маршрута и соседних остановок.
+      enum:
+        - matched
+        - matched_spatial
+        - unmapped_unit
+        - invalid_location
+        - no_schedule
+        - no_active_pattern
+        - off_route
+      example: matched
+
+    VehicleState:
+      type: object
+      description: |
+        Нормализованная телеметрия, дополненная сопоставлением с маршрутом.
+        ML-полей здесь нет, поэтому обновления координат не зависят от прогнозов.
+      required:
+        - unitId
+        - speedKmh
+        - headingDegrees
+        - eventTime
+        - receivedAt
+        - historical
+        - freshness
+        - matchStatus
+      properties:
+        unitId:
+          type: integer
+          format: int64
+          description: Идентифицирует движущийся маркер, берётся из NDTP `peerAddress`.
+          example: 663271
+        trId:
+          type: integer
+          format: int64
+          description: Отсутствует, если ТС не найдено в таблице соответствий.
+          example: 101
+        position:
+          allOf:
+            - $ref: "#/components/schemas/GeoPoint"
+          description: Отсутствует при `location_valid=false`.
+        speedKmh:
+          type: number
+          format: double
+          description: Декодируется из `G6CellNav00.speedAvg`.
+          example: 24.5
+        headingDegrees:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 360
+          description: Декодируется из `G6CellNav00.course`.
+          example: 120
+        eventTime:
+          type: string
+          format: date-time
+          description: Декодируется из `G6CellNav00.timestamp` и задаёт порядок телеметрии.
+          example: "2026-09-28T10:00:11Z"
+        receivedAt:
+          type: string
+          format: date-time
+          description: Время приёма backend, нужно для диагностики запоздалых пакетов.
+          example: "2026-09-28T10:00:11.4Z"
+        historical:
+          type: boolean
+          description: Отличает историческую запись от текущей телеметрии.
+          example: false
+        freshness:
+          $ref: "#/components/schemas/TelemetryFreshness"
+        matchStatus:
+          allOf:
+            - $ref: "#/components/schemas/MatchStatus"
+          description: Результат связывания идентификаторов и сопоставления с коридором маршрута.
+        routePatternId:
+          type: string
+          description: Присутствует после выбора активного паттерна маршрута.
+          example: pat-3f9c
+        occurrenceId:
+          type: string
+          description: Идентифицирует выбранный рейс с датой.
+          example: occ-2026-09-28-am
+        previousStop:
+          $ref: "#/components/schemas/StopReference"
+        nextStop:
+          $ref: "#/components/schemas/StopReference"
+        nextActionItemId:
+          type: integer
+          format: int64
+          description: Идентифицирует следующее событие расписания для ML и интерфейса.
+          example: 8812
+        distanceToRouteMeters:
+          type: number
+          format: double
+          description: Расстояние до центральной линии маршрута в метрах.
+          example: 18.4
+        geometryQuality:
+          allOf:
+            - $ref: "#/components/schemas/GeometryQuality"
+          description: Присутствует после выбора паттерна маршрута.
+        currentDelaySeconds:
+          type: number
+          format: double
+          description: |
+            Появляется после подтверждённого двумя пакетами перехода на
+            следующий сегмент. Отсутствие значения означает «нет данных» и не
+            трактуется как нулевая задержка.
+          example: 62.5
+
+    MapSnapshot:
+      type: object
+      description: Изменяемые данные рабочей карты.
+      required: [version, createdAt, vehicles]
+      properties:
+        version:
+          type: integer
+          format: int64
+          description: Позиция потока событий, которой соответствует снимок.
+          example: 1044
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:00:15Z"
+        vehicles:
+          type: array
+          description: Последние известные состояния ТС, отсортированные по `unitId`.
+          items:
+            $ref: "#/components/schemas/VehicleState"
+
+    DelayPrediction:
+      type: object
+      description: |
+        Гарантированные факты и необязательные дополнения. Frontend не должен
+        придумывать отсутствующие `confidence`, `reason` или версию модели.
+      required:
+        - id
+        - unitId
+        - trId
+        - routePatternId
+        - occurrenceId
+        - targetActionItemId
+        - targetStop
+        - predictionTime
+        - targetPlannedAt
+        - predictedDelaySeconds
+      properties:
+        id:
+          type: string
+          description: "`sample_id` либо другой стабильный идентификатор прогноза."
+          example: inc-7
+        unitId:
+          type: integer
+          format: int64
+          description: Связывает прогноз с конкретным движущимся ТС.
+          example: 663271
+        trId:
+          type: integer
+          format: int64
+          description: Связывает прогноз с расписанием и признаками модели.
+          example: 101
+        routePatternId:
+          type: string
+          description: Идентифицирует выбранный маршрутный контекст.
+          example: pat-3f9c
+        occurrenceId:
+          type: string
+          example: occ-2026-09-28-am
+        targetActionItemId:
+          type: integer
+          format: int64
+          description: Это `tt_action_item_id` или `target_stop_id`.
+          example: 8812
+        targetStop:
+          $ref: "#/components/schemas/StopReference"
+        predictionTime:
+          type: string
+          format: date-time
+          description: |
+            Момент `T`. Входные данные модели обязаны удовлетворять
+            `event_time <= T`, а цель выбирается среди остановок с плановым
+            прибытием в окне `(T + 10 минут, T + 15 минут]`.
+          example: "2026-09-28T10:00:15Z"
+        targetPlannedAt:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:14:40Z"
+        currentDelaySeconds:
+          type: number
+          format: double
+          description: "`cur_dev_s`, если значение доступно."
+          example: 62.5
+        predictedDelaySeconds:
+          type: number
+          format: double
+          description: "Результат ML: плюс означает опоздание, минус — опережение."
+          example: 245
+        confidence:
+          type: number
+          format: double
+          description: Необязателен, поскольку текущий ответ ML его не содержит.
+        reason:
+          type: string
+          description: Необязателен и должен приходить от backend, а не вычисляться frontend.
+          example: Длительное открытие дверей на остановке
+        reasonCode:
+          type: string
+          description: Машинный код возможной причины; frontend показывает `reason`.
+          example: doors_open_long
+        evidence:
+          type: object
+          description: Числовой снимок признаков, на которых основана диагностика.
+          additionalProperties:
+            type: number
+            format: double
+          example: { "door_open_seconds": 214, "speed_kmh": 0.4 }
+        scenarioId:
+          type: string
+          description: Отмечает контролируемый тестовый сценарий.
+          example: mock-doors
+        modelVersion:
+          type: string
+          description: Необязателен, пока версия не появилась в контракте ML.
+
+    IncidentStatus:
+      type: string
+      description: Состояние инцидента в очереди диспетчера.
+      enum:
+        - active
+        - awaiting_result
+        - resolved
+        - cancelled
+      example: active
+
+    IncidentOutcome:
+      type: string
+      description: Подтвердился ли прогноз задержки по факту прибытия.
+      enum:
+        - occurred
+        - not_occurred
+      example: occurred
+
+    IncidentOutcomeFilter:
+      type: string
+      description: Значение `all` или пустая строка отключают фильтр.
+      enum:
+        - all
+        - occurred
+        - not_occurred
+
+    IncidentEventType:
+      type: string
+      description: |
+        Обнаруженное backend изменение инцидента. Это не операторский workflow:
+        dashboard только добавляет, обновляет или удаляет элемент очереди.
+      enum:
+        - new
+        - updated
+        - closed
+      example: new
+
+    Incident:
+      type: object
+      description: |
+        Минимальный набор фактов для отображения задержанного ТС на карте и в
+        очереди инцидентов. Критичность намеренно не хранится: frontend
+        вычисляет OK, WATCH и HIGH по `predictedDelaySeconds` и порогам из
+        `DashboardInit`.
+      required:
+        - id
+        - eventType
+        - status
+        - unitId
+        - trId
+        - routePatternId
+        - predictionId
+        - targetActionItemId
+        - targetStop
+        - predictedDelaySeconds
+        - predictionTime
+        - targetPlannedAt
+        - firstPredictedDelaySeconds
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Стабильный идентификатор, общий для событий `new`, `updated` и `closed`.
+          example: inc-7
+        eventType:
+          $ref: "#/components/schemas/IncidentEventType"
+        status:
+          $ref: "#/components/schemas/IncidentStatus"
+        unitId:
+          type: integer
+          format: int64
+          description: Идентифицирует ТС, для которого возник инцидент.
+          example: 663271
+        trId:
+          type: integer
+          format: int64
+          description: Связывает инцидент с расписанием и ML. Это не публичный номер маршрута.
+          example: 101
+        routePatternId:
+          type: string
+          description: Выбирает вычисленную линию маршрута для карты.
+          example: pat-3f9c
+        occurrenceId:
+          type: string
+          example: occ-2026-09-28-am
+        predictionId:
+          type: string
+          description: Ссылается на прогноз, создавший или обновивший инцидент.
+          example: inc-7
+        targetActionItemId:
+          type: integer
+          format: int64
+          description: Идентифицирует целевое событие прибытия из расписания.
+          example: 8812
+        targetStop:
+          $ref: "#/components/schemas/StopReference"
+        currentDelaySeconds:
+          type: number
+          format: double
+          description: "`cur_dev_s` на момент последнего обновления."
+          example: 62.5
+        predictedDelaySeconds:
+          type: number
+          format: double
+          description: Текущий прогноз задержки. Положительное значение означает опоздание.
+          example: 245
+        predictionTime:
+          type: string
+          format: date-time
+          description: Момент `T`, на который рассчитан связанный прогноз.
+          example: "2026-09-28T10:00:15Z"
+        targetPlannedAt:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:14:40Z"
+        firstPredictedDelaySeconds:
+          type: number
+          format: double
+          description: Прогноз, с которого начался непрерывный инцидент.
+          example: 245
+        actualArrivalAt:
+          type: string
+          format: date-time
+          description: Заполняется при подтверждении фактического прибытия.
+          example: "2026-09-28T10:19:05Z"
+        actualDelaySeconds:
+          type: number
+          format: double
+          description: Измеренное отклонение фактического прибытия от расписания.
+          example: 265
+        outcome:
+          allOf:
+            - $ref: "#/components/schemas/IncidentOutcome"
+          description: Отсутствует, пока факт прибытия не зафиксирован.
+        reasonCode:
+          type: string
+          description: Машинный код возможной причины задержки.
+          example: doors_open_long
+        reason:
+          type: string
+          description: Человекочитаемое описание причины для карточки инцидента.
+          example: Длительное открытие дверей на остановке
+        evidence:
+          type: object
+          description: Числовые подтверждения диагностики.
+          additionalProperties:
+            type: number
+            format: double
+          example: { "door_open_seconds": 214, "speed_kmh": 0.4 }
+        scenarioId:
+          type: string
+          description: Отмечает контролируемый тестовый сценарий.
+          example: mock-doors
+        createdAt:
+          type: string
+          format: date-time
+          description: Время первого обнаружения непрерывного инцидента.
+          example: "2026-09-28T10:00:15Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Время последнего изменения любого поля инцидента.
+          example: "2026-09-28T10:05:15Z"
+
+    IncidentHistoryPage:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Incident"
+        total:
+          type: integer
+          description: Размер выборки до применения `limit` и `offset`.
+          example: 37
+        limit:
+          type: integer
+          example: 50
+        offset:
+          type: integer
+          example: 0
+
+    OperatorActionStatus:
+      type: string
+      description: Состояние исходящего сообщения оператору.
+      enum:
+        - pending
+        - consumed
+      example: pending
+
+    OperatorAction:
+      type: object
+      description: |
+        Запись об истории реакции и исходящее сообщение для внешнего сервиса,
+        который передаёт указания водителям или диспетчеру. Статус `pending`
+        делает таблицу outbox-очередью.
+      required:
+        - id
+        - incidentId
+        - unitId
+        - routePatternId
+        - actionCode
+        - label
+        - recipient
+        - message
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          example: act-31
+        incidentId:
+          type: string
+          example: inc-7
+        unitId:
+          type: integer
+          format: int64
+          example: 663271
+        routePatternId:
+          type: string
+          example: pat-3f9c
+        actionCode:
+          type: string
+          example: contact_driver
+        label:
+          type: string
+          description: Подпись действия для интерфейса.
+          example: Связаться с водителем
+        recipient:
+          type: string
+          description: Адресат разделяет сообщения водителю и диспетчерскому штабу.
+          example: driver
+        message:
+          type: string
+          example: ТС 663271 отстаёт от графика, требуется вмешательство
+        status:
+          $ref: "#/components/schemas/OperatorActionStatus"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:01:02Z"
+        consumedAt:
+          type: string
+          format: date-time
+          description: Заполняется, когда внешний сервис доставки забрал сообщение.
+          example: "2026-09-28T10:01:30Z"
+
+    IncidentActionOption:
+      type: object
+      description: Разрешённая backend реакция диспетчера на инцидент.
+      required: [code, label, recipient, message]
+      properties:
+        code:
+          type: string
+          example: contact_driver
+        label:
+          type: string
+          example: Связаться с водителем
+        recipient:
+          type: string
+          example: driver
+        message:
+          type: string
+          example: ТС 663271 отстаёт от графика, требуется вмешательство
+
+    IncidentActions:
+      type: object
+      required: [available, history]
+      properties:
+        available:
+          type: array
+          description: Действия, которые backend разрешает применить сейчас.
+          items:
+            $ref: "#/components/schemas/IncidentActionOption"
+        history:
+          type: array
+          description: Ранее созданные действия по этому инциденту.
+          items:
+            $ref: "#/components/schemas/OperatorAction"
+
+    SseFrame:
+      type: string
+      description: |
+        Один кадр потока в том виде, в каком он идёт по проводу: строка
+        `event: <имя события>`, затем `data: <json>` и пустая строка.
+      example: |
+        event: vehicle_updated
+        data: {"eventId":"e-1042","sequence":1043,"type":"vehicle_updated","occurredAt":"2026-09-28T10:00:12Z","vehicle":{"unitId":663271,"speedKmh":24.5,"headingDegrees":120,"eventTime":"2026-09-28T10:00:11Z","receivedAt":"2026-09-28T10:00:11.4Z","historical":false,"freshness":"live","matchStatus":"matched"}}
+
+    LiveEventFrame:
+      description: |
+        Полезная нагрузка одного кадра. Первый кадр потока — полный снимок
+        dashboard, все последующие — конверты `LiveEvent` с одним заполненным
+        полем.
+      oneOf:
+        - $ref: "#/components/schemas/DashboardSnapshot"
+        - $ref: "#/components/schemas/LiveEvent"
+
+    LiveEventType:
+      type: string
+      description: Определяет единственную полезную нагрузку события.
+      enum:
+        - vehicle_updated
+        - prediction_updated
+        - incident_updated
+      example: vehicle_updated
+
+    LiveEvent:
+      type: object
+      description: |
+        Версионированный конверт SSE-события. `eventId` и `sequence` позволяют
+        frontend отбрасывать дубли и обнаруживать разрывы, требующие нового
+        снимка.
+      required: [eventId, sequence, type, occurredAt]
+      properties:
+        eventId:
+          type: string
+          description: Глобально уникален в пределах сохраняемого потока.
+          example: e-1042
+        sequence:
+          type: integer
+          format: int64
+          description: Монотонно растёт и нужен для порядка и обнаружения пропусков.
+          example: 1043
+        type:
+          $ref: "#/components/schemas/LiveEventType"
+        occurredAt:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:00:12Z"
+        vehicle:
+          description: Присутствует для `vehicle_updated`.
+          allOf:
+            - $ref: "#/components/schemas/VehicleState"
+        prediction:
+          description: Присутствует для `prediction_updated`.
+          allOf:
+            - $ref: "#/components/schemas/DelayPrediction"
+        incident:
+          description: Присутствует для `incident_updated`.
+          allOf:
+            - $ref: "#/components/schemas/Incident"
+
+    DashboardSnapshot:
+      type: object
+      description: |
+        Изменяемое состояние, из которого dashboard восстанавливается после
+        запуска или переподключения.
+      required: [version, createdAt, vehicles, predictions, incidents]
+      properties:
+        version:
+          type: integer
+          format: int64
+          description: Монотонная позиция потока событий, представленная снимком.
+          example: 1044
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:00:15Z"
+        vehicles:
+          type: array
+          description: Последнее состояние видимых реальных ТС.
+          items:
+            $ref: "#/components/schemas/VehicleState"
+        predictions:
+          type: array
+          description: Последний пригодный прогноз для каждой цели и ТС.
+          items:
+            $ref: "#/components/schemas/DelayPrediction"
+        incidents:
+          type: array
+          description: Текущее состояние очереди инцидентов.
+          items:
+            $ref: "#/components/schemas/Incident"
+
+    MockTelemetrySample:
+      type: object
+      description: |
+        Одна входная запись телеметрии для сценария. Координаты не передаются:
+        они восстанавливаются назад от текущего положения ТС по скорости и
+        курсу, поэтому вся история согласована по времени и движению.
+      required: [secondsBefore, speedKmh, headingDegrees]
+      properties:
+        secondsBefore:
+          type: integer
+          description: Насколько секунд запись отстоит от момента прогноза.
+          example: 30
+        speedKmh:
+          type: number
+          format: double
+          example: 24.5
+        headingDegrees:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 360
+          example: 120
+        locationValid:
+          type: boolean
+          default: true
+        doorOpen:
+          type: boolean
+          default: false
+        congestionIndex:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        routeDeviationMeters:
+          type: number
+          format: double
+          description: Отклонение от линии маршрута в метрах.
+
+    MockScenario:
+      type: object
+      required:
+        - scenarioId
+        - unitId
+        - trId
+        - routePatternId
+        - targetActionItemId
+        - targetStop
+        - predictionTime
+        - currentPlannedAt
+        - targetPlannedAt
+        - predictedDelaySeconds
+        - evidence
+        - telemetryHistory
+      properties:
+        scenarioId:
+          type: string
+          example: mock-doors
+        unitId:
+          type: integer
+          format: int64
+          example: 663271
+        trId:
+          type: integer
+          format: int64
+          example: 101
+        routePatternId:
+          type: string
+          example: pat-3f9c
+        targetActionItemId:
+          type: integer
+          format: int64
+          example: 8812
+        targetStop:
+          $ref: "#/components/schemas/StopReference"
+        predictionTime:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:00:00Z"
+        currentPlannedAt:
+          type: string
+          format: date-time
+          description: Плановое прибытие на позицию, с которой снята задержка.
+          example: "2026-09-28T09:58:00Z"
+        targetPlannedAt:
+          type: string
+          format: date-time
+          example: "2026-09-28T10:14:40Z"
+        predictedDelaySeconds:
+          type: number
+          format: double
+          example: 245
+        expectedReasonCode:
+          type: string
+          description: Ожидаемый код причины для самопроверки сценария.
+          example: doors_open_long
+        evidence:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+        telemetryHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/MockTelemetrySample"
+
+    MockScenarioBatch:
+      type: object
+      required: [scenarios]
+      properties:
+        replaySpeed:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1000
+          default: 1
+          description: Ускоряет появление новых ситуаций, не меняя физический смысл признаков.
+        bindToLiveVehicle:
+          type: boolean
+          default: false
+          description: Привязать сценарии к реально движущимся ТС вместо собственных маршрутов.
+        scenarios:
+          type: array
+          minItems: 1
+          maxItems: 32
+          items:
+            $ref: "#/components/schemas/MockScenario"
