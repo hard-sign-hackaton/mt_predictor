@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 
@@ -113,4 +114,24 @@ func TestIncidentLifecycleUsesStrictThresholdAndStableID(t *testing.T) {
 	if len(runtime.DashboardSnapshot(now).Incidents) != 0 {
 		t.Fatal("значение на пороге 120 должно закрыть инцидент")
 	}
+}
+
+func TestIncidentAwaitsArrivalAndMovesToHistory(t *testing.T) {
+	runtime := NewRuntime(catalog.NewMatcher(nil), time.Minute)
+	now := time.Date(2026, 1, 6, 10, 0, 0, 0, time.UTC)
+	prediction := models.DelayPrediction{ID: "p1", UnitID: 7, TRID: 42, RoutePatternID: "pattern", OccurrenceID: "run", TargetActionItemID: 9, TargetStop: models.StopReference{ID: "stop"}, TargetPlannedAt: now.Add(12 * time.Minute), PredictedDelaySeconds: 240}
+	require.NoError(t, runtime.ApplyPrediction(prediction, 120, now))
+	require.NoError(t, runtime.AwaitOtherTargets(7, 10, now.Add(time.Minute)))
+	current := runtime.DashboardSnapshot(now).Incidents
+	require.Len(t, current, 1)
+	require.Equal(t, models.IncidentAwaitingResult, current[0].Status)
+
+	arrival := now.Add(15 * time.Minute)
+	require.NoError(t, runtime.ResolveArrival(7, 9, arrival, 180, 120, arrival))
+	require.Empty(t, runtime.DashboardSnapshot(arrival).Incidents)
+	history, err := runtime.IncidentHistory(context.Background(), nil, 50, 0)
+	require.NoError(t, err)
+	require.Len(t, history.Items, 1)
+	require.Equal(t, models.IncidentOccurred, *history.Items[0].Outcome)
+	require.Equal(t, 180.0, *history.Items[0].ActualDelaySeconds)
 }

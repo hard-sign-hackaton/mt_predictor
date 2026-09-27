@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"time"
 )
@@ -42,12 +43,31 @@ type Stop struct {
 type Point [2]float64
 
 type RoutePattern struct {
-	RoutePatternID  string          `json:"route_pattern_id"`
-	StopIDs         []string        `json:"stop_ids"`
-	Polyline        []Point         `json:"polyline"`
-	FrequentPoints  []FrequentPoint `json:"frequent_points"`
-	GeometryQuality string          `json:"geometry_quality"`
-	Quality         PatternQuality  `json:"quality"`
+	RoutePatternID       string          `json:"route_pattern_id"`
+	OfficialRouteID      string          `json:"-"`
+	OfficialRouteName    string          `json:"-"`
+	OfficialMatchQuality string          `json:"-"`
+	StopIDs              []string        `json:"stop_ids"`
+	Polyline             []Point         `json:"polyline"`
+	FrequentPoints       []FrequentPoint `json:"frequent_points"`
+	GeometryQuality      string          `json:"geometry_quality"`
+	Quality              PatternQuality  `json:"quality"`
+}
+
+type publicTransportReference struct {
+	SchemaVersion int                             `json:"schema_version"`
+	Stops         map[string]publicStopReference  `json:"stops"`
+	Routes        map[string]publicRouteReference `json:"routes"`
+}
+
+type publicStopReference struct {
+	Name string `json:"name"`
+}
+
+type publicRouteReference struct {
+	Number       string `json:"number"`
+	Name         string `json:"name"`
+	MatchQuality string `json:"match_quality"`
 }
 
 type FrequentPoint struct {
@@ -94,10 +114,43 @@ func Load(path string) (*Catalog, error) {
 	if result.SchemaVersion != 1 {
 		return nil, fmt.Errorf("unsupported route catalog schema_version=%d", result.SchemaVersion)
 	}
+	if err := result.applyPublicTransportReference(filepath.Join(filepath.Dir(path), "public_transport_reference.json")); err != nil {
+		return nil, err
+	}
 	if err := result.buildIndexes(); err != nil {
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (c *Catalog) applyPublicTransportReference(path string) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("read public transport reference: %w", err)
+	}
+	var reference publicTransportReference
+	if err := json.Unmarshal(data, &reference); err != nil {
+		return fmt.Errorf("decode public transport reference: %w", err)
+	}
+	if reference.SchemaVersion != 1 {
+		return fmt.Errorf("unsupported public transport reference schema_version=%d", reference.SchemaVersion)
+	}
+	for index := range c.Stops {
+		if public, ok := reference.Stops[c.Stops[index].StopID]; ok && public.Name != "" {
+			c.Stops[index].Address = public.Name
+		}
+	}
+	for index := range c.RoutePatterns {
+		if public, ok := reference.Routes[c.RoutePatterns[index].RoutePatternID]; ok {
+			c.RoutePatterns[index].OfficialRouteID = public.Number
+			c.RoutePatterns[index].OfficialRouteName = public.Name
+			c.RoutePatterns[index].OfficialMatchQuality = public.MatchQuality
+		}
+	}
+	return nil
 }
 
 func (c *Catalog) buildIndexes() error {

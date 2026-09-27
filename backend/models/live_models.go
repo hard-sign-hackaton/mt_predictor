@@ -105,6 +105,7 @@ type DelayPrediction struct {
 	TRID int64 `json:"trId"`
 	// RoutePatternID идентифицирует выбранный маршрутный контекст.
 	RoutePatternID string `json:"routePatternId"`
+	OccurrenceID   string `json:"occurrenceId"`
 	// TargetActionItemID — это tt_action_item_id или target_stop_id.
 	TargetActionItemID int64 `json:"targetActionItemId"`
 	// TargetStop — целевая остановка, отображаемая в деталях инцидента.
@@ -121,6 +122,12 @@ type DelayPrediction struct {
 	Confidence *float64 `json:"confidence,omitempty"`
 	// Reason необязателен и должен приходить от backend/ML, а не вычисляться frontend.
 	Reason *string `json:"reason,omitempty"`
+	// ReasonCode — машинный код возможной причины; frontend показывает Reason.
+	ReasonCode string `json:"reasonCode,omitempty"`
+	// Evidence — числовой снимок признаков, на которых основана диагностика.
+	Evidence map[string]float64 `json:"evidence,omitempty"`
+	// ScenarioID отмечает контролируемый тестовый сценарий.
+	ScenarioID string `json:"scenarioId,omitempty"`
 	// ModelVersion необязателен, пока версия не появилась в контракте ML.
 	ModelVersion *string `json:"modelVersion,omitempty"`
 }

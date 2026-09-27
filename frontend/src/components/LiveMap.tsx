@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import L, { type LatLngExpression } from 'leaflet'
 import { CircleMarker, MapContainer, Marker, Polyline, Popup, TileLayer, Tooltip } from 'react-leaflet'
 import type { DashboardInit, RoutePattern, VehicleState } from '../api/types'
-import { matchStatusLabel, vehicleName } from '../domain/vehiclePresentation'
+import { riskFromScheduleDeviation } from '../api/risk'
+import { matchStatusLabel, routeDirection, routeDisplayName, stopDisplayName, vehicleName, vehicleRouteName } from '../domain/vehiclePresentation'
 import { MapCameraController } from './MapCameraController'
 
 interface LiveMapProps {
@@ -39,13 +40,12 @@ function escapeHTML(value: string) {
   return value.replace(/[&<>'"]/g, (symbol) => htmlEntities[symbol])
 }
 
-function vehicleIcon(vehicle: VehicleState, selected: boolean) {
-  const matched = vehicle.matchStatus === 'matched' || vehicle.matchStatus === 'matched_spatial'
+function vehicleIcon(vehicle: VehicleState, risk: string, selected: boolean) {
   const label = escapeHTML(vehicleName(vehicle))
   const width = Math.max(62, label.length * 7 + 16)
   return L.divIcon({
     className: 'live-vehicle-icon-wrap',
-    html: `<div class="live-vehicle-icon ${matched ? 'live-vehicle-icon--matched' : 'live-vehicle-icon--unmatched'} ${selected ? 'live-vehicle-icon--selected' : ''}" style="--heading:${vehicle.headingDegrees}deg;width:${width}px"><span>▲</span><b>${label}</b></div>`,
+    html: `<div class="live-vehicle-icon live-vehicle-icon--${risk} ${selected ? 'live-vehicle-icon--selected' : ''}" style="--heading:${vehicle.headingDegrees}deg;width:${width}px"><span>▲</span><b>${label}</b></div>`,
     iconSize: [width, 36],
     iconAnchor: [width / 2, 18],
   })
@@ -53,6 +53,7 @@ function vehicleIcon(vehicle: VehicleState, selected: boolean) {
 
 export function LiveMap(props: LiveMapProps) {
   const stopsById = useMemo(() => new Map(props.catalog.stops.map((stop) => [stop.id, stop])), [props.catalog.stops])
+  const routesById = useMemo(() => new Map(props.catalog.routes.map((route) => [route.id, route])), [props.catalog.routes])
   const visibleStops = useMemo(() => {
     if (!props.selectedRouteId) return props.catalog.stops
     const route = props.catalog.routes.find((item) => item.id === props.selectedRouteId)
@@ -74,7 +75,7 @@ export function LiveMap(props: LiveMapProps) {
         positions={routePositions(route)}
         pathOptions={{ color: selected ? '#000' : style.color, weight: selected ? 6 : 3, opacity: selected ? 1 : 0.56, dashArray: style.dashArray }}
         eventHandlers={{ click: () => props.onSelectRoute(route.id) }}
-      ><Tooltip sticky>{route.id}<br />{route.geometryQuality}</Tooltip></Polyline>
+      ><Tooltip sticky>{routeDisplayName(route)}<br />{routeDirection(route)}</Tooltip></Polyline>
     })}
 
     {props.showStops && visibleStops.map((stop) => <CircleMarker
@@ -82,20 +83,22 @@ export function LiveMap(props: LiveMapProps) {
       center={[stop.position.lat, stop.position.lon]}
       radius={props.selectedRouteId ? 4 : 2}
       pathOptions={{ color: '#111', weight: 1, fillColor: '#fff', fillOpacity: 1 }}
-    ><Tooltip>{stop.address || stop.id}</Tooltip></CircleMarker>)}
+    ><Tooltip>{stopDisplayName(stop)}</Tooltip></CircleMarker>)}
 
-    {props.showVehicles && props.vehicles.filter((vehicle) => vehicle.position).map((vehicle) => <Marker
-      key={vehicle.unitId}
-      position={[vehicle.position!.lat, vehicle.position!.lon]}
-      icon={vehicleIcon(vehicle, vehicle.unitId === props.selectedVehicleId)}
-      eventHandlers={{ click: () => props.onSelectVehicle(vehicle.unitId) }}
-    ><Popup>
-      <strong>{vehicleName(vehicle)}</strong><br />
-      unit_id: {vehicle.unitId}<br />
-      tr_id: {vehicle.trId ?? 'не определён'}<br />
-      скорость: {Math.round(vehicle.speedKmh)} км/ч<br />
-      статус: {matchStatusLabel(vehicle.matchStatus)}<br />
-      {vehicle.nextStop ? `следующая: ${vehicle.nextStop.address || vehicle.nextStop.id}` : 'следующая остановка не определена'}
-    </Popup></Marker>)}
+    {props.showVehicles && props.vehicles.filter((vehicle) => vehicle.position).map((vehicle) => {
+      const routeLabel = vehicleRouteName(vehicle, routesById)
+      const risk = riskFromScheduleDeviation(vehicle.currentDelaySeconds, props.catalog.riskThresholds)
+      return <Marker
+        key={vehicle.unitId}
+        position={[vehicle.position!.lat, vehicle.position!.lon]}
+        icon={vehicleIcon(vehicle, risk, vehicle.unitId === props.selectedVehicleId)}
+        eventHandlers={{ click: () => props.onSelectVehicle(vehicle.unitId) }}
+      ><Popup>
+        <strong>{routeLabel}</strong><br />
+        скорость: {Math.round(vehicle.speedKmh)} км/ч<br />
+        статус: {matchStatusLabel(vehicle.matchStatus)}<br />
+        следующая остановка: {stopDisplayName(vehicle.nextStop)}
+      </Popup></Marker>
+    })}
   </MapContainer>
 }

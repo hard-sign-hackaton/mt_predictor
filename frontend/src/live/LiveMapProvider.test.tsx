@@ -15,9 +15,9 @@ const initialSnapshot: DashboardSnapshot = {
 }
 
 const incident: Incident = {
-  id: 'incident-7-99', eventType: 'new', unitId: 7, trId: 42, routePatternId: 'route_pattern_test',
+  id: 'incident-7-99', eventType: 'new', status: 'active', unitId: 7, trId: 42, routePatternId: 'route_pattern_test', occurrenceId: 'run-1',
   predictionId: 'prediction-7-99', targetActionItemId: 99, targetStop: { id: 'stop-99', address: 'Тестовая остановка' },
-  predictedDelaySeconds: 240, predictionTime: '2026-01-06T10:01:00Z', createdAt: '2026-01-06T10:01:01Z', updatedAt: '2026-01-06T10:01:01Z',
+  predictedDelaySeconds: 240, firstPredictedDelaySeconds: 240, predictionTime: '2026-01-06T10:01:00Z', targetPlannedAt: '2026-01-06T10:13:00Z', createdAt: '2026-01-06T10:01:01Z', updatedAt: '2026-01-06T10:01:01Z',
 }
 
 class FakeEventSource {
@@ -74,7 +74,7 @@ describe('LiveMapProvider', () => {
     await waitFor(() => expect(screen.getByTestId('state')).toHaveTextContent('"version":10'))
     const stream = FakeEventSource.current!
     act(() => stream.emit('vehicle_updated', event({ type: 'vehicle_updated', sequence: 11, vehicle: { ...initialSnapshot.vehicles[0], speedKmh: 25 } })))
-    act(() => stream.emit('prediction_updated', event({ type: 'prediction_updated', sequence: 12, prediction: { id: 'prediction-7-99', unitId: 7, trId: 42, routePatternId: 'route_pattern_test', targetActionItemId: 99, targetStop: incident.targetStop, predictionTime: incident.predictionTime, targetPlannedAt: '2026-01-06T10:13:00Z', predictedDelaySeconds: 240 } })))
+    act(() => stream.emit('prediction_updated', event({ type: 'prediction_updated', sequence: 12, prediction: { id: 'prediction-7-99', unitId: 7, trId: 42, routePatternId: 'route_pattern_test', occurrenceId: 'run-1', targetActionItemId: 99, targetStop: incident.targetStop, predictionTime: incident.predictionTime, targetPlannedAt: '2026-01-06T10:13:00Z', predictedDelaySeconds: 240 } })))
     act(() => stream.emit('incident_updated', event({ type: 'incident_updated', sequence: 13, incident })))
     await waitFor(() => expect(screen.getByTestId('state')).toHaveTextContent('"version":13'))
     expect(screen.getByTestId('state')).toHaveTextContent('"speedKmh":25')

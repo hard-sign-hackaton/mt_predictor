@@ -8,6 +8,8 @@ traffic_file="${project_dir}/../../dataset/validate/traffic.csv"
 
 cd "${project_dir}"
 
+mode="${1:-full}"
+
 for dependency in docker curl; do
   if ! command -v "${dependency}" >/dev/null 2>&1; then
     echo "Не найдена обязательная команда: ${dependency}" >&2
@@ -15,13 +17,13 @@ for dependency in docker curl; do
   fi
 done
 
-if [[ ! -f "${traffic_file}" ]]; then
+if [[ "${mode}" != "mock" && ! -f "${traffic_file}" ]]; then
   echo "Не найден датасет для CSV replay: ${traffic_file}" >&2
   echo "Репозиторий должен находиться в Project/mt_predictor рядом с каталогом dataset из раздачи." >&2
   exit 1
 fi
 
-if ! docker image inspect ndtp-telemetry-emulator:1.0 >/dev/null 2>&1; then
+if [[ "${mode}" != "mock" ]] && ! docker image inspect ndtp-telemetry-emulator:1.0 >/dev/null 2>&1; then
   if [[ ! -f "${emulator_archive}" ]]; then
     echo "Не найден образ эмулятора: ${emulator_archive}" >&2
     exit 1
@@ -30,9 +32,15 @@ if ! docker image inspect ndtp-telemetry-emulator:1.0 >/dev/null 2>&1; then
   docker load -i "${emulator_archive}"
 fi
 
-echo "Запускаю backend, frontend, CSV replay и официальный эмулятор..."
-docker compose --profile official-emulator up -d --build
+if [[ "${mode}" == "mock" ]]; then
+  echo "Запускаю контролируемый mock-набор..."
+  docker compose --profile mock up -d --build postgres ml backend frontend mock-feeder
+else
+  echo "Запускаю backend, frontend, CSV replay и официальный эмулятор..."
+  docker compose --profile official-emulator up -d --build
+fi
 
+if [[ "${mode}" != "mock" ]]; then
 echo "Жду готовности HTTP API эмулятора..."
 emulator_ready=false
 for _ in {1..45}; do
@@ -53,6 +61,7 @@ echo "Настраиваю пять ТС официального эмулято
 curl -fsS -X POST http://localhost:18080/api/config \
   -H 'Content-Type: application/json' \
   --data-binary @demo/official-emulator-config.json >/dev/null
+fi
 
 backend_ready=false
 for _ in {1..20}; do
@@ -66,6 +75,13 @@ done
 if [[ "${backend_ready}" != "true" ]]; then
   echo "Backend не отвечает. Проверьте: docker compose logs backend" >&2
   exit 1
+fi
+
+if [[ "${mode}" == "mock" ]]; then
+  echo "Загружаю сценарии диагностических причин..."
+  curl -fsS -X POST http://localhost:8080/api/v1/demo/scenarios \
+    -H 'Content-Type: application/json' \
+    --data-binary @backend/data/mock_scenarios.json >/dev/null
 fi
 
 echo "Готово: http://localhost:5173"

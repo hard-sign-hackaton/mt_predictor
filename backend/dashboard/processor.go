@@ -50,6 +50,7 @@ type predictionCandidate struct {
 	telemetry      []mlclient.TelemetryPoint
 	unitID         uint32
 	routePatternID string
+	occurrenceID   string
 	targetStop     models.StopReference
 }
 
@@ -128,7 +129,12 @@ func (p *Processor) Apply(point ndtp.TelemetryPoint) models.VehicleState {
 	if match.TRID != 0 {
 		p.appendHistory(match.TRID, point, valid, lon, lat)
 	}
-	p.updateDelay(progress, match, telemetry.EventTime)
+	arrival := p.updateDelay(progress, match, telemetry.EventTime)
+	if arrival != nil {
+		if err := p.runtime.ResolveArrival(point.VehicleID, arrival.actionItemID, arrival.arrivalAt, arrival.delaySeconds, p.incidentThreshold, point.ReceivedAt); err != nil {
+			p.logger.Error("не удалось зафиксировать результат инцидента", "error", err)
+		}
+	}
 	vehicle := catalog.VehicleState(telemetry, match, models.TelemetryLive)
 	if progress.currentDelay != nil {
 		delay := *progress.currentDelay
@@ -139,7 +145,9 @@ func (p *Processor) Apply(point ndtp.TelemetryPoint) models.VehicleState {
 	if p.predictor != nil && match.Status == catalog.MatchMatched && progress.currentDelay != nil {
 		if assignment, ok := p.catalog.Assignment(match.OccurrenceID); ok {
 			if target, ok := selectTarget(assignment.Events, telemetry.EventTime); ok {
-				p.runtime.CloseOtherTargets(point.VehicleID, target.ActionItemID, point.ReceivedAt)
+				if err := p.runtime.AwaitOtherTargets(point.VehicleID, target.ActionItemID, point.ReceivedAt); err != nil {
+					p.logger.Error("не удалось обновить цели инцидентов", "error", err)
+				}
 				changedTarget := progress.lastTargetAction != target.ActionItemID
 				if changedTarget || progress.lastAttemptAt.IsZero() || telemetry.EventTime.Sub(progress.lastAttemptAt) >= p.predictionEvery {
 					progress.lastAttemptAt = telemetry.EventTime
@@ -153,13 +161,15 @@ func (p *Processor) Apply(point ndtp.TelemetryPoint) models.VehicleState {
 							CurrentDelay: *progress.currentDelay,
 						},
 						telemetry: append([]mlclient.TelemetryPoint(nil), p.history[match.TRID]...),
-						unitID:    point.VehicleID, routePatternID: match.RoutePatternID,
+						unitID:    point.VehicleID, routePatternID: match.RoutePatternID, occurrenceID: match.OccurrenceID,
 						targetStop: models.StopReference{ID: target.StopID, Address: stop.Address},
 					}
 					candidate = &value
 				}
 			} else {
-				p.runtime.CloseOtherTargets(point.VehicleID, 0, point.ReceivedAt)
+				if err := p.runtime.AwaitOtherTargets(point.VehicleID, 0, point.ReceivedAt); err != nil {
+					p.logger.Error("не удалось перевести инциденты в ожидание", "error", err)
+				}
 				progress.lastTargetAction = 0
 			}
 		}
@@ -179,9 +189,15 @@ func (p *Processor) Apply(point ndtp.TelemetryPoint) models.VehicleState {
 	return current
 }
 
-func (p *Processor) updateDelay(progress *vehicleProgress, match catalog.MatchResult, eventTime time.Time) {
+type confirmedArrival struct {
+	actionItemID int64
+	arrivalAt    time.Time
+	delaySeconds float64
+}
+
+func (p *Processor) updateDelay(progress *vehicleProgress, match catalog.MatchResult, eventTime time.Time) *confirmedArrival {
 	if match.Status != catalog.MatchMatched {
-		return
+		return nil
 	}
 	if progress.occurrenceID != match.OccurrenceID {
 		progress.occurrenceID = match.OccurrenceID
@@ -191,28 +207,29 @@ func (p *Processor) updateDelay(progress *vehicleProgress, match catalog.MatchRe
 		progress.currentDelay = nil
 		progress.lastAttemptAt = time.Time{}
 		progress.lastTargetAction = 0
-		return
+		return nil
 	}
 	if match.SegmentIndex <= progress.confirmedSegment {
 		progress.candidateSegment = -1
 		progress.candidateCount = 0
-		return
+		return nil
 	}
 	if progress.candidateSegment != match.SegmentIndex {
 		progress.candidateSegment = match.SegmentIndex
 		progress.candidateCount = 1
 		progress.candidateFirstAt = eventTime
-		return
+		return nil
 	}
 	progress.candidateCount++
 	if progress.candidateCount < 2 || match.PreviousPlannedAt.IsZero() {
-		return
+		return nil
 	}
 	delay := progress.candidateFirstAt.Sub(match.PreviousPlannedAt).Seconds()
 	progress.currentDelay = &delay
 	progress.confirmedSegment = match.SegmentIndex
 	progress.candidateSegment = -1
 	progress.candidateCount = 0
+	return &confirmedArrival{actionItemID: match.PreviousActionItemID, arrivalAt: progress.candidateFirstAt, delaySeconds: delay}
 }
 
 func (p *Processor) appendHistory(trID int64, point ndtp.TelemetryPoint, valid bool, lon, lat float64) {
@@ -299,12 +316,14 @@ func (p *Processor) flush(parent context.Context) {
 		}
 		prediction := models.DelayPrediction{
 			ID: candidate.point.SampleID, UnitID: candidate.unitID, TRID: candidate.point.TRID,
-			RoutePatternID: candidate.routePatternID, TargetActionItemID: candidate.point.TargetStopID,
+			RoutePatternID: candidate.routePatternID, OccurrenceID: candidate.occurrenceID, TargetActionItemID: candidate.point.TargetStopID,
 			TargetStop: candidate.targetStop, PredictionTime: candidate.point.PredictionTime,
 			TargetPlannedAt: candidate.point.TargetTime, PredictedDelaySeconds: value,
 		}
 		currentDelay := candidate.point.CurrentDelay
 		prediction.CurrentDelaySeconds = &currentDelay
-		p.runtime.ApplyPrediction(prediction, p.incidentThreshold, time.Now())
+		if err := p.runtime.ApplyPrediction(prediction, p.incidentThreshold, time.Now()); err != nil {
+			p.logger.Error("не удалось сохранить инцидент", "error", err)
+		}
 	}
 }

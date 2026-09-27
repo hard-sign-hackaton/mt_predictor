@@ -1,4 +1,19 @@
 services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: mt_predictor
+      POSTGRES_USER: mt_predictor
+      POSTGRES_PASSWORD: mt_predictor
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mt_predictor -d mt_predictor"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - incident-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
   ml:
     build:
       context: ./ml
@@ -18,8 +33,22 @@ services:
       - "8080:8080"
       - "9201:9201"
     restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://mt_predictor:mt_predictor@postgres:5432/mt_predictor?sslmode=disable
+    command:
+      - /app/mt-backend
+      - -ndtp-addr
+      - :9201
+      - -http-addr
+      - :8080
+      - -catalog
+      - /app/data/generated/route_catalog.json
+      - -enable-mock-scenarios
     depends_on:
-      - ml
+      ml:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
@@ -43,11 +72,33 @@ services:
       - -vehicles
       - "8"
       - -speed
-      - "50"
+      - "5"
       - -timestamp-mode
       - source
     volumes:
       - ../../dataset:/dataset:ro
+    depends_on:
+      - backend
+    restart: on-failure
+
+  mock-feeder:
+    build:
+      context: ./backend
+    profiles: ["mock"]
+    command:
+      - /app/ndtpfeeder
+      - -addr
+      - backend:9201
+      - -file
+      - /demo/mock_telemetry.csv
+      - -vehicles
+      - "7"
+      - -speed
+      - "2"
+      - -timestamp-mode
+      - source
+    volumes:
+      - ./backend/data/mock_telemetry.csv:/demo/mock_telemetry.csv:ro
     depends_on:
       - backend
     restart: on-failure
@@ -60,3 +111,6 @@ services:
       - "18080:18080"
     depends_on:
       - backend
+
+volumes:
+  incident-data:

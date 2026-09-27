@@ -82,6 +82,10 @@ type RoutePattern struct {
 	ID string `json:"id"`
 	// OfficialRouteID отсутствует до подключения внешнего справочника маршрутов.
 	OfficialRouteID *string `json:"officialRouteId,omitempty"`
+	// OfficialRouteName — человекочитаемое направление из открытого GTFS.
+	OfficialRouteName *string `json:"officialRouteName,omitempty"`
+	// OfficialMatchQuality сообщает, подтверждено сопоставление или является вероятным.
+	OfficialMatchQuality *string `json:"officialMatchQuality,omitempty"`
 	// StopIDs описывает один канонический круг без повторных дневных проходов.
 	StopIDs []string `json:"stopIds"`
 	// Polyline — упрощённый GPS-проход либо fallback-линия только по остановкам.

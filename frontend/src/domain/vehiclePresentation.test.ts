@@ -11,7 +11,7 @@ function vehicle(unitId: number, matchStatus: MatchStatus, currentDelaySeconds?:
 }
 
 describe('операторское представление транспорта', () => {
-  it('показывает протокольный ID без выдуманного псевдонима', () => {
+  it('показывает идентификатор конкретного ТС', () => {
     expect(vehicleName(vehicle(10, 'matched'))).toBe('ТС 10')
   })
 

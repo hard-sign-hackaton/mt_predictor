@@ -1,0 +1,4243 @@
+{
+  "schema_version": 1,
+  "source": {
+    "name": "Moscow Transport GTFS",
+    "url": "https://mobilitydatabase.org/feeds/gtfs/mdb-3226",
+    "snapshot": "2026-06-30"
+  },
+  "matching_note": "Stops matched by nearest coordinates within 100 m. Route numbers are published only for confirmed or probable whole-sequence matches; ambiguous patterns remain unnamed.",
+  "stops": {
+    "stop_39185aa9050e": {
+      "name": "Метромост",
+      "gtfs_stop_id": "1009816",
+      "distance_m": 48.7
+    },
+    "stop_c6adbe384895": {
+      "name": "6-й микрорайон",
+      "gtfs_stop_id": "1009763",
+      "distance_m": 0.0
+    },
+    "stop_01c724b8f7fe": {
+      "name": "МЦД Перерва",
+      "gtfs_stop_id": "1009959",
+      "distance_m": 0.0
+    },
+    "stop_486d7d3a22f3": {
+      "name": "МЦД Перерва",
+      "gtfs_stop_id": "1009960",
+      "distance_m": 0.0
+    },
+    "stop_0c043d0687ff": {
+      "name": "Метро «Алма-Атинская»",
+      "gtfs_stop_id": "1009997",
+      "distance_m": 0.0
+    },
+    "stop_360436559959": {
+      "name": "Метро «Каширская»",
+      "gtfs_stop_id": "6431",
+      "distance_m": 0.0
+    },
+    "stop_131b2f3104b6": {
+      "name": "МЦД Люблино",
+      "gtfs_stop_id": "1010064",
+      "distance_m": 0.0
+    },
+    "stop_0c590808fe45": {
+      "name": "Метро «Аминьевская»",
+      "gtfs_stop_id": "8824",
+      "distance_m": 0.0
+    },
+    "stop_1e82aaf542b8": {
+      "name": "Бархатная Роща",
+      "gtfs_stop_id": "1010245",
+      "distance_m": 0.0
+    },
+    "stop_6738ffc565c8": {
+      "name": "Метро «Боровское шоссе»",
+      "gtfs_stop_id": "9041",
+      "distance_m": 0.0
+    },
+    "stop_662396098194": {
+      "name": "Ломоносовский проспект",
+      "gtfs_stop_id": "2662",
+      "distance_m": 0.0
+    },
+    "stop_513634abc2c0": {
+      "name": "Посёлок Воскресенское, 60",
+      "gtfs_stop_id": "1010467",
+      "distance_m": 0.0
+    },
+    "stop_5d03381263fd": {
+      "name": "Каштановый переулок",
+      "gtfs_stop_id": "1010470",
+      "distance_m": 0.0
+    },
+    "stop_4e7aa509ec9d": {
+      "name": "Каштановый переулок",
+      "gtfs_stop_id": "1010469",
+      "distance_m": 0.0
+    },
+    "stop_c2c1b58728d9": {
+      "name": "Бархатная Роща",
+      "gtfs_stop_id": "1010475",
+      "distance_m": 0.0
+    },
+    "stop_2872c460c7ac": {
+      "name": "Московский",
+      "gtfs_stop_id": "1010420",
+      "distance_m": 0.0
+    },
+    "stop_4e4235ea3b72": {
+      "name": "Метро «Рассказовка»",
+      "gtfs_stop_id": "1002668",
+      "distance_m": 0.0
+    },
+    "stop_1bfa862d9833": {
+      "name": "Брёхово",
+      "gtfs_stop_id": "1010451",
+      "distance_m": 0.0
+    },
+    "stop_ac8be374a3ee": {
+      "name": "Брёхово",
+      "gtfs_stop_id": "1010452",
+      "distance_m": 0.0
+    },
+    "stop_e37b105560c7": {
+      "name": "Посёлок «Воскресенское, 37»",
+      "gtfs_stop_id": "21128",
+      "distance_m": 0.0
+    },
+    "stop_f38bd48f0629": {
+      "name": "Мемориал",
+      "gtfs_stop_id": "21127",
+      "distance_m": 0.0
+    },
+    "stop_3ae2f6d10051": {
+      "name": "Мемориал",
+      "gtfs_stop_id": "21125",
+      "distance_m": 0.0
+    },
+    "stop_8a47281e88ee": {
+      "name": "Детская школа искусств",
+      "gtfs_stop_id": "21129",
+      "distance_m": 0.0
+    },
+    "stop_f3580ca1d80f": {
+      "name": "Сосенки",
+      "gtfs_stop_id": "9419",
+      "distance_m": 0.0
+    },
+    "stop_2f05766af271": {
+      "name": "Петровско-Разумовская аллея",
+      "gtfs_stop_id": "246",
+      "distance_m": 0.0
+    },
+    "stop_8bd391ea3a68": {
+      "name": "Петровско-Разумовская ал.",
+      "gtfs_stop_id": "635",
+      "distance_m": 0.0
+    },
+    "stop_ac0f91c6f84a": {
+      "name": "Планетная ул.",
+      "gtfs_stop_id": "636",
+      "distance_m": 0.0
+    },
+    "stop_7beec781bd9e": {
+      "name": "Ул. Верхн. Масловка",
+      "gtfs_stop_id": "637",
+      "distance_m": 0.0
+    },
+    "stop_7ce92c3b1ff2": {
+      "name": "Поликлиника",
+      "gtfs_stop_id": "638",
+      "distance_m": 0.0
+    },
+    "stop_acecbb2d0d8d": {
+      "name": "Поликлиника",
+      "gtfs_stop_id": "625",
+      "distance_m": 0.0
+    },
+    "stop_cf5c0b2bf72e": {
+      "name": "Ул. Верхн. Масловка",
+      "gtfs_stop_id": "626",
+      "distance_m": 0.0
+    },
+    "stop_35805ebb469d": {
+      "name": "Метро «Новокосино»",
+      "gtfs_stop_id": "7037",
+      "distance_m": 0.0
+    },
+    "stop_92fbbd35c991": {
+      "name": "Путевой дворец",
+      "gtfs_stop_id": "379",
+      "distance_m": 0.0
+    },
+    "stop_cc2bb8837bd9": {
+      "name": "МЦД Белорусская",
+      "gtfs_stop_id": "381",
+      "distance_m": 0.0
+    },
+    "stop_9903edf8f4ad": {
+      "name": "Вятская ул.",
+      "gtfs_stop_id": "620",
+      "distance_m": 0.0
+    },
+    "stop_f1936472cc7f": {
+      "name": "4-й Вятский переулок",
+      "gtfs_stop_id": "622",
+      "distance_m": 0.0
+    },
+    "stop_51d4e8d1b8c2": {
+      "name": "Башиловская ул. - Гор. б-ца № 24",
+      "gtfs_stop_id": "565",
+      "distance_m": 0.0
+    },
+    "stop_047fefe11fa0": {
+      "name": "Районный центр «Прага»",
+      "gtfs_stop_id": "3482",
+      "distance_m": 0.0
+    },
+    "stop_ba58e2271749": {
+      "name": "Бутырский рынок",
+      "gtfs_stop_id": "577",
+      "distance_m": 0.0
+    },
+    "stop_82ae19687b30": {
+      "name": "Башиловская улица - Городская больница № 24",
+      "gtfs_stop_id": "578",
+      "distance_m": 0.0
+    },
+    "stop_69444a2dd527": {
+      "name": "4-й Вятский пер.",
+      "gtfs_stop_id": "605",
+      "distance_m": 0.0
+    },
+    "stop_096f6c5e2baa": {
+      "name": "Бутырский рынок",
+      "gtfs_stop_id": "606",
+      "distance_m": 0.0
+    },
+    "stop_0fce1d9e8e0b": {
+      "name": "Бутырская ул.",
+      "gtfs_stop_id": "607",
+      "distance_m": 0.0
+    },
+    "stop_16842c2b6877": {
+      "name": "Метро «Новаторская»",
+      "gtfs_stop_id": "1002921",
+      "distance_m": 0.0
+    },
+    "stop_b1016e978788": {
+      "name": "Планетная ул.",
+      "gtfs_stop_id": "627",
+      "distance_m": 0.0
+    },
+    "stop_a2678091c46c": {
+      "name": "Метро «Динамо»",
+      "gtfs_stop_id": "21572",
+      "distance_m": 0.0
+    },
+    "stop_25530a387d92": {
+      "name": "Перинатальный центр",
+      "gtfs_stop_id": "624",
+      "distance_m": 0.0
+    },
+    "stop_bd9854598158": {
+      "name": "Полтавская улица",
+      "gtfs_stop_id": "623",
+      "distance_m": 0.0
+    },
+    "stop_6ca9160549c6": {
+      "name": "Метро «Озёрная»",
+      "gtfs_stop_id": "15205",
+      "distance_m": 0.0
+    },
+    "stop_18cb1491e854": {
+      "name": "Бережковская набережная, 8",
+      "gtfs_stop_id": "2268",
+      "distance_m": 0.0
+    },
+    "stop_f4dd13ed9179": {
+      "name": "Бережковская набережная, 14",
+      "gtfs_stop_id": "2269",
+      "distance_m": 0.0
+    },
+    "stop_c8c40c9c93b9": {
+      "name": "Воробьевское ш.",
+      "gtfs_stop_id": "2271",
+      "distance_m": 0.0
+    },
+    "stop_975f5b547d11": {
+      "name": "Академия внешней торговли",
+      "gtfs_stop_id": "2272",
+      "distance_m": 0.0
+    },
+    "stop_8b366ba707c0": {
+      "name": "Мосфильмовская ул., 13",
+      "gtfs_stop_id": "2276",
+      "distance_m": 0.0
+    },
+    "stop_4dd4f476e1cc": {
+      "name": "Институт международных экономических связей",
+      "gtfs_stop_id": "2278",
+      "distance_m": 0.0
+    },
+    "stop_3cf254756f62": {
+      "name": "Ломоносовский проспект",
+      "gtfs_stop_id": "2279",
+      "distance_m": 0.0
+    },
+    "stop_75720ba7b3cb": {
+      "name": "Метро «Ленинский проспект»",
+      "gtfs_stop_id": "2290",
+      "distance_m": 0.0
+    },
+    "stop_d0fe92acc6e1": {
+      "name": "Улица Стасовой",
+      "gtfs_stop_id": "2291",
+      "distance_m": 0.0
+    },
+    "stop_70085b8fa841": {
+      "name": "Больница Святителя Алексия",
+      "gtfs_stop_id": "2292",
+      "distance_m": 0.0
+    },
+    "stop_71d5a6fc94ac": {
+      "name": "1-я городская больница",
+      "gtfs_stop_id": "2294",
+      "distance_m": 0.0
+    },
+    "stop_191a99b73cb0": {
+      "name": "1-й Бабьегородский переулок",
+      "gtfs_stop_id": "2297",
+      "distance_m": 0.0
+    },
+    "stop_0711271228e8": {
+      "name": "3-й Голутвинский переулок",
+      "gtfs_stop_id": "2298",
+      "distance_m": 0.0
+    },
+    "stop_e490c4b2afcd": {
+      "name": "Большая Якиманка",
+      "gtfs_stop_id": "2299",
+      "distance_m": 0.0
+    },
+    "stop_b5ab5682c907": {
+      "name": "Попутная улица",
+      "gtfs_stop_id": "8421",
+      "distance_m": 0.0
+    },
+    "stop_3ed639a54642": {
+      "name": "Метро «Рассказовка»",
+      "gtfs_stop_id": "1002667",
+      "distance_m": 0.0
+    },
+    "stop_3f5dca5439f3": {
+      "name": "Ул. Правды",
+      "gtfs_stop_id": "1013",
+      "distance_m": 0.0
+    },
+    "stop_8a52ae0fbd8f": {
+      "name": "Метро «Молодёжная»",
+      "gtfs_stop_id": "1079",
+      "distance_m": 0.0
+    },
+    "stop_0527ac3147f5": {
+      "name": "Улица Маршала Катукова",
+      "gtfs_stop_id": "1086",
+      "distance_m": 0.0
+    },
+    "stop_f8cecf4a7a7a": {
+      "name": "Метро «Коломенская»",
+      "gtfs_stop_id": "1002922",
+      "distance_m": 0.0
+    },
+    "stop_563d89fdf817": {
+      "name": "Ул. Марш. Катукова",
+      "gtfs_stop_id": "1075",
+      "distance_m": 0.0
+    },
+    "stop_ed1e34c9f1f7": {
+      "name": "Метро «Китай-город»",
+      "gtfs_stop_id": "1001938",
+      "distance_m": 55.1
+    },
+    "stop_85a8f0762750": {
+      "name": "Метро «Молодёжная»",
+      "gtfs_stop_id": "1001038",
+      "distance_m": 0.0
+    },
+    "stop_ab28b2e5b72d": {
+      "name": "Метро «Новокосино»",
+      "gtfs_stop_id": "7038",
+      "distance_m": 0.0
+    },
+    "stop_5d00f8c605fc": {
+      "name": "Метро «Новокосино»",
+      "gtfs_stop_id": "7050",
+      "distance_m": 0.0
+    },
+    "stop_d9739eef8314": {
+      "name": "Метро «Новокосино»",
+      "gtfs_stop_id": "9225",
+      "distance_m": 0.0
+    },
+    "stop_7eb5c0c093a2": {
+      "name": "Строгинский бульвар, 1",
+      "gtfs_stop_id": "1382",
+      "distance_m": 0.0
+    },
+    "stop_b905b9b873ee": {
+      "name": "Мед. центр им. Бурназяна",
+      "gtfs_stop_id": "1371",
+      "distance_m": 0.0
+    },
+    "stop_946c0351179e": {
+      "name": "Новокосинская улица, 10",
+      "gtfs_stop_id": "9772",
+      "distance_m": 0.0
+    },
+    "stop_942b8686aa3e": {
+      "name": "Новокосинская ул., 10",
+      "gtfs_stop_id": "9773",
+      "distance_m": 0.0
+    },
+    "stop_3e2ce379ae04": {
+      "name": "Ул. Исаковского, 33",
+      "gtfs_stop_id": "1368",
+      "distance_m": 0.0
+    },
+    "stop_5d067da821f7": {
+      "name": "Ул. Исаковского, 33",
+      "gtfs_stop_id": "1369",
+      "distance_m": 0.0
+    },
+    "stop_c32f92cb1715": {
+      "name": "Метро «Тушинская»",
+      "gtfs_stop_id": "8263",
+      "distance_m": 0.0
+    },
+    "stop_806d00b9571b": {
+      "name": "Метро «Строгино» (западный вход)",
+      "gtfs_stop_id": "1383",
+      "distance_m": 0.0
+    },
+    "stop_f0ec6b43666b": {
+      "name": "Спорткомплекс «Янтарь»",
+      "gtfs_stop_id": "1384",
+      "distance_m": 0.0
+    },
+    "stop_16cd99aa56c1": {
+      "name": "Строгинский бульвар, 1",
+      "gtfs_stop_id": "1390",
+      "distance_m": 98.5
+    },
+    "stop_388c09cb40da": {
+      "name": "Метро «Щукинская»",
+      "gtfs_stop_id": "1003687",
+      "distance_m": 0.0
+    },
+    "stop_c6d695c1d8f8": {
+      "name": "Метро «Печатники»",
+      "gtfs_stop_id": "8487",
+      "distance_m": 0.0
+    },
+    "stop_5c466e868ad2": {
+      "name": "Ленинградский просп., 12",
+      "gtfs_stop_id": "1757",
+      "distance_m": 0.0
+    },
+    "stop_6f8ed16d565d": {
+      "name": "Метро «Беляево»",
+      "gtfs_stop_id": "4938",
+      "distance_m": 0.0
+    },
+    "stop_73ee6d06ee3d": {
+      "name": "Беговая ул., 32",
+      "gtfs_stop_id": "1758",
+      "distance_m": 0.0
+    },
+    "stop_eec27dd6e435": {
+      "name": "Метро «Лубянка»",
+      "gtfs_stop_id": "6464",
+      "distance_m": 0.0
+    },
+    "stop_812a609b8637": {
+      "name": "Новокосинская улица, 17",
+      "gtfs_stop_id": "9862",
+      "distance_m": 0.0
+    },
+    "stop_a2b28f4d9913": {
+      "name": "Новокосинская улица, 17",
+      "gtfs_stop_id": "9863",
+      "distance_m": 0.0
+    },
+    "stop_46d862bc5f4c": {
+      "name": "Верейская улица, 41",
+      "gtfs_stop_id": "2038",
+      "distance_m": 0.0
+    },
+    "stop_2045998b01f1": {
+      "name": "Можайское шоссе",
+      "gtfs_stop_id": "2110",
+      "distance_m": 0.0
+    },
+    "stop_9d79db52e1b6": {
+      "name": "66-й квартал Кунцева",
+      "gtfs_stop_id": "1970",
+      "distance_m": 0.0
+    },
+    "stop_f5ece8b15b47": {
+      "name": "Барвихинская улица",
+      "gtfs_stop_id": "1971",
+      "distance_m": 0.0
+    },
+    "stop_d54f46a619ca": {
+      "name": "Улица Говорова",
+      "gtfs_stop_id": "1972",
+      "distance_m": 0.0
+    },
+    "stop_61e4f1d57372": {
+      "name": "МЦД Сетунь",
+      "gtfs_stop_id": "1973",
+      "distance_m": 0.0
+    },
+    "stop_62366b941664": {
+      "name": "Улица Говорова",
+      "gtfs_stop_id": "2009",
+      "distance_m": 0.0
+    },
+    "stop_0d25f03a66de": {
+      "name": "Барвихинская улица",
+      "gtfs_stop_id": "2010",
+      "distance_m": 0.0
+    },
+    "stop_40575adec0e3": {
+      "name": "66-й кв. Кунцева",
+      "gtfs_stop_id": "2011",
+      "distance_m": 0.0
+    },
+    "stop_94370c8d1444": {
+      "name": "Дом культуры «Сетунь»",
+      "gtfs_stop_id": "2012",
+      "distance_m": 0.0
+    },
+    "stop_11543a7f82ff": {
+      "name": "Дворец спорта «Крылья Советов»",
+      "gtfs_stop_id": "2014",
+      "distance_m": 0.0
+    },
+    "stop_dd63ffe53d56": {
+      "name": "Дорогобужская ул.",
+      "gtfs_stop_id": "2015",
+      "distance_m": 0.0
+    },
+    "stop_f2be755c694a": {
+      "name": "МЦД Сетунь",
+      "gtfs_stop_id": "2008",
+      "distance_m": 0.0
+    },
+    "stop_614c402d8886": {
+      "name": "Улица Толбухина",
+      "gtfs_stop_id": "2026",
+      "distance_m": 0.0
+    },
+    "stop_85420140bcb6": {
+      "name": "Дом культуры «Сетунь»",
+      "gtfs_stop_id": "2027",
+      "distance_m": 0.0
+    },
+    "stop_599e739d1afd": {
+      "name": "Улица Толбухина",
+      "gtfs_stop_id": "2013",
+      "distance_m": 0.0
+    },
+    "stop_ea3455542533": {
+      "name": "Дорогобужская ул.",
+      "gtfs_stop_id": "2025",
+      "distance_m": 0.0
+    },
+    "stop_4f27be06b029": {
+      "name": "Лечебный корпус",
+      "gtfs_stop_id": "15258",
+      "distance_m": 0.0
+    },
+    "stop_ad3815113f7e": {
+      "name": "Рябиновая улица, 14",
+      "gtfs_stop_id": "2112",
+      "distance_m": 0.0
+    },
+    "stop_012e6ebfbd6a": {
+      "name": "Верейская ул., 41",
+      "gtfs_stop_id": "2114",
+      "distance_m": 0.0
+    },
+    "stop_5cc0ea27bf7e": {
+      "name": "МРТЗ",
+      "gtfs_stop_id": "2115",
+      "distance_m": 0.0
+    },
+    "stop_554e1fdc3a7c": {
+      "name": "Улица Маршала Сергеева",
+      "gtfs_stop_id": "2107",
+      "distance_m": 0.0
+    },
+    "stop_08badf39ea16": {
+      "name": "Улица Генерала Дорохова",
+      "gtfs_stop_id": "2117",
+      "distance_m": 0.0
+    },
+    "stop_e7f8a20868f0": {
+      "name": "Улица Маршала Сергеева",
+      "gtfs_stop_id": "2131",
+      "distance_m": 0.0
+    },
+    "stop_2030023e0633": {
+      "name": "Рябиновая улица, 14",
+      "gtfs_stop_id": "2126",
+      "distance_m": 0.0
+    },
+    "stop_53611a627e74": {
+      "name": "Нагатинская набережная, 48",
+      "gtfs_stop_id": "3230",
+      "distance_m": 0.0
+    },
+    "stop_7b05c6101e6f": {
+      "name": "Причал «Кленовый бульвар»",
+      "gtfs_stop_id": "3231",
+      "distance_m": 36.2
+    },
+    "stop_ff46111838c4": {
+      "name": "Коломенская улица, 5",
+      "gtfs_stop_id": "3210",
+      "distance_m": 0.0
+    },
+    "stop_0aa6cd3c3c1a": {
+      "name": "Диспансер",
+      "gtfs_stop_id": "3236",
+      "distance_m": 0.0
+    },
+    "stop_1b89ac64976f": {
+      "name": "Корабельная улица",
+      "gtfs_stop_id": "3237",
+      "distance_m": 0.0
+    },
+    "stop_61dcafa7df7b": {
+      "name": "ОВД Нагатинский Затон",
+      "gtfs_stop_id": "3238",
+      "distance_m": 0.0
+    },
+    "stop_200a37172f5d": {
+      "name": "Метро «Тульская» (северный вход)",
+      "gtfs_stop_id": "3526",
+      "distance_m": 0.0
+    },
+    "stop_b8912f85155e": {
+      "name": "Улица Новинки",
+      "gtfs_stop_id": "3241",
+      "distance_m": 0.0
+    },
+    "stop_cf10dfa21301": {
+      "name": "Метромост",
+      "gtfs_stop_id": "3255",
+      "distance_m": 0.0
+    },
+    "stop_8d0e4a8bd09b": {
+      "name": "Коломенская улица, 5",
+      "gtfs_stop_id": "3239",
+      "distance_m": 0.0
+    },
+    "stop_c301f355cc3a": {
+      "name": "Метро «Пыхтино»",
+      "gtfs_stop_id": "9964",
+      "distance_m": 0.0
+    },
+    "stop_f90853d0ace0": {
+      "name": "Гостиница онкоцентра",
+      "gtfs_stop_id": "3281",
+      "distance_m": 0.0
+    },
+    "stop_887498e8ceed": {
+      "name": "МЦД Новогиреево",
+      "gtfs_stop_id": "4294",
+      "distance_m": 0.0
+    },
+    "stop_f07f9481c147": {
+      "name": "Улица Алексея Дикого",
+      "gtfs_stop_id": "15863",
+      "distance_m": 0.0
+    },
+    "stop_b9bda0972ebf": {
+      "name": "МЦК Верхние Котлы",
+      "gtfs_stop_id": "21787",
+      "distance_m": 0.0
+    },
+    "stop_d01a74c5ee68": {
+      "name": "Даниловская мануфактура",
+      "gtfs_stop_id": "3533",
+      "distance_m": 0.0
+    },
+    "stop_86988adc9a2e": {
+      "name": "Стадион «Труд»",
+      "gtfs_stop_id": "3528",
+      "distance_m": 0.0
+    },
+    "stop_7bc451cf9f14": {
+      "name": "Районный центр «Эльбрус»",
+      "gtfs_stop_id": "11273",
+      "distance_m": 0.0
+    },
+    "stop_26db3c71a25e": {
+      "name": "Большая Якиманка",
+      "gtfs_stop_id": "2396",
+      "distance_m": 0.0
+    },
+    "stop_a03ee62b0912": {
+      "name": "1-й Бабьегородский пер.",
+      "gtfs_stop_id": "2397",
+      "distance_m": 0.0
+    },
+    "stop_3bb45deafa53": {
+      "name": "Метро «Октябрьская» (радиальная)",
+      "gtfs_stop_id": "2398",
+      "distance_m": 0.0
+    },
+    "stop_64c9743833ac": {
+      "name": "1-я городская больница",
+      "gtfs_stop_id": "2400",
+      "distance_m": 0.0
+    },
+    "stop_6d9091926e60": {
+      "name": "Б-ца Святителя Алексия",
+      "gtfs_stop_id": "2402",
+      "distance_m": 0.0
+    },
+    "stop_ee800ff2f89b": {
+      "name": "Академия внешней торговли",
+      "gtfs_stop_id": "2411",
+      "distance_m": 0.0
+    },
+    "stop_b0cf134e1252": {
+      "name": "Институт промышленной собственности",
+      "gtfs_stop_id": "2412",
+      "distance_m": 0.0
+    },
+    "stop_c73a016faa38": {
+      "name": "Бережковская набережная, 14",
+      "gtfs_stop_id": "2413",
+      "distance_m": 0.0
+    },
+    "stop_9616efdb345f": {
+      "name": "Улица Марии Ульяновой",
+      "gtfs_stop_id": "2666",
+      "distance_m": 0.0
+    },
+    "stop_2b07f0448858": {
+      "name": "Улица Крупской",
+      "gtfs_stop_id": "2640",
+      "distance_m": 0.0
+    },
+    "stop_5615e3f848e4": {
+      "name": "Ленинский проспект, 83",
+      "gtfs_stop_id": "2664",
+      "distance_m": 0.0
+    },
+    "stop_2f032f7b3d46": {
+      "name": "Улица Строителей",
+      "gtfs_stop_id": "2642",
+      "distance_m": 19.9
+    },
+    "stop_4deb756b597c": {
+      "name": "Ломоносовский просп.",
+      "gtfs_stop_id": "2643",
+      "distance_m": 0.0
+    },
+    "stop_978458b53c8b": {
+      "name": "Молодёжная улица",
+      "gtfs_stop_id": "2645",
+      "distance_m": 0.0
+    },
+    "stop_5bbab1f4ad94": {
+      "name": "Университетский просп.",
+      "gtfs_stop_id": "2646",
+      "distance_m": 0.0
+    },
+    "stop_896892f8b1d0": {
+      "name": "Воробьёвское шоссе",
+      "gtfs_stop_id": "2548",
+      "distance_m": 0.0
+    },
+    "stop_db768c6fdea8": {
+      "name": "Улица 26 Бакинских Комиссаров, 3",
+      "gtfs_stop_id": "2631",
+      "distance_m": 0.0
+    },
+    "stop_0943a05f12a7": {
+      "name": "Улица 26 Бакинских Комиссаров",
+      "gtfs_stop_id": "2632",
+      "distance_m": 0.0
+    },
+    "stop_ff31917855e3": {
+      "name": "Киноклуб «Эльдар»",
+      "gtfs_stop_id": "2635",
+      "distance_m": 0.0
+    },
+    "stop_a59a0d0ed064": {
+      "name": "Улица Обручева",
+      "gtfs_stop_id": "2634",
+      "distance_m": 0.0
+    },
+    "stop_000c3aa592cf": {
+      "name": "Улица Крупской",
+      "gtfs_stop_id": "2665",
+      "distance_m": 0.0
+    },
+    "stop_3e611b74c9fa": {
+      "name": "Улица Строителей",
+      "gtfs_stop_id": "2663",
+      "distance_m": 0.0
+    },
+    "stop_299cf2b1c305": {
+      "name": "Киноклуб «Эльдар»",
+      "gtfs_stop_id": "2670",
+      "distance_m": 0.0
+    },
+    "stop_7d5b93b2b2f3": {
+      "name": "Улица Обручева",
+      "gtfs_stop_id": "2671",
+      "distance_m": 0.0
+    },
+    "stop_6008b18493fd": {
+      "name": "Улица 26 Бакинских Комиссаров, 3",
+      "gtfs_stop_id": "2673",
+      "distance_m": 0.0
+    },
+    "stop_5864b72e7929": {
+      "name": "Ленинский просп., 34",
+      "gtfs_stop_id": "2651",
+      "distance_m": 0.0
+    },
+    "stop_21d67fa32173": {
+      "name": "Ул. Стасовой",
+      "gtfs_stop_id": "2653",
+      "distance_m": 0.0
+    },
+    "stop_65e4a7e3a2a5": {
+      "name": "Дворец спорта «Крылья Советов»",
+      "gtfs_stop_id": "2688",
+      "distance_m": 0.0
+    },
+    "stop_772f3a4ed1de": {
+      "name": "Ленинский просп., 34",
+      "gtfs_stop_id": "2654",
+      "distance_m": 0.0
+    },
+    "stop_f2b6a6ab8d50": {
+      "name": "Ул. Ляпунова",
+      "gtfs_stop_id": "2648",
+      "distance_m": 0.0
+    },
+    "stop_76b3f6504045": {
+      "name": "Универмаг «Москва»",
+      "gtfs_stop_id": "2647",
+      "distance_m": 0.0
+    },
+    "stop_54d839717a97": {
+      "name": "Метро «Новаторская»",
+      "gtfs_stop_id": "2669",
+      "distance_m": 0.0
+    },
+    "stop_e00c8b00be65": {
+      "name": "Ул. Миклухо-Маклая",
+      "gtfs_stop_id": "2672",
+      "distance_m": 0.0
+    },
+    "stop_ec863e4958bc": {
+      "name": "Метро «Пыхтино»",
+      "gtfs_stop_id": "9963",
+      "distance_m": 0.0
+    },
+    "stop_a779e7462548": {
+      "name": "Улица Академика Зелинского",
+      "gtfs_stop_id": "2655",
+      "distance_m": 0.0
+    },
+    "stop_e9d6b0642df5": {
+      "name": "Дворец труда профсоюзов",
+      "gtfs_stop_id": "2656",
+      "distance_m": 0.0
+    },
+    "stop_711b868ff9ee": {
+      "name": "Ул. Ляпунова",
+      "gtfs_stop_id": "2657",
+      "distance_m": 0.0
+    },
+    "stop_3f0b50d48794": {
+      "name": "Универмаг «Москва»",
+      "gtfs_stop_id": "2658",
+      "distance_m": 0.0
+    },
+    "stop_4c2f796fe3d5": {
+      "name": "Университетский проспект",
+      "gtfs_stop_id": "2659",
+      "distance_m": 0.0
+    },
+    "stop_b5263f6ea0ff": {
+      "name": "Молодёжная улица",
+      "gtfs_stop_id": "2660",
+      "distance_m": 0.0
+    },
+    "stop_3ed5adbfce9f": {
+      "name": "Дворец труда профсоюзов",
+      "gtfs_stop_id": "2649",
+      "distance_m": 0.0
+    },
+    "stop_84454d5c569b": {
+      "name": "Улица Академика Зелинского",
+      "gtfs_stop_id": "2650",
+      "distance_m": 0.0
+    },
+    "stop_4b4ade88a44f": {
+      "name": "Рублёвский пляж",
+      "gtfs_stop_id": "5044",
+      "distance_m": 0.0
+    },
+    "stop_a24e4ed61746": {
+      "name": "1-й Нагатинский проезд",
+      "gtfs_stop_id": "21782",
+      "distance_m": 0.0
+    },
+    "stop_26a5a54823a4": {
+      "name": "Нижние Котлы",
+      "gtfs_stop_id": "3039",
+      "distance_m": 0.0
+    },
+    "stop_7472ecec39bb": {
+      "name": "МЦК Верхние Котлы",
+      "gtfs_stop_id": "3041",
+      "distance_m": 0.0
+    },
+    "stop_b3ebbd9f10af": {
+      "name": "Стадион «Труд»",
+      "gtfs_stop_id": "3042",
+      "distance_m": 0.0
+    },
+    "stop_b97223000c79": {
+      "name": "Даниловская мануфактура",
+      "gtfs_stop_id": "3043",
+      "distance_m": 0.0
+    },
+    "stop_d6f489fea46e": {
+      "name": "Даниловский рынок",
+      "gtfs_stop_id": "3046",
+      "distance_m": 0.0
+    },
+    "stop_95fb71cdff7f": {
+      "name": "Александровские казармы",
+      "gtfs_stop_id": "3047",
+      "distance_m": 0.0
+    },
+    "stop_1d3fe5626c20": {
+      "name": "3-й Павловский переулок - Театриум на Серпуховке",
+      "gtfs_stop_id": "3048",
+      "distance_m": 0.0
+    },
+    "stop_98500a5ee071": {
+      "name": "Ул. Павла Андреева",
+      "gtfs_stop_id": "3049",
+      "distance_m": 0.0
+    },
+    "stop_3deb3b7c05f8": {
+      "name": "Институт имени Вишневского",
+      "gtfs_stop_id": "3050",
+      "distance_m": 0.0
+    },
+    "stop_423f344eafa1": {
+      "name": "3-й Люсиновский пер.",
+      "gtfs_stop_id": "3062",
+      "distance_m": 0.0
+    },
+    "stop_21cd9adb4e62": {
+      "name": "Детская п-ка",
+      "gtfs_stop_id": "3064",
+      "distance_m": 0.0
+    },
+    "stop_0bbad0186a74": {
+      "name": "Даниловский рынок",
+      "gtfs_stop_id": "3065",
+      "distance_m": 0.0
+    },
+    "stop_4b9ab4bce751": {
+      "name": "Нижние Котлы",
+      "gtfs_stop_id": "3071",
+      "distance_m": 0.0
+    },
+    "stop_1bac242c4ef4": {
+      "name": "Школа",
+      "gtfs_stop_id": "3259",
+      "distance_m": 0.0
+    },
+    "stop_59e86e2ec268": {
+      "name": "Улица Новинки",
+      "gtfs_stop_id": "3257",
+      "distance_m": 0.0
+    },
+    "stop_8d8837ab210e": {
+      "name": "Онкологический центр",
+      "gtfs_stop_id": "3265",
+      "distance_m": 0.0
+    },
+    "stop_baf6933f9130": {
+      "name": "Библиотека имени Льва Толстого",
+      "gtfs_stop_id": "3266",
+      "distance_m": 0.0
+    },
+    "stop_c740302ed70a": {
+      "name": "Платформа Нагатинская",
+      "gtfs_stop_id": "1000408",
+      "distance_m": 0.0
+    },
+    "stop_9505a5dce500": {
+      "name": "Библиотека имени Льва Толстого",
+      "gtfs_stop_id": "3271",
+      "distance_m": 0.0
+    },
+    "stop_32e3ae83f960": {
+      "name": "Гостиница онкоцентра",
+      "gtfs_stop_id": "3272",
+      "distance_m": 0.0
+    },
+    "stop_7ce93695c5ea": {
+      "name": "Онкологический центр",
+      "gtfs_stop_id": "3273",
+      "distance_m": 0.0
+    },
+    "stop_ee60ff6268c4": {
+      "name": "Метро «Коломенская»",
+      "gtfs_stop_id": "3256",
+      "distance_m": 0.0
+    },
+    "stop_2381f0e49eba": {
+      "name": "Метро «Коломенская»",
+      "gtfs_stop_id": "3217",
+      "distance_m": 0.0
+    },
+    "stop_3ea8263ca112": {
+      "name": "ОВД Нагатинский Затон",
+      "gtfs_stop_id": "3211",
+      "distance_m": 0.0
+    },
+    "stop_dbe3b8286315": {
+      "name": "Корабельная улица",
+      "gtfs_stop_id": "3212",
+      "distance_m": 0.0
+    },
+    "stop_d4ca9c513058": {
+      "name": "Диспансер",
+      "gtfs_stop_id": "3213",
+      "distance_m": 0.0
+    },
+    "stop_c198ce96eaf0": {
+      "name": "Метро «Кленовый бульвар»",
+      "gtfs_stop_id": "3215",
+      "distance_m": 0.0
+    },
+    "stop_6c5c79dd6510": {
+      "name": "Районный центр «Орбита»",
+      "gtfs_stop_id": "3216",
+      "distance_m": 0.0
+    },
+    "stop_f2a295b11eab": {
+      "name": "Нагатинская набережная, 48",
+      "gtfs_stop_id": "3219",
+      "distance_m": 26.2
+    },
+    "stop_cfd6fff58c26": {
+      "name": "Якорная ул.",
+      "gtfs_stop_id": "3220",
+      "distance_m": 46.2
+    },
+    "stop_9f6d8c5aee14": {
+      "name": "Нагатинская набережная, 62",
+      "gtfs_stop_id": "3221",
+      "distance_m": 39.2
+    },
+    "stop_a6c1733acfb0": {
+      "name": "Храм Спиридона",
+      "gtfs_stop_id": "3222",
+      "distance_m": 35.9
+    },
+    "stop_c4ab660e3308": {
+      "name": "Нагатино",
+      "gtfs_stop_id": "3224",
+      "distance_m": 0.0
+    },
+    "stop_20bd700197ff": {
+      "name": "Метро «Петровский парк»",
+      "gtfs_stop_id": "1002179",
+      "distance_m": 0.0
+    },
+    "stop_de86a5b9df18": {
+      "name": "Нагатинская набережная, 62",
+      "gtfs_stop_id": "3228",
+      "distance_m": 0.0
+    },
+    "stop_1a7c07113979": {
+      "name": "Якорная ул.",
+      "gtfs_stop_id": "3229",
+      "distance_m": 0.0
+    },
+    "stop_dd735054f891": {
+      "name": "Деревня Мякинино",
+      "gtfs_stop_id": "5041",
+      "distance_m": 0.0
+    },
+    "stop_3594b8784d90": {
+      "name": "Метро «Нагатинский Затон»",
+      "gtfs_stop_id": "3803",
+      "distance_m": 0.0
+    },
+    "stop_aed6c9d08a6c": {
+      "name": "Платформа Нагатинская",
+      "gtfs_stop_id": "1002903",
+      "distance_m": 0.0
+    },
+    "stop_3065f1faf255": {
+      "name": "Метро «Новогиреево»",
+      "gtfs_stop_id": "14014",
+      "distance_m": 0.0
+    },
+    "stop_0dac5dcf12f8": {
+      "name": "Музыкальная школа имени Гайдна",
+      "gtfs_stop_id": "9229",
+      "distance_m": 0.0
+    },
+    "stop_cb17d5641362": {
+      "name": "Кетчерская ул.",
+      "gtfs_stop_id": "4354",
+      "distance_m": 0.0
+    },
+    "stop_f59e0448ead2": {
+      "name": "Кетчерская ул., 8",
+      "gtfs_stop_id": "4355",
+      "distance_m": 0.0
+    },
+    "stop_ebaab97ecb06": {
+      "name": "МЦД Новогиреево",
+      "gtfs_stop_id": "4356",
+      "distance_m": 0.0
+    },
+    "stop_bc919b8b211e": {
+      "name": "МЦД Новогиреево",
+      "gtfs_stop_id": "4358",
+      "distance_m": 0.0
+    },
+    "stop_df0d739147e1": {
+      "name": "Кетчерская ул., 8",
+      "gtfs_stop_id": "4359",
+      "distance_m": 0.0
+    },
+    "stop_f0d78ad6d080": {
+      "name": "Кетчерская ул.",
+      "gtfs_stop_id": "4360",
+      "distance_m": 0.0
+    },
+    "stop_e99f545dab08": {
+      "name": "МЦД Новогиреево",
+      "gtfs_stop_id": "4397",
+      "distance_m": 0.0
+    },
+    "stop_1c4fb3ee8a21": {
+      "name": "Метро «Новогиреево»",
+      "gtfs_stop_id": "9774",
+      "distance_m": 0.0
+    },
+    "stop_a70c22eba2c1": {
+      "name": "Аминьево",
+      "gtfs_stop_id": "2035",
+      "distance_m": 0.0
+    },
+    "stop_62c84ad1149e": {
+      "name": "Метро «Новаторская»",
+      "gtfs_stop_id": "1002824",
+      "distance_m": 0.0
+    },
+    "stop_d835bbf7ea5f": {
+      "name": "Матвеевское",
+      "gtfs_stop_id": "5898",
+      "distance_m": 0.0
+    },
+    "stop_4369d4933ef6": {
+      "name": "Веерная ул., 12",
+      "gtfs_stop_id": "5899",
+      "distance_m": 0.0
+    },
+    "stop_b2baac047729": {
+      "name": "Веерная ул., 20",
+      "gtfs_stop_id": "5900",
+      "distance_m": 0.0
+    },
+    "stop_f6f72ea218ab": {
+      "name": "Веерная улица, 20",
+      "gtfs_stop_id": "5923",
+      "distance_m": 0.0
+    },
+    "stop_1b0db6f5b181": {
+      "name": "Веерная улица, 12",
+      "gtfs_stop_id": "5924",
+      "distance_m": 0.0
+    },
+    "stop_bbd3c105e62a": {
+      "name": "Матвеевское",
+      "gtfs_stop_id": "5925",
+      "distance_m": 0.0
+    },
+    "stop_24b2374c79aa": {
+      "name": "Улица Маршала Голованова",
+      "gtfs_stop_id": "5931",
+      "distance_m": 0.0
+    },
+    "stop_f28d883d1e76": {
+      "name": "Батайский проезд, 33",
+      "gtfs_stop_id": "5941",
+      "distance_m": 0.0
+    },
+    "stop_51cc25bcc28c": {
+      "name": "Улица Перерва",
+      "gtfs_stop_id": "5932",
+      "distance_m": 0.0
+    },
+    "stop_1ebe19348436": {
+      "name": "Улица Маршала Голованова",
+      "gtfs_stop_id": "5934",
+      "distance_m": 0.0
+    },
+    "stop_eb779c5ad94b": {
+      "name": "Западные Марьинские пруды",
+      "gtfs_stop_id": "5935",
+      "distance_m": 0.0
+    },
+    "stop_332c5fb6e90a": {
+      "name": "Батайский пр.",
+      "gtfs_stop_id": "5938",
+      "distance_m": 0.0
+    },
+    "stop_a6382e46171a": {
+      "name": "Батайский проезд, 5",
+      "gtfs_stop_id": "5939",
+      "distance_m": 0.0
+    },
+    "stop_bcb2ef8ceb86": {
+      "name": "Подольская улица, 33",
+      "gtfs_stop_id": "5879",
+      "distance_m": 0.0
+    },
+    "stop_fd632b0bb5e5": {
+      "name": "Подольская улица, 33",
+      "gtfs_stop_id": "5880",
+      "distance_m": 0.0
+    },
+    "stop_5d1459416f06": {
+      "name": "Автобаза «Мослифт»",
+      "gtfs_stop_id": "5875",
+      "distance_m": 0.0
+    },
+    "stop_eaa568aa97d3": {
+      "name": "Школа «Марьино»",
+      "gtfs_stop_id": "5940",
+      "distance_m": 0.0
+    },
+    "stop_8dd9af25f9bc": {
+      "name": "Батайский проезд, 33",
+      "gtfs_stop_id": "5942",
+      "distance_m": 0.0
+    },
+    "stop_ce20f836e9bc": {
+      "name": "Школа «Марьино»",
+      "gtfs_stop_id": "5943",
+      "distance_m": 0.0
+    },
+    "stop_78ca01688b3a": {
+      "name": "Студгородок Пироговского Университета",
+      "gtfs_stop_id": "6098",
+      "distance_m": 0.0
+    },
+    "stop_22bad3329e2d": {
+      "name": "Ул. Островитянова, 27",
+      "gtfs_stop_id": "6137",
+      "distance_m": 76.0
+    },
+    "stop_2ebbef27935c": {
+      "name": "Улица 26 Бакинских Комиссаров",
+      "gtfs_stop_id": "6144",
+      "distance_m": 0.0
+    },
+    "stop_a33abbb0c8c2": {
+      "name": "Академия интеллектуальной собственности",
+      "gtfs_stop_id": "4915",
+      "distance_m": 0.0
+    },
+    "stop_845e2d2c76b5": {
+      "name": "Рублёвский пляж",
+      "gtfs_stop_id": "5042",
+      "distance_m": 0.0
+    },
+    "stop_96caaa73c2e0": {
+      "name": "6-й мкр.",
+      "gtfs_stop_id": "4926",
+      "distance_m": 0.0
+    },
+    "stop_f6bce5becb46": {
+      "name": "Академия интеллектуальной собственности",
+      "gtfs_stop_id": "4927",
+      "distance_m": 0.0
+    },
+    "stop_c7f27353d4fc": {
+      "name": "Дом культуры",
+      "gtfs_stop_id": "5009",
+      "distance_m": 0.0
+    },
+    "stop_18d25e6e0507": {
+      "name": "Детская стоматологическая п-ка",
+      "gtfs_stop_id": "1009412",
+      "distance_m": 0.0
+    },
+    "stop_344929a3aa5a": {
+      "name": "Кунцевская ул.",
+      "gtfs_stop_id": "5011",
+      "distance_m": 0.0
+    },
+    "stop_7573c425b975": {
+      "name": "Кунцевская ул., 8",
+      "gtfs_stop_id": "5012",
+      "distance_m": 0.0
+    },
+    "stop_f285d2d70ed9": {
+      "name": "Полоцкая улица, 8",
+      "gtfs_stop_id": "5013",
+      "distance_m": 0.0
+    },
+    "stop_6e4d7acd7e50": {
+      "name": "Ул. Ивана Франко",
+      "gtfs_stop_id": "5014",
+      "distance_m": 0.0
+    },
+    "stop_99f2b052c4fb": {
+      "name": "Дом культуры",
+      "gtfs_stop_id": "5018",
+      "distance_m": 0.0
+    },
+    "stop_ed4bf9da83ef": {
+      "name": "Метро «Молодёжная»",
+      "gtfs_stop_id": "5008",
+      "distance_m": 0.0
+    },
+    "stop_3ee237d9e733": {
+      "name": "Метро «Ленинский проспект»",
+      "gtfs_stop_id": "2403",
+      "distance_m": 0.0
+    },
+    "stop_286b35782f58": {
+      "name": "Ленинский просп., 68",
+      "gtfs_stop_id": "2644",
+      "distance_m": 0.0
+    },
+    "stop_721c07cc4081": {
+      "name": "Проектируемый проезд № 812",
+      "gtfs_stop_id": "1002909",
+      "distance_m": 0.0
+    },
+    "stop_d26519de513a": {
+      "name": "Ленинский просп., 68",
+      "gtfs_stop_id": "2661",
+      "distance_m": 0.0
+    },
+    "stop_0baa67c75e4f": {
+      "name": "Савёловский вокзал",
+      "gtfs_stop_id": "1008539",
+      "distance_m": 0.0
+    },
+    "stop_948aa8c92438": {
+      "name": "Институт промышленной собственности",
+      "gtfs_stop_id": "22016",
+      "distance_m": 0.0
+    },
+    "stop_3d06a707ab77": {
+      "name": "Очаковское шоссе",
+      "gtfs_stop_id": "5467",
+      "distance_m": 0.0
+    },
+    "stop_f32a7816d03c": {
+      "name": "Аминьевское шоссе",
+      "gtfs_stop_id": "5468",
+      "distance_m": 0.0
+    },
+    "stop_adfa4f7827be": {
+      "name": "Матвеевская улица, 10",
+      "gtfs_stop_id": "5471",
+      "distance_m": 0.0
+    },
+    "stop_78a488a8ff7d": {
+      "name": "МЦД Матвеевская",
+      "gtfs_stop_id": "5472",
+      "distance_m": 0.0
+    },
+    "stop_637986b57bc5": {
+      "name": "МЦД Матвеевская",
+      "gtfs_stop_id": "5488",
+      "distance_m": 0.0
+    },
+    "stop_1e24820cc891": {
+      "name": "Метро «Нагатинская»",
+      "gtfs_stop_id": "3040",
+      "distance_m": 0.0
+    },
+    "stop_d9abb7c250e6": {
+      "name": "Очаковское шоссе",
+      "gtfs_stop_id": "5493",
+      "distance_m": 0.0
+    },
+    "stop_d4a3907b5b0e": {
+      "name": "Троицкое-Голенищево",
+      "gtfs_stop_id": "5561",
+      "distance_m": 0.0
+    },
+    "stop_d4df6aebc557": {
+      "name": "Институт международных экономических связей",
+      "gtfs_stop_id": "5558",
+      "distance_m": 0.0
+    },
+    "stop_f460bc2c3567": {
+      "name": "Мосфильмовская ул., 13",
+      "gtfs_stop_id": "5560",
+      "distance_m": 0.0
+    },
+    "stop_fb1ff504598b": {
+      "name": "Университетский просп.",
+      "gtfs_stop_id": "5559",
+      "distance_m": 0.0
+    },
+    "stop_24f9dc800b93": {
+      "name": "Мосфильмовская ул.",
+      "gtfs_stop_id": "5450",
+      "distance_m": 0.0
+    },
+    "stop_d7ff8112b12d": {
+      "name": "Мосфильмовская ул.",
+      "gtfs_stop_id": "7712",
+      "distance_m": 0.0
+    },
+    "stop_b8ca1b388c85": {
+      "name": "Полоцкая ул.",
+      "gtfs_stop_id": "5598",
+      "distance_m": 0.0
+    },
+    "stop_24b8dd910b38": {
+      "name": "Женская консультация",
+      "gtfs_stop_id": "5599",
+      "distance_m": 0.0
+    },
+    "stop_fd1b2320c368": {
+      "name": "Женская консультация",
+      "gtfs_stop_id": "5608",
+      "distance_m": 0.0
+    },
+    "stop_e9dfc8c85f43": {
+      "name": "Метро «Октябрьская»",
+      "gtfs_stop_id": "2295",
+      "distance_m": 0.0
+    },
+    "stop_bfe3289f19b4": {
+      "name": "Районный центр «Экран»",
+      "gtfs_stop_id": "5846",
+      "distance_m": 0.0
+    },
+    "stop_b3e814b20d86": {
+      "name": "Западные Марьинские пруды",
+      "gtfs_stop_id": "5847",
+      "distance_m": 0.0
+    },
+    "stop_0f4bb1abbcf9": {
+      "name": "Автобаза «Мослифт»",
+      "gtfs_stop_id": "5857",
+      "distance_m": 0.0
+    },
+    "stop_f85787ca11b2": {
+      "name": "Детская поликлиника",
+      "gtfs_stop_id": "5728",
+      "distance_m": 0.0
+    },
+    "stop_24baa3cdf43c": {
+      "name": "Улица Полбина, 54",
+      "gtfs_stop_id": "5729",
+      "distance_m": 0.0
+    },
+    "stop_9d23892d3760": {
+      "name": "МЦД Депо",
+      "gtfs_stop_id": "5730",
+      "distance_m": 0.0
+    },
+    "stop_5ef16c54dc1e": {
+      "name": "Образовательный комплекс",
+      "gtfs_stop_id": "5731",
+      "distance_m": 0.0
+    },
+    "stop_467b3811f490": {
+      "name": "Технологический колледж",
+      "gtfs_stop_id": "8583",
+      "distance_m": 0.0
+    },
+    "stop_6d00d74d4a98": {
+      "name": "Поликлиника № 109",
+      "gtfs_stop_id": "5739",
+      "distance_m": 0.0
+    },
+    "stop_eea7062d4faf": {
+      "name": "Мемориал",
+      "gtfs_stop_id": "5746",
+      "distance_m": 0.0
+    },
+    "stop_34c88579e0b7": {
+      "name": "Технологический колледж",
+      "gtfs_stop_id": "5752",
+      "distance_m": 0.0
+    },
+    "stop_457f00fc7d11": {
+      "name": "Образовательный комплекс",
+      "gtfs_stop_id": "5753",
+      "distance_m": 0.0
+    },
+    "stop_f6b310d25a2a": {
+      "name": "Детская п-ка",
+      "gtfs_stop_id": "5754",
+      "distance_m": 0.0
+    },
+    "stop_5a525d3971b8": {
+      "name": "Школа имени Полбина",
+      "gtfs_stop_id": "5763",
+      "distance_m": 0.0
+    },
+    "stop_4c7200976bff": {
+      "name": "Метро «Юго-Западная»",
+      "gtfs_stop_id": "8371",
+      "distance_m": 0.0
+    },
+    "stop_74a6b6b16233": {
+      "name": "Ин-т им. Герцена",
+      "gtfs_stop_id": "7697",
+      "distance_m": 0.0
+    },
+    "stop_b99d2e14e01b": {
+      "name": "Социальный фонд России",
+      "gtfs_stop_id": "7699",
+      "distance_m": 0.0
+    },
+    "stop_f478200a8edd": {
+      "name": "1-й Боткинский пр.",
+      "gtfs_stop_id": "7700",
+      "distance_m": 0.0
+    },
+    "stop_b14308aabb03": {
+      "name": "Б-ца им. Боткина",
+      "gtfs_stop_id": "7698",
+      "distance_m": 0.0
+    },
+    "stop_bfdd5581593c": {
+      "name": "Метро «Нагатинский Затон»",
+      "gtfs_stop_id": "1008766",
+      "distance_m": 0.0
+    },
+    "stop_ad3d7757a361": {
+      "name": "Даниловская площадь",
+      "gtfs_stop_id": "6363",
+      "distance_m": 0.0
+    },
+    "stop_d377e3399a51": {
+      "name": "Студгородок Пироговского Университета",
+      "gtfs_stop_id": "6232",
+      "distance_m": 0.0
+    },
+    "stop_7302d73d171c": {
+      "name": "Ул. Акад. Арцимовича",
+      "gtfs_stop_id": "6223",
+      "distance_m": 0.0
+    },
+    "stop_133e69600342": {
+      "name": "Ул. Акад. Арцимовича",
+      "gtfs_stop_id": "6230",
+      "distance_m": 0.0
+    },
+    "stop_019e889ed2a8": {
+      "name": "Культурный центр",
+      "gtfs_stop_id": "6231",
+      "distance_m": 0.0
+    },
+    "stop_0d04dbde2f8c": {
+      "name": "Ул. Павла Андреева",
+      "gtfs_stop_id": "6528",
+      "distance_m": 0.0
+    },
+    "stop_9c95599243f2": {
+      "name": "Ул. Ген. Белова",
+      "gtfs_stop_id": "6530",
+      "distance_m": 0.0
+    },
+    "stop_c73f73d13a4d": {
+      "name": "Нагатино",
+      "gtfs_stop_id": "3225",
+      "distance_m": 0.0
+    },
+    "stop_d7127066fe6e": {
+      "name": "Музыкальная школа имени В.Я. Шебалина",
+      "gtfs_stop_id": "6531",
+      "distance_m": 0.0
+    },
+    "stop_1701390ad22f": {
+      "name": "Улица Городянка",
+      "gtfs_stop_id": "6532",
+      "distance_m": 0.0
+    },
+    "stop_81fc8a4c410a": {
+      "name": "З-д полиметаллов",
+      "gtfs_stop_id": "6454",
+      "distance_m": 0.0
+    },
+    "stop_43d216234fa4": {
+      "name": "МИФИ",
+      "gtfs_stop_id": "6432",
+      "distance_m": 0.0
+    },
+    "stop_2f704b627f05": {
+      "name": "Д/к «Москворечье»",
+      "gtfs_stop_id": "6433",
+      "distance_m": 0.0
+    },
+    "stop_0465d89a6ef9": {
+      "name": "Институт автоматики",
+      "gtfs_stop_id": "6434",
+      "distance_m": 0.0
+    },
+    "stop_885d6b175fdb": {
+      "name": "Борисовский мост",
+      "gtfs_stop_id": "6438",
+      "distance_m": 0.0
+    },
+    "stop_961e869f5fe8": {
+      "name": "Борисовский мост",
+      "gtfs_stop_id": "6451",
+      "distance_m": 0.0
+    },
+    "stop_a281fa3642ba": {
+      "name": "Институт автоматики",
+      "gtfs_stop_id": "6455",
+      "distance_m": 0.0
+    },
+    "stop_dee720a16835": {
+      "name": "Д/к «Москворечье»",
+      "gtfs_stop_id": "6456",
+      "distance_m": 0.0
+    },
+    "stop_8a8354324b61": {
+      "name": "Храм Спиридона",
+      "gtfs_stop_id": "3227",
+      "distance_m": 55.1
+    },
+    "stop_bc6d3c26d610": {
+      "name": "Метро «Юго-Западная»",
+      "gtfs_stop_id": "11241",
+      "distance_m": 0.0
+    },
+    "stop_095407c15360": {
+      "name": "Улица Городянка",
+      "gtfs_stop_id": "6570",
+      "distance_m": 0.0
+    },
+    "stop_856203b82cf7": {
+      "name": "Музыкальная школа имени В.Я. Шебалина",
+      "gtfs_stop_id": "6571",
+      "distance_m": 0.0
+    },
+    "stop_a5914296a9e8": {
+      "name": "Детская спортшкола",
+      "gtfs_stop_id": "6626",
+      "distance_m": 0.0
+    },
+    "stop_d13f10362a89": {
+      "name": "Улица Борисовские Пруды, 7",
+      "gtfs_stop_id": "6628",
+      "distance_m": 0.0
+    },
+    "stop_6789a48e9872": {
+      "name": "Детский сад",
+      "gtfs_stop_id": "6629",
+      "distance_m": 0.0
+    },
+    "stop_5a9791d58315": {
+      "name": "Паромная улица",
+      "gtfs_stop_id": "6633",
+      "distance_m": 0.0
+    },
+    "stop_22f8984b6001": {
+      "name": "Паромная улица",
+      "gtfs_stop_id": "6667",
+      "distance_m": 0.0
+    },
+    "stop_0abe19ece254": {
+      "name": "Детский сад",
+      "gtfs_stop_id": "6640",
+      "distance_m": 0.0
+    },
+    "stop_311f1ab2c351": {
+      "name": "Улица Борисовские Пруды, 7",
+      "gtfs_stop_id": "6641",
+      "distance_m": 0.0
+    },
+    "stop_bcbcea3928a7": {
+      "name": "Детская спортшкола",
+      "gtfs_stop_id": "6643",
+      "distance_m": 0.0
+    },
+    "stop_1b2432fc1078": {
+      "name": "Сабурово",
+      "gtfs_stop_id": "6644",
+      "distance_m": 0.0
+    },
+    "stop_05c6d3053871": {
+      "name": "МЦД Москворечье",
+      "gtfs_stop_id": "6624",
+      "distance_m": 0.0
+    },
+    "stop_b3833e033629": {
+      "name": "МИФИ",
+      "gtfs_stop_id": "6647",
+      "distance_m": 0.0
+    },
+    "stop_eb43e74be0b6": {
+      "name": "Братеевская улица, 10",
+      "gtfs_stop_id": "6651",
+      "distance_m": 0.0
+    },
+    "stop_c6a8becca3bc": {
+      "name": "Завод полиметаллов",
+      "gtfs_stop_id": "6623",
+      "distance_m": 0.0
+    },
+    "stop_b80667fba4ae": {
+      "name": "Братеевская улица, 23",
+      "gtfs_stop_id": "6652",
+      "distance_m": 0.0
+    },
+    "stop_30719cc05d11": {
+      "name": "Сабурово",
+      "gtfs_stop_id": "6658",
+      "distance_m": 0.0
+    },
+    "stop_cfad0d321983": {
+      "name": "Детская школа искусств",
+      "gtfs_stop_id": "6660",
+      "distance_m": 0.0
+    },
+    "stop_6aa5715f9679": {
+      "name": "Братеевская улица, 23",
+      "gtfs_stop_id": "6662",
+      "distance_m": 0.0
+    },
+    "stop_cd5dd36e1dbb": {
+      "name": "Братеевская улица, 10",
+      "gtfs_stop_id": "6663",
+      "distance_m": 0.0
+    },
+    "stop_e20cb7a02143": {
+      "name": "3-й микрорайон Братеева",
+      "gtfs_stop_id": "6665",
+      "distance_m": 0.0
+    },
+    "stop_0a0f2f857eb3": {
+      "name": "Братеевский пруд",
+      "gtfs_stop_id": "6666",
+      "distance_m": 0.0
+    },
+    "stop_63d4721a13ae": {
+      "name": "Братеевский пруд",
+      "gtfs_stop_id": "6668",
+      "distance_m": 0.0
+    },
+    "stop_14192cdbcb58": {
+      "name": "Братеевская улица, 21",
+      "gtfs_stop_id": "6670",
+      "distance_m": 0.0
+    },
+    "stop_ccc965fc9334": {
+      "name": "Ул. Борисовские Пруды, 18",
+      "gtfs_stop_id": "6671",
+      "distance_m": 0.0
+    },
+    "stop_9288f7e69814": {
+      "name": "Метро «Тульская» (южный вход)",
+      "gtfs_stop_id": "7450",
+      "distance_m": 0.0
+    },
+    "stop_c737cd25f5aa": {
+      "name": "Шипиловская ул.",
+      "gtfs_stop_id": "6569",
+      "distance_m": 0.0
+    },
+    "stop_3d8cbdeea8b5": {
+      "name": "Автохозяйство",
+      "gtfs_stop_id": "6751",
+      "distance_m": 0.0
+    },
+    "stop_139b841f8ec2": {
+      "name": "Иловайская ул.",
+      "gtfs_stop_id": "6753",
+      "distance_m": 0.0
+    },
+    "stop_1d3bbc730c5f": {
+      "name": "Автохозяйство",
+      "gtfs_stop_id": "6755",
+      "distance_m": 0.0
+    },
+    "stop_86c4fb512e99": {
+      "name": "Метро «Библиотека имени Ленина»",
+      "gtfs_stop_id": "6765",
+      "distance_m": 0.0
+    },
+    "stop_6d203d16711c": {
+      "name": "Детская поликлиника № 23",
+      "gtfs_stop_id": "6823",
+      "distance_m": 0.0
+    },
+    "stop_b710dbe8ce72": {
+      "name": "Улица Генерала Белова",
+      "gtfs_stop_id": "6737",
+      "distance_m": 0.0
+    },
+    "stop_e69809982477": {
+      "name": "Новогиреевский путепровод",
+      "gtfs_stop_id": "7034",
+      "distance_m": 0.0
+    },
+    "stop_b0e67b0cd807": {
+      "name": "Реутовская ул.",
+      "gtfs_stop_id": "7035",
+      "distance_m": 0.0
+    },
+    "stop_638d9befcb6c": {
+      "name": "Юбилейный проспект",
+      "gtfs_stop_id": "7036",
+      "distance_m": 0.0
+    },
+    "stop_5db5d3bfad5d": {
+      "name": "Улица Медиков",
+      "gtfs_stop_id": "6898",
+      "distance_m": 0.0
+    },
+    "stop_59a8ba713790": {
+      "name": "Почта",
+      "gtfs_stop_id": "6899",
+      "distance_m": 0.0
+    },
+    "stop_1b9babff82b3": {
+      "name": "Каспийская ул.",
+      "gtfs_stop_id": "6900",
+      "distance_m": 0.0
+    },
+    "stop_23f814be6b3c": {
+      "name": "Каспийская улица, 6",
+      "gtfs_stop_id": "6888",
+      "distance_m": 0.0
+    },
+    "stop_4ca0fca9c879": {
+      "name": "МЦД Москворечье",
+      "gtfs_stop_id": "6934",
+      "distance_m": 0.0
+    },
+    "stop_9dd8d4ce2efd": {
+      "name": "Метро «Каширская»",
+      "gtfs_stop_id": "7008",
+      "distance_m": 0.0
+    },
+    "stop_b34971f610cb": {
+      "name": "Университетский просп.",
+      "gtfs_stop_id": "2277",
+      "distance_m": 0.0
+    },
+    "stop_67243e25f183": {
+      "name": "Метро «Серпуховская»",
+      "gtfs_stop_id": "1001791",
+      "distance_m": 0.0
+    },
+    "stop_5b71647b0870": {
+      "name": "Метро «Новокосино»",
+      "gtfs_stop_id": "7051",
+      "distance_m": 0.0
+    },
+    "stop_c01792ec4526": {
+      "name": "Юбилейный проспект",
+      "gtfs_stop_id": "7052",
+      "distance_m": 0.0
+    },
+    "stop_69bec132cb76": {
+      "name": "Реутовская ул.",
+      "gtfs_stop_id": "7053",
+      "distance_m": 0.0
+    },
+    "stop_779c2362bf79": {
+      "name": "Метро «Красногвардейская»",
+      "gtfs_stop_id": "7295",
+      "distance_m": 0.0
+    },
+    "stop_c289acb16053": {
+      "name": "Улица Мусы Джалиля, 38",
+      "gtfs_stop_id": "7269",
+      "distance_m": 0.0
+    },
+    "stop_3c2802b4f50f": {
+      "name": "Метро «Красногвардейская»",
+      "gtfs_stop_id": "7281",
+      "distance_m": 0.0
+    },
+    "stop_8be3e2cf5bb0": {
+      "name": "Шипиловская улица, 41",
+      "gtfs_stop_id": "7271",
+      "distance_m": 0.0
+    },
+    "stop_8a267d1db5d2": {
+      "name": "Ул. Мусы Джалиля, 38",
+      "gtfs_stop_id": "7280",
+      "distance_m": 0.0
+    },
+    "stop_1ff2283120a5": {
+      "name": "Шипиловская улица, 41",
+      "gtfs_stop_id": "7283",
+      "distance_m": 0.0
+    },
+    "stop_f30a61b5faa8": {
+      "name": "Метро «Красногвардейская»",
+      "gtfs_stop_id": "7282",
+      "distance_m": 0.0
+    },
+    "stop_b50589717746": {
+      "name": "Олимпийская Деревня",
+      "gtfs_stop_id": "7404",
+      "distance_m": 0.0
+    },
+    "stop_ff5b2d2ab03c": {
+      "name": "Музей Обороны Москвы",
+      "gtfs_stop_id": "7405",
+      "distance_m": 0.0
+    },
+    "stop_fb6911f2c5fe": {
+      "name": "Центр детской психоневрологии",
+      "gtfs_stop_id": "7406",
+      "distance_m": 0.0
+    },
+    "stop_63369effd0c9": {
+      "name": "Мичуринский проспект, 70",
+      "gtfs_stop_id": "7407",
+      "distance_m": 0.0
+    },
+    "stop_0c63d9120660": {
+      "name": "Мичуринский проспект, 70",
+      "gtfs_stop_id": "7409",
+      "distance_m": 0.0
+    },
+    "stop_4cc41a60911d": {
+      "name": "Центр детской психоневрологии",
+      "gtfs_stop_id": "7410",
+      "distance_m": 0.0
+    },
+    "stop_bb75aad0aab6": {
+      "name": "Музей Обороны Москвы",
+      "gtfs_stop_id": "7411",
+      "distance_m": 0.0
+    },
+    "stop_479d6a4001c0": {
+      "name": "Олимпийская Деревня",
+      "gtfs_stop_id": "7412",
+      "distance_m": 0.0
+    },
+    "stop_6d97f25a9330": {
+      "name": "Братеево",
+      "gtfs_stop_id": "7421",
+      "distance_m": 0.0
+    },
+    "stop_98355f195613": {
+      "name": "Ул. Столетова",
+      "gtfs_stop_id": "7432",
+      "distance_m": 0.0
+    },
+    "stop_0f303cd87aba": {
+      "name": "Мичуринский проспект, 21",
+      "gtfs_stop_id": "7433",
+      "distance_m": 0.0
+    },
+    "stop_2fe56f6022bd": {
+      "name": "Мичуринский проспект, 54",
+      "gtfs_stop_id": "7436",
+      "distance_m": 0.0
+    },
+    "stop_b058dcaaa162": {
+      "name": "Мичуринский просп., 58",
+      "gtfs_stop_id": "7437",
+      "distance_m": 0.0
+    },
+    "stop_2b7c1add6ff8": {
+      "name": "Мичуринский просп., 58",
+      "gtfs_stop_id": "7438",
+      "distance_m": 0.0
+    },
+    "stop_ba4e803daad1": {
+      "name": "Мичуринский просп., 54",
+      "gtfs_stop_id": "7439",
+      "distance_m": 0.0
+    },
+    "stop_92a43fab637f": {
+      "name": "Мичуринский проспект, 21",
+      "gtfs_stop_id": "7441",
+      "distance_m": 0.0
+    },
+    "stop_d98a5798c7d1": {
+      "name": "Алма-Атинская улица",
+      "gtfs_stop_id": "7446",
+      "distance_m": 0.0
+    },
+    "stop_5ed3d4742573": {
+      "name": "Братеевская улица, 39",
+      "gtfs_stop_id": "7447",
+      "distance_m": 0.0
+    },
+    "stop_a03df0147c6f": {
+      "name": "Улица Столетова",
+      "gtfs_stop_id": "7449",
+      "distance_m": 0.0
+    },
+    "stop_64bf4722d28b": {
+      "name": "Районный центр «Экран»",
+      "gtfs_stop_id": "8771",
+      "distance_m": 0.0
+    },
+    "stop_9231700316fd": {
+      "name": "Белорусский вокзал",
+      "gtfs_stop_id": "1001848",
+      "distance_m": 0.0
+    },
+    "stop_b1851849a903": {
+      "name": "2-й микрорайон Тропарёво-Никулина",
+      "gtfs_stop_id": "8738",
+      "distance_m": 0.0
+    },
+    "stop_ff7ca605e74c": {
+      "name": "Метро «Пятницкое шоссе»",
+      "gtfs_stop_id": "8885",
+      "distance_m": 0.0
+    },
+    "stop_9251e0769d47": {
+      "name": "2-й микрорайон Тропарёво-Никулина",
+      "gtfs_stop_id": "8741",
+      "distance_m": 0.0
+    },
+    "stop_5cfcda5ec401": {
+      "name": "Академия при Президенте РФ",
+      "gtfs_stop_id": "8737",
+      "distance_m": 0.0
+    },
+    "stop_37ea1d9eefa9": {
+      "name": "Улица Главмосстроя",
+      "gtfs_stop_id": "8964",
+      "distance_m": 0.0
+    },
+    "stop_6c7b0fc4054c": {
+      "name": "Попутная улица",
+      "gtfs_stop_id": "8961",
+      "distance_m": 0.0
+    },
+    "stop_281e5766ce42": {
+      "name": "Улица Главмосстроя",
+      "gtfs_stop_id": "8965",
+      "distance_m": 0.0
+    },
+    "stop_c44fd8bb32b4": {
+      "name": "Батайский проезд, 5",
+      "gtfs_stop_id": "9002",
+      "distance_m": 0.0
+    },
+    "stop_5e7bf24df831": {
+      "name": "Терёшково",
+      "gtfs_stop_id": "9029",
+      "distance_m": 0.0
+    },
+    "stop_baf25192d17a": {
+      "name": "Терёшково",
+      "gtfs_stop_id": "9030",
+      "distance_m": 0.0
+    },
+    "stop_6887a7464ea6": {
+      "name": "Улица Богданова",
+      "gtfs_stop_id": "9031",
+      "distance_m": 0.0
+    },
+    "stop_077b8c2880e4": {
+      "name": "Улица Богданова",
+      "gtfs_stop_id": "9032",
+      "distance_m": 0.0
+    },
+    "stop_4cbf3bca3fe2": {
+      "name": "Боровский проезд",
+      "gtfs_stop_id": "9033",
+      "distance_m": 0.0
+    },
+    "stop_fbfd25dfbb47": {
+      "name": "Боровский пр.",
+      "gtfs_stop_id": "9034",
+      "distance_m": 0.0
+    },
+    "stop_c810fe560bb7": {
+      "name": "Новопеределкинская ул.",
+      "gtfs_stop_id": "9038",
+      "distance_m": 0.0
+    },
+    "stop_f2ef35071788": {
+      "name": "Новопеределкинская улица",
+      "gtfs_stop_id": "9039",
+      "distance_m": 0.0
+    },
+    "stop_56e15cbc802c": {
+      "name": "Боровское ш., 56",
+      "gtfs_stop_id": "9047",
+      "distance_m": 0.0
+    },
+    "stop_cb610003700d": {
+      "name": "Боровское шоссе, 56",
+      "gtfs_stop_id": "9048",
+      "distance_m": 0.0
+    },
+    "stop_9f3756409207": {
+      "name": "Метро «Новопеределкино»",
+      "gtfs_stop_id": "9045",
+      "distance_m": 0.0
+    },
+    "stop_14b4c2205c37": {
+      "name": "Метро «Боровское шоссе»",
+      "gtfs_stop_id": "9042",
+      "distance_m": 0.0
+    },
+    "stop_d7a7949f686b": {
+      "name": "9-я Чоботовская ал.",
+      "gtfs_stop_id": "9159",
+      "distance_m": 0.0
+    },
+    "stop_5d329add022d": {
+      "name": "Каспийская улица, 2",
+      "gtfs_stop_id": "7681",
+      "distance_m": 0.0
+    },
+    "stop_86d30534b8ce": {
+      "name": "Каспийская улица, 2",
+      "gtfs_stop_id": "7683",
+      "distance_m": 0.0
+    },
+    "stop_06ace22caa8e": {
+      "name": "Улица Полбина, 14",
+      "gtfs_stop_id": "7939",
+      "distance_m": 0.0
+    },
+    "stop_6fc9373fa66a": {
+      "name": "Улица Полбина, 14",
+      "gtfs_stop_id": "7940",
+      "distance_m": 0.0
+    },
+    "stop_e94978f8ff9d": {
+      "name": "Профсоюзная улица, 156",
+      "gtfs_stop_id": "8001",
+      "distance_m": 0.0
+    },
+    "stop_0640ee75136a": {
+      "name": "Метро «Тёплый Стан»",
+      "gtfs_stop_id": "8079",
+      "distance_m": 0.0
+    },
+    "stop_95fda90b9f6e": {
+      "name": "Востряковское кладб.",
+      "gtfs_stop_id": "8292",
+      "distance_m": 0.0
+    },
+    "stop_c9ed2ff6aba9": {
+      "name": "Востряковское кладб.",
+      "gtfs_stop_id": "8305",
+      "distance_m": 0.0
+    },
+    "stop_b35d428afd70": {
+      "name": "Метро «Говорово»",
+      "gtfs_stop_id": "8294",
+      "distance_m": 0.0
+    },
+    "stop_e8584dd26acd": {
+      "name": "Метро «Говорово»",
+      "gtfs_stop_id": "8304",
+      "distance_m": 0.0
+    },
+    "stop_f30e7adaa5db": {
+      "name": "14-й автобусный парк",
+      "gtfs_stop_id": "8306",
+      "distance_m": 0.0
+    },
+    "stop_b419e7c8c168": {
+      "name": "Метро «Юго-Западная»",
+      "gtfs_stop_id": "7966",
+      "distance_m": 0.0
+    },
+    "stop_78113101415f": {
+      "name": "Мещерский лес",
+      "gtfs_stop_id": "11198",
+      "distance_m": 0.0
+    },
+    "stop_ac43c091673a": {
+      "name": "Улица 50 лет Октября",
+      "gtfs_stop_id": "8295",
+      "distance_m": 0.0
+    },
+    "stop_dd1aee224cf5": {
+      "name": "Метро «Озёрная»",
+      "gtfs_stop_id": "8307",
+      "distance_m": 0.0
+    },
+    "stop_233d34c6bdab": {
+      "name": "Коньковские пруды",
+      "gtfs_stop_id": "8197",
+      "distance_m": 0.0
+    },
+    "stop_ded678f0b4de": {
+      "name": "Иловайская ул.",
+      "gtfs_stop_id": "8136",
+      "distance_m": 0.0
+    },
+    "stop_24aad7c1994d": {
+      "name": "Театр «На Юго-Западе»",
+      "gtfs_stop_id": "8252",
+      "distance_m": 0.0
+    },
+    "stop_91d1b1b13d2c": {
+      "name": "Метро «Юго-Западная»",
+      "gtfs_stop_id": "5547",
+      "distance_m": 0.0
+    },
+    "stop_90fd36571ea0": {
+      "name": "Театр «На Юго-Западе»",
+      "gtfs_stop_id": "8260",
+      "distance_m": 0.0
+    },
+    "stop_b21970dd8b95": {
+      "name": "Метро «Тушинская»",
+      "gtfs_stop_id": "8264",
+      "distance_m": 0.0
+    },
+    "stop_f269854cdd45": {
+      "name": "Парк «Никулино»",
+      "gtfs_stop_id": "8236",
+      "distance_m": 0.0
+    },
+    "stop_e5c5053ce47e": {
+      "name": "Парк «Никулино»",
+      "gtfs_stop_id": "8237",
+      "distance_m": 0.0
+    },
+    "stop_af6dcef8933c": {
+      "name": "Культурный центр",
+      "gtfs_stop_id": "8238",
+      "distance_m": 0.0
+    },
+    "stop_3ec8a28d914b": {
+      "name": "Метро «Тёплый Стан»",
+      "gtfs_stop_id": "8288",
+      "distance_m": 0.0
+    },
+    "stop_850ce3a0e74b": {
+      "name": "14-й автобусный парк",
+      "gtfs_stop_id": "8291",
+      "distance_m": 0.0
+    },
+    "stop_7b603dd62fda": {
+      "name": "МЦД Люблино",
+      "gtfs_stop_id": "8139",
+      "distance_m": 0.0
+    },
+    "stop_e3619c7695ca": {
+      "name": "Парк «Аллея Славы»",
+      "gtfs_stop_id": "9976",
+      "distance_m": 0.0
+    },
+    "stop_c0cf1fb42cd9": {
+      "name": "Научный центр акушерства и гинекологии",
+      "gtfs_stop_id": "8356",
+      "distance_m": 0.0
+    },
+    "stop_96056bde9dd6": {
+      "name": "Научный центр акушерства и гинекологии",
+      "gtfs_stop_id": "8350",
+      "distance_m": 0.0
+    },
+    "stop_4b3e2fb38b03": {
+      "name": "Учебный центр Пироговского Университета",
+      "gtfs_stop_id": "1001237",
+      "distance_m": 0.0
+    },
+    "stop_4330a4e83a72": {
+      "name": "Учебный центр Пироговского Университета",
+      "gtfs_stop_id": "8357",
+      "distance_m": 0.0
+    },
+    "stop_dfbac9c903d3": {
+      "name": "Мичуринский проспект",
+      "gtfs_stop_id": "7408",
+      "distance_m": 0.0
+    },
+    "stop_b1526de939df": {
+      "name": "Мичуринский просп.",
+      "gtfs_stop_id": "7448",
+      "distance_m": 0.0
+    },
+    "stop_f2265b3b6734": {
+      "name": "МЦД Депо",
+      "gtfs_stop_id": "8431",
+      "distance_m": 0.0
+    },
+    "stop_c2b1fe02cd87": {
+      "name": "Перинатальный центр",
+      "gtfs_stop_id": "8694",
+      "distance_m": 0.0
+    },
+    "stop_07b842e79b2d": {
+      "name": "Полтавская улица",
+      "gtfs_stop_id": "8695",
+      "distance_m": 0.0
+    },
+    "stop_9fb047393491": {
+      "name": "Улица Кошкина",
+      "gtfs_stop_id": "8704",
+      "distance_m": 0.0
+    },
+    "stop_6990f3242da5": {
+      "name": "Метро «Коньково»",
+      "gtfs_stop_id": "8698",
+      "distance_m": 0.0
+    },
+    "stop_f1c64b53cb82": {
+      "name": "Школа имени Полбина",
+      "gtfs_stop_id": "8584",
+      "distance_m": 0.0
+    },
+    "stop_2052736e22ce": {
+      "name": "Улица Полбина, 8",
+      "gtfs_stop_id": "8585",
+      "distance_m": 0.0
+    },
+    "stop_a00bd0bbb8c7": {
+      "name": "Улица Полбина, 8",
+      "gtfs_stop_id": "8588",
+      "distance_m": 0.0
+    },
+    "stop_8004457a1ffb": {
+      "name": "Батайский проезд",
+      "gtfs_stop_id": "8591",
+      "distance_m": 0.0
+    },
+    "stop_1cac85953372": {
+      "name": "Аптека",
+      "gtfs_stop_id": "8660",
+      "distance_m": 0.0
+    },
+    "stop_33738cc2ae3e": {
+      "name": "Батайский пр., 41",
+      "gtfs_stop_id": "8661",
+      "distance_m": 0.0
+    },
+    "stop_6b4880793c83": {
+      "name": "Батайский пр., 51",
+      "gtfs_stop_id": "8662",
+      "distance_m": 0.0
+    },
+    "stop_172f2669f0fb": {
+      "name": "Батайский пр., 51",
+      "gtfs_stop_id": "8664",
+      "distance_m": 0.0
+    },
+    "stop_bf1b69507753": {
+      "name": "Батайский пр., 41",
+      "gtfs_stop_id": "8665",
+      "distance_m": 0.0
+    },
+    "stop_03fec5196bc2": {
+      "name": "Аптека",
+      "gtfs_stop_id": "8667",
+      "distance_m": 0.0
+    },
+    "stop_313f5b581160": {
+      "name": "Почта",
+      "gtfs_stop_id": "8668",
+      "distance_m": 0.0
+    },
+    "stop_7b44f073eea4": {
+      "name": "Шайдаровская улица",
+      "gtfs_stop_id": "8528",
+      "distance_m": 8.1
+    },
+    "stop_da08cbee1c98": {
+      "name": "Почта",
+      "gtfs_stop_id": "8659",
+      "distance_m": 0.0
+    },
+    "stop_82c647969ed7": {
+      "name": "Улица Покрышкина",
+      "gtfs_stop_id": "8742",
+      "distance_m": 0.0
+    },
+    "stop_29f2fbfca8e5": {
+      "name": "Мамыри",
+      "gtfs_stop_id": "10811",
+      "distance_m": 0.0
+    },
+    "stop_906fbac3b74f": {
+      "name": "Лесные поляны",
+      "gtfs_stop_id": "10904",
+      "distance_m": 0.0
+    },
+    "stop_3f6299cd5846": {
+      "name": "Лесные поляны",
+      "gtfs_stop_id": "10905",
+      "distance_m": 0.0
+    },
+    "stop_7095ec78f6a9": {
+      "name": "Сосенки-2",
+      "gtfs_stop_id": "10907",
+      "distance_m": 0.0
+    },
+    "stop_8e6e3c7894f9": {
+      "name": "Метро «Озёрная»",
+      "gtfs_stop_id": "11197",
+      "distance_m": 0.0
+    },
+    "stop_272facd54a8f": {
+      "name": "Мост Богдана Хмельницкого",
+      "gtfs_stop_id": "11205",
+      "distance_m": 0.0
+    },
+    "stop_3679d7603ee8": {
+      "name": "Садовое товарищество «Рассвет»",
+      "gtfs_stop_id": "11221",
+      "distance_m": 0.0
+    },
+    "stop_76dd8b4e3033": {
+      "name": "Садовое товарищество «Рассвет»",
+      "gtfs_stop_id": "11222",
+      "distance_m": 0.0
+    },
+    "stop_0e7390dfe7ea": {
+      "name": "Ямонтово",
+      "gtfs_stop_id": "11223",
+      "distance_m": 0.0
+    },
+    "stop_dc1b1cf4d264": {
+      "name": "Ямонтово",
+      "gtfs_stop_id": "11224",
+      "distance_m": 0.0
+    },
+    "stop_c08e566fcd5c": {
+      "name": "Школа",
+      "gtfs_stop_id": "11225",
+      "distance_m": 0.0
+    },
+    "stop_fa7b15a35726": {
+      "name": "Школа",
+      "gtfs_stop_id": "11226",
+      "distance_m": 0.0
+    },
+    "stop_54fe7b37c050": {
+      "name": "Хордовый пр.",
+      "gtfs_stop_id": "9288",
+      "distance_m": 0.0
+    },
+    "stop_f0756cb93871": {
+      "name": "Новокосинская улица",
+      "gtfs_stop_id": "9779",
+      "distance_m": 0.0
+    },
+    "stop_e862e16176d8": {
+      "name": "Школа искусств",
+      "gtfs_stop_id": "9340",
+      "distance_m": 0.0
+    },
+    "stop_ecb71ed75d9f": {
+      "name": "Новокосинская улица",
+      "gtfs_stop_id": "9333",
+      "distance_m": 0.0
+    },
+    "stop_97a68c7bc6b8": {
+      "name": "Улица Старые Сосенки",
+      "gtfs_stop_id": "9416",
+      "distance_m": 0.0
+    },
+    "stop_28d0194831f1": {
+      "name": "Улица Старые Сосенки",
+      "gtfs_stop_id": "9417",
+      "distance_m": 0.0
+    },
+    "stop_c1128e2635e1": {
+      "name": "Братеевский мост",
+      "gtfs_stop_id": "9265",
+      "distance_m": 0.0
+    },
+    "stop_9e9530793460": {
+      "name": "Братеевский мост",
+      "gtfs_stop_id": "9266",
+      "distance_m": 0.0
+    },
+    "stop_d4fed502df83": {
+      "name": "Алма-Атинская ул.",
+      "gtfs_stop_id": "9270",
+      "distance_m": 0.0
+    },
+    "stop_3310adab5d71": {
+      "name": "Санаторий",
+      "gtfs_stop_id": "9609",
+      "distance_m": 0.0
+    },
+    "stop_30afb22c66a1": {
+      "name": "Санаторий",
+      "gtfs_stop_id": "9610",
+      "distance_m": 0.0
+    },
+    "stop_5a4f3ff7b2df": {
+      "name": "Больница",
+      "gtfs_stop_id": "9611",
+      "distance_m": 0.0
+    },
+    "stop_b24a3ab54347": {
+      "name": "Больница",
+      "gtfs_stop_id": "9612",
+      "distance_m": 0.0
+    },
+    "stop_eeb97447a928": {
+      "name": "МФЦ Внуково",
+      "gtfs_stop_id": "9973",
+      "distance_m": 0.0
+    },
+    "stop_6e46dfa337f6": {
+      "name": "МФЦ Внуково",
+      "gtfs_stop_id": "9974",
+      "distance_m": 0.0
+    },
+    "stop_ac4d4c2e0446": {
+      "name": "ТЭЦ № 12",
+      "gtfs_stop_id": "9940",
+      "distance_m": 0.0
+    },
+    "stop_392b76dcf1fc": {
+      "name": "Братеевский проезд",
+      "gtfs_stop_id": "10003",
+      "distance_m": 0.0
+    },
+    "stop_e310385b520e": {
+      "name": "Улица Борисовские Пруды",
+      "gtfs_stop_id": "10004",
+      "distance_m": 0.0
+    },
+    "stop_21c7c2fc517c": {
+      "name": "ОВД Братеево",
+      "gtfs_stop_id": "10006",
+      "distance_m": 0.0
+    },
+    "stop_fe688b0a5605": {
+      "name": "Центральная улица",
+      "gtfs_stop_id": "9972",
+      "distance_m": 0.0
+    },
+    "stop_e5c7bff2e659": {
+      "name": "Центральная улица",
+      "gtfs_stop_id": "9971",
+      "distance_m": 0.0
+    },
+    "stop_541dc4f48da1": {
+      "name": "ОВД Братеево",
+      "gtfs_stop_id": "10007",
+      "distance_m": 0.0
+    },
+    "stop_33320a8aba42": {
+      "name": "Метро «Алма-Атинская» (южный вход)",
+      "gtfs_stop_id": "10009",
+      "distance_m": 0.0
+    },
+    "stop_67f9b3e4afd5": {
+      "name": "Ключевая ул., 24",
+      "gtfs_stop_id": "10011",
+      "distance_m": 0.0
+    },
+    "stop_a0f163dda373": {
+      "name": "Метро «Коньково»",
+      "gtfs_stop_id": "6099",
+      "distance_m": 0.0
+    },
+    "stop_e2b177132b73": {
+      "name": "Улица Борисовские Пруды, 6",
+      "gtfs_stop_id": "10401",
+      "distance_m": 0.0
+    },
+    "stop_5a20ee775ec4": {
+      "name": "Проспект Вернадского, 127",
+      "gtfs_stop_id": "10388",
+      "distance_m": 0.0
+    },
+    "stop_1002d6bcaf00": {
+      "name": "Братеевская улица, 21",
+      "gtfs_stop_id": "10224",
+      "distance_m": 0.0
+    },
+    "stop_035291325b8f": {
+      "name": "Митинский радиорынок",
+      "gtfs_stop_id": "1008933",
+      "distance_m": 0.0
+    },
+    "stop_6242e45a63b6": {
+      "name": "Улица Борисовские Пруды, 16",
+      "gtfs_stop_id": "10423",
+      "distance_m": 0.0
+    },
+    "stop_81ea9e2eef6e": {
+      "name": "Школа искусств",
+      "gtfs_stop_id": "10666",
+      "distance_m": 0.0
+    },
+    "stop_76bdbb4c9879": {
+      "name": "Платформа Тульская",
+      "gtfs_stop_id": "10614",
+      "distance_m": 0.0
+    },
+    "stop_0000a4277c83": {
+      "name": "Метро «Октябрьская»",
+      "gtfs_stop_id": "2399",
+      "distance_m": 0.0
+    },
+    "stop_57398a9a8dc9": {
+      "name": "Школа № 806",
+      "gtfs_stop_id": "10617",
+      "distance_m": 0.0
+    },
+    "stop_837ca5f49406": {
+      "name": "Улица Академика Петровского",
+      "gtfs_stop_id": "15927",
+      "distance_m": 0.0
+    },
+    "stop_1833dab84fca": {
+      "name": "Пироговский Университет",
+      "gtfs_stop_id": "16107",
+      "distance_m": 0.0
+    },
+    "stop_fe611ac74113": {
+      "name": "Пироговский Университет",
+      "gtfs_stop_id": "16108",
+      "distance_m": 0.0
+    },
+    "stop_16fa9d1b9e65": {
+      "name": "Пруд «Чайка»",
+      "gtfs_stop_id": "15781",
+      "distance_m": 0.0
+    },
+    "stop_60e0e6e55e14": {
+      "name": "Ликова",
+      "gtfs_stop_id": "13256",
+      "distance_m": 0.0
+    },
+    "stop_a7ffa092eece": {
+      "name": "Метро «Шипиловская»",
+      "gtfs_stop_id": "16407",
+      "distance_m": 0.0
+    },
+    "stop_92e2bc4a34fc": {
+      "name": "Метро «Шипиловская»",
+      "gtfs_stop_id": "16404",
+      "distance_m": 0.0
+    },
+    "stop_9ec9be2b3044": {
+      "name": "Метро «Шипиловская»",
+      "gtfs_stop_id": "16413",
+      "distance_m": 0.0
+    },
+    "stop_1ee43655393e": {
+      "name": "Улица Борисовские Пруды",
+      "gtfs_stop_id": "16421",
+      "distance_m": 0.0
+    },
+    "stop_97e38073ecb0": {
+      "name": "Братеевский проезд",
+      "gtfs_stop_id": "16422",
+      "distance_m": 0.0
+    },
+    "stop_287e2ec80e39": {
+      "name": "Киевский вокзал",
+      "gtfs_stop_id": "5408",
+      "distance_m": 0.0
+    },
+    "stop_a44045c915d7": {
+      "name": "Вахнеевка",
+      "gtfs_stop_id": "16584",
+      "distance_m": 0.0
+    },
+    "stop_ccc362693b5a": {
+      "name": "Посёлок Юрлово",
+      "gtfs_stop_id": "16587",
+      "distance_m": 0.0
+    },
+    "stop_c07fc0bd17fb": {
+      "name": "Посёлок Юрлово",
+      "gtfs_stop_id": "16588",
+      "distance_m": 0.0
+    },
+    "stop_167e7ea5f849": {
+      "name": "Братеевская ул., 39",
+      "gtfs_stop_id": "11272",
+      "distance_m": 0.0
+    },
+    "stop_4b479266aa7c": {
+      "name": "Метро «Беляево»",
+      "gtfs_stop_id": "11310",
+      "distance_m": 0.0
+    },
+    "stop_b1100734c464": {
+      "name": "Управа района Коньково",
+      "gtfs_stop_id": "13277",
+      "distance_m": 0.0
+    },
+    "stop_0a3251c80e6b": {
+      "name": "Метро «Щукинская»",
+      "gtfs_stop_id": "13212",
+      "distance_m": 0.0
+    },
+    "stop_7c0551926947": {
+      "name": "Управа района Коньково",
+      "gtfs_stop_id": "13278",
+      "distance_m": 0.0
+    },
+    "stop_cf571e293199": {
+      "name": "Киевский вокзал",
+      "gtfs_stop_id": "1008549",
+      "distance_m": 0.0
+    },
+    "stop_5285d0c284cc": {
+      "name": "Центр занятости населения",
+      "gtfs_stop_id": "13724",
+      "distance_m": 0.0
+    },
+    "stop_698c65a41f4b": {
+      "name": "Центр занятости населения",
+      "gtfs_stop_id": "13725",
+      "distance_m": 0.0
+    },
+    "stop_db9e9a81bfff": {
+      "name": "Детская п-ка",
+      "gtfs_stop_id": "13726",
+      "distance_m": 0.0
+    },
+    "stop_ac0e51b13e53": {
+      "name": "Детская п-ка",
+      "gtfs_stop_id": "13727",
+      "distance_m": 0.0
+    },
+    "stop_af54e46e63bd": {
+      "name": "Корпус 1538",
+      "gtfs_stop_id": "13729",
+      "distance_m": 0.0
+    },
+    "stop_d4286bd3cf05": {
+      "name": "Новокрюковская улица",
+      "gtfs_stop_id": "13754",
+      "distance_m": 0.0
+    },
+    "stop_86b325f46804": {
+      "name": "МЦД Зеленоград-Крюково",
+      "gtfs_stop_id": "13756",
+      "distance_m": 0.0
+    },
+    "stop_fd5d9753bd31": {
+      "name": "МЦД Зеленоград-Крюково",
+      "gtfs_stop_id": "13762",
+      "distance_m": 0.0
+    },
+    "stop_4a948d5b2e85": {
+      "name": "Заводская улица",
+      "gtfs_stop_id": "13763",
+      "distance_m": 0.0
+    },
+    "stop_bf193a58c113": {
+      "name": "Заводская ул.",
+      "gtfs_stop_id": "13764",
+      "distance_m": 0.0
+    },
+    "stop_cbc10c4085c6": {
+      "name": "Дежурная аптека",
+      "gtfs_stop_id": "13749",
+      "distance_m": 0.0
+    },
+    "stop_2b8b13dcc6df": {
+      "name": "Дежурная аптека",
+      "gtfs_stop_id": "13750",
+      "distance_m": 0.0
+    },
+    "stop_e091687c000e": {
+      "name": "Новокрюковская улица",
+      "gtfs_stop_id": "13753",
+      "distance_m": 0.0
+    },
+    "stop_1a965d8dc9d0": {
+      "name": "Стоматологическая п-ка",
+      "gtfs_stop_id": "13877",
+      "distance_m": 0.0
+    },
+    "stop_1d5e7ff12f2e": {
+      "name": "Рынок",
+      "gtfs_stop_id": "13878",
+      "distance_m": 0.0
+    },
+    "stop_990759a42a3f": {
+      "name": "Рынок",
+      "gtfs_stop_id": "13879",
+      "distance_m": 0.0
+    },
+    "stop_f0ae7479902b": {
+      "name": "15-й микрорайон",
+      "gtfs_stop_id": "13880",
+      "distance_m": 0.0
+    },
+    "stop_47d10d5a593d": {
+      "name": "Михайловский пруд",
+      "gtfs_stop_id": "13881",
+      "distance_m": 0.0
+    },
+    "stop_1f601bab879b": {
+      "name": "Михайловский пруд",
+      "gtfs_stop_id": "13882",
+      "distance_m": 0.0
+    },
+    "stop_53d500337d9b": {
+      "name": "Корпус 1602",
+      "gtfs_stop_id": "13884",
+      "distance_m": 0.0
+    },
+    "stop_18d84a70eaea": {
+      "name": "Корпус 1602",
+      "gtfs_stop_id": "13885",
+      "distance_m": 0.0
+    },
+    "stop_3cf8f1d4a364": {
+      "name": "16-й мкр.",
+      "gtfs_stop_id": "13886",
+      "distance_m": 0.0
+    },
+    "stop_b47c163d0306": {
+      "name": "Георгиевский проспект",
+      "gtfs_stop_id": "1009118",
+      "distance_m": 0.0
+    },
+    "stop_589c0763fbcc": {
+      "name": "Метро «Тушинская»",
+      "gtfs_stop_id": "13912",
+      "distance_m": 0.0
+    },
+    "stop_9e6bb2f9e8e0": {
+      "name": "Метро «Строгино» (восточный вход)",
+      "gtfs_stop_id": "14597",
+      "distance_m": 0.0
+    },
+    "stop_bd99c0de1197": {
+      "name": "Улица Федосьино",
+      "gtfs_stop_id": "14234",
+      "distance_m": 0.0
+    },
+    "stop_75da1214f7fa": {
+      "name": "Улица Федосьино",
+      "gtfs_stop_id": "14235",
+      "distance_m": 0.0
+    },
+    "stop_ce497a79027b": {
+      "name": "Путевой дворец",
+      "gtfs_stop_id": "14307",
+      "distance_m": 0.0
+    },
+    "stop_52e3ecc69f4f": {
+      "name": "Ходынское поле",
+      "gtfs_stop_id": "14308",
+      "distance_m": 0.0
+    },
+    "stop_b21e06788d3a": {
+      "name": "Поликлиника № 109",
+      "gtfs_stop_id": "14453",
+      "distance_m": 0.0
+    },
+    "stop_2d97813ba820": {
+      "name": "Б-ца им. Боткина",
+      "gtfs_stop_id": "15257",
+      "distance_m": 0.0
+    },
+    "stop_f37c33814ed1": {
+      "name": "Мякинино",
+      "gtfs_stop_id": "14713",
+      "distance_m": 0.0
+    },
+    "stop_62213ab329c0": {
+      "name": "Улица Академика Петровского",
+      "gtfs_stop_id": "14854",
+      "distance_m": 0.0
+    },
+    "stop_5c90ccb9cff5": {
+      "name": "Пруд «Чайка»",
+      "gtfs_stop_id": "15780",
+      "distance_m": 0.0
+    },
+    "stop_740b328241e1": {
+      "name": "Детская п-ка",
+      "gtfs_stop_id": "1340",
+      "distance_m": 0.0
+    },
+    "stop_c38181b5653e": {
+      "name": "Детская п-ка",
+      "gtfs_stop_id": "1337",
+      "distance_m": 0.0
+    },
+    "stop_9aba051c64eb": {
+      "name": "Улица Островитянова, 37",
+      "gtfs_stop_id": "1000178",
+      "distance_m": 0.0
+    },
+    "stop_d16a8c278937": {
+      "name": "Коньковские пруды",
+      "gtfs_stop_id": "1000179",
+      "distance_m": 0.0
+    },
+    "stop_6fcab5b94260": {
+      "name": "Кутузовская слобода",
+      "gtfs_stop_id": "1000268",
+      "distance_m": 0.0
+    },
+    "stop_65b9359db8a9": {
+      "name": "Микрорайон Зелёный бор",
+      "gtfs_stop_id": "1000270",
+      "distance_m": 0.0
+    },
+    "stop_4e4c45004217": {
+      "name": "Микрорайон Зелёный бор",
+      "gtfs_stop_id": "1000269",
+      "distance_m": 0.0
+    },
+    "stop_94577fa3a4e3": {
+      "name": "7-я Боровская улица",
+      "gtfs_stop_id": "1000294",
+      "distance_m": 0.0
+    },
+    "stop_9c35a4a9f4cc": {
+      "name": "СНТ «Маяк»",
+      "gtfs_stop_id": "1000290",
+      "distance_m": 0.0
+    },
+    "stop_4f28dee137ef": {
+      "name": "Ульяновский лесопарк",
+      "gtfs_stop_id": "1000292",
+      "distance_m": 0.0
+    },
+    "stop_b500af2b111e": {
+      "name": "Ульяновский лесопарк",
+      "gtfs_stop_id": "1000293",
+      "distance_m": 0.0
+    },
+    "stop_22178d8272eb": {
+      "name": "СНТ «Маяк»",
+      "gtfs_stop_id": "1000291",
+      "distance_m": 0.0
+    },
+    "stop_adf0d0ebcee0": {
+      "name": "7-я Боровская улица",
+      "gtfs_stop_id": "1000295",
+      "distance_m": 0.0
+    },
+    "stop_05ace24705ec": {
+      "name": "Метро «Новопеределкино»",
+      "gtfs_stop_id": "1002573",
+      "distance_m": 0.0
+    },
+    "stop_c99326f9ee93": {
+      "name": "Центр спорта",
+      "gtfs_stop_id": "1000424",
+      "distance_m": 0.0
+    },
+    "stop_716ab3dcc7c0": {
+      "name": "Улица Введенского, 23",
+      "gtfs_stop_id": "1000532",
+      "distance_m": 0.0
+    },
+    "stop_bd3464096d5b": {
+      "name": "Торговый комплекс",
+      "gtfs_stop_id": "16832",
+      "distance_m": 0.0
+    },
+    "stop_e5439d1e52e0": {
+      "name": "Метро «Алма-Атинская» (южный вход)",
+      "gtfs_stop_id": "17092",
+      "distance_m": 0.0
+    },
+    "stop_e30e31aad4c1": {
+      "name": "Улица Хабарова, 2",
+      "gtfs_stop_id": "16647",
+      "distance_m": 0.0
+    },
+    "stop_2be1b9d2409e": {
+      "name": "Улица Хабарова, 2",
+      "gtfs_stop_id": "16648",
+      "distance_m": 0.0
+    },
+    "stop_4862b90d2b24": {
+      "name": "Метро «Алма-Атинская»",
+      "gtfs_stop_id": "17094",
+      "distance_m": 0.0
+    },
+    "stop_589fc6267c5d": {
+      "name": "Центр спорта",
+      "gtfs_stop_id": "17962",
+      "distance_m": 0.0
+    },
+    "stop_9a21ed02c835": {
+      "name": "Школа профсоюзов",
+      "gtfs_stop_id": "17963",
+      "distance_m": 0.0
+    },
+    "stop_22ab4babbec0": {
+      "name": "Школа профсоюзов",
+      "gtfs_stop_id": "17964",
+      "distance_m": 0.0
+    },
+    "stop_2bb4a14db97e": {
+      "name": "3-й микрорайон Московского",
+      "gtfs_stop_id": "17961",
+      "distance_m": 0.0
+    },
+    "stop_9d8914ce0b3f": {
+      "name": "Улица Летовского Ополчения",
+      "gtfs_stop_id": "18040",
+      "distance_m": 0.0
+    },
+    "stop_99b242244c53": {
+      "name": "Улица Островитянова, 37",
+      "gtfs_stop_id": "8196",
+      "distance_m": 0.0
+    },
+    "stop_011b935e32da": {
+      "name": "Улица Летовского Ополчения",
+      "gtfs_stop_id": "18043",
+      "distance_m": 0.0
+    },
+    "stop_3983ebe4c84f": {
+      "name": "Московский",
+      "gtfs_stop_id": "17992",
+      "distance_m": 0.0
+    },
+    "stop_f623ae02846d": {
+      "name": "Корпус 1538",
+      "gtfs_stop_id": "18277",
+      "distance_m": 0.0
+    },
+    "stop_08bb6535e9a7": {
+      "name": "Метро «Рассказовка»",
+      "gtfs_stop_id": "1002673",
+      "distance_m": 0.0
+    },
+    "stop_5ade48f2e100": {
+      "name": "Кутузовская слобода",
+      "gtfs_stop_id": "1000267",
+      "distance_m": 0.0
+    },
+    "stop_78bc6e76a002": {
+      "name": "Спорткомплекс «ЦСКА»",
+      "gtfs_stop_id": "1001254",
+      "distance_m": 0.0
+    },
+    "stop_a16cb93f5dc4": {
+      "name": "Вахнеевка",
+      "gtfs_stop_id": "16585",
+      "distance_m": 0.0
+    },
+    "stop_5f51fd2deffc": {
+      "name": "Поликлиника № 67",
+      "gtfs_stop_id": "1001311",
+      "distance_m": 0.0
+    },
+    "stop_5e25eec6154d": {
+      "name": "Поликлиника № 67",
+      "gtfs_stop_id": "1001312",
+      "distance_m": 0.0
+    },
+    "stop_2e7f34656dae": {
+      "name": "Колледж связи",
+      "gtfs_stop_id": "1001313",
+      "distance_m": 0.0
+    },
+    "stop_27b26bf7c961": {
+      "name": "Колледж связи",
+      "gtfs_stop_id": "1001314",
+      "distance_m": 0.0
+    },
+    "stop_0871e39b3b67": {
+      "name": "Метро «Библиотека имени Ленина»",
+      "gtfs_stop_id": "1001367",
+      "distance_m": 0.0
+    },
+    "stop_238a3d8ed970": {
+      "name": "Манежная пл.",
+      "gtfs_stop_id": "1001368",
+      "distance_m": 0.0
+    },
+    "stop_b8eb54c6e781": {
+      "name": "Манежная площадь",
+      "gtfs_stop_id": "1001372",
+      "distance_m": 0.0
+    },
+    "stop_482d8016e80b": {
+      "name": "Метро «Лубянка»",
+      "gtfs_stop_id": "1001374",
+      "distance_m": 0.0
+    },
+    "stop_3276c42dd221": {
+      "name": "Театральная площадь",
+      "gtfs_stop_id": "1001373",
+      "distance_m": 0.0
+    },
+    "stop_0de4f8f0dcac": {
+      "name": "Метро «Лубянка» - Политехнический музей",
+      "gtfs_stop_id": "1001390",
+      "distance_m": 0.0
+    },
+    "stop_810eb391d8a5": {
+      "name": "Воднолыжный стадион",
+      "gtfs_stop_id": "1385",
+      "distance_m": 0.0
+    },
+    "stop_a5f8165bea2d": {
+      "name": "Парк Школьников",
+      "gtfs_stop_id": "8740",
+      "distance_m": 0.0
+    },
+    "stop_eff55d9906e3": {
+      "name": "Воднолыжный стадион",
+      "gtfs_stop_id": "1387",
+      "distance_m": 0.0
+    },
+    "stop_b06e00eaefcb": {
+      "name": "Метро «Октябрьская» (радиальная)",
+      "gtfs_stop_id": "2296",
+      "distance_m": 0.0
+    },
+    "stop_b3ed18aa9bc3": {
+      "name": "Метро «Тульская» (северный вход)",
+      "gtfs_stop_id": "3045",
+      "distance_m": 0.0
+    },
+    "stop_9d8143afd557": {
+      "name": "Метро «Добрынинская»",
+      "gtfs_stop_id": "1001790",
+      "distance_m": 0.0
+    },
+    "stop_8334bf42b049": {
+      "name": "Метро «Марьино»",
+      "gtfs_stop_id": "9069",
+      "distance_m": 0.0
+    },
+    "stop_11acecbeaba6": {
+      "name": "Метро «Марьино»",
+      "gtfs_stop_id": "8920",
+      "distance_m": 0.0
+    },
+    "stop_8745600b9275": {
+      "name": "4-й микрорайон Митина",
+      "gtfs_stop_id": "8886",
+      "distance_m": 0.0
+    },
+    "stop_59ebe87fa171": {
+      "name": "4-й микрорайон Митина",
+      "gtfs_stop_id": "8887",
+      "distance_m": 0.0
+    },
+    "stop_6126114ce2b4": {
+      "name": "Метро «Печатники»",
+      "gtfs_stop_id": "1001694",
+      "distance_m": 0.0
+    },
+    "stop_14f8aa20ae5c": {
+      "name": "Донецкая улица",
+      "gtfs_stop_id": "5855",
+      "distance_m": 0.0
+    },
+    "stop_27c27f7f7cd9": {
+      "name": "Донецкая улица",
+      "gtfs_stop_id": "5881",
+      "distance_m": 0.0
+    },
+    "stop_7bab0ec39e32": {
+      "name": "Газопровод",
+      "gtfs_stop_id": "9414",
+      "distance_m": 0.0
+    },
+    "stop_db0360818350": {
+      "name": "Газопровод",
+      "gtfs_stop_id": "9415",
+      "distance_m": 0.0
+    },
+    "stop_7093856c4706": {
+      "name": "Верейская ул., 25",
+      "gtfs_stop_id": "2037",
+      "distance_m": 0.0
+    },
+    "stop_cc65fd5afa91": {
+      "name": "Верейская ул., 25",
+      "gtfs_stop_id": "2116",
+      "distance_m": 0.0
+    },
+    "stop_612d67338caf": {
+      "name": "Боровское ш., 20",
+      "gtfs_stop_id": "9035",
+      "distance_m": 0.0
+    },
+    "stop_683ed761079d": {
+      "name": "Аминьевское шоссе",
+      "gtfs_stop_id": "5492",
+      "distance_m": 0.0
+    },
+    "stop_026b669f94be": {
+      "name": "МЦД Перерва",
+      "gtfs_stop_id": "6754",
+      "distance_m": 0.0
+    },
+    "stop_05c55fce0887": {
+      "name": "Платформа Тульская",
+      "gtfs_stop_id": "3527",
+      "distance_m": 0.0
+    },
+    "stop_47a3ee5092f0": {
+      "name": "Лесная сторожка",
+      "gtfs_stop_id": "1003219",
+      "distance_m": 0.0
+    },
+    "stop_9e2dea70d572": {
+      "name": "Отель «Советский» - Театр «Ромэн»",
+      "gtfs_stop_id": "1012",
+      "distance_m": 0.0
+    },
+    "stop_94e2518ca68c": {
+      "name": "Ул. Правды",
+      "gtfs_stop_id": "15850",
+      "distance_m": 0.0
+    },
+    "stop_a5e16140774b": {
+      "name": "Отель «Советский» - Театр «Ромэн»",
+      "gtfs_stop_id": "1017",
+      "distance_m": 0.0
+    },
+    "stop_ae310f8d960f": {
+      "name": "Метро «Ломоносовский проспект»",
+      "gtfs_stop_id": "5557",
+      "distance_m": 32.8
+    },
+    "stop_a6c9d3c9d51a": {
+      "name": "Санаторий «Энергия»",
+      "gtfs_stop_id": "1001538",
+      "distance_m": 0.0
+    },
+    "stop_35252765ce38": {
+      "name": "Ферма",
+      "gtfs_stop_id": "1001542",
+      "distance_m": 0.0
+    },
+    "stop_82931d1b8fb5": {
+      "name": "Мещерский лес",
+      "gtfs_stop_id": "8293",
+      "distance_m": 0.0
+    },
+    "stop_e66af252047d": {
+      "name": "43-й квартал Юго-Запада",
+      "gtfs_stop_id": "11322",
+      "distance_m": 0.0
+    },
+    "stop_69630ed8deb4": {
+      "name": "Метро «Борисово»",
+      "gtfs_stop_id": "16410",
+      "distance_m": 0.0
+    },
+    "stop_2ec30137303d": {
+      "name": "Метро «Алма-Атинская»",
+      "gtfs_stop_id": "6669",
+      "distance_m": 0.0
+    },
+    "stop_ecb5acd03991": {
+      "name": "Ключевая ул., 24",
+      "gtfs_stop_id": "10012",
+      "distance_m": 0.0
+    },
+    "stop_30f4bafe556b": {
+      "name": "43-й квартал Юго-Запада",
+      "gtfs_stop_id": "11317",
+      "distance_m": 0.0
+    },
+    "stop_d5d08cd4756b": {
+      "name": "Метро «Ломоносовский проспект»",
+      "gtfs_stop_id": "1001607",
+      "distance_m": 0.0
+    },
+    "stop_9594655c365d": {
+      "name": "Брёхово-2",
+      "gtfs_stop_id": "1001609",
+      "distance_m": 0.0
+    },
+    "stop_5f5739ed6e66": {
+      "name": "Брёхово-2",
+      "gtfs_stop_id": "1001610",
+      "distance_m": 0.0
+    },
+    "stop_e8cc2c1fbd45": {
+      "name": "Метро «Озёрная»",
+      "gtfs_stop_id": "7442",
+      "distance_m": 0.0
+    },
+    "stop_bb51c88c1ea6": {
+      "name": "Парк Школьников",
+      "gtfs_stop_id": "8739",
+      "distance_m": 0.0
+    },
+    "stop_c1f71d6f2488": {
+      "name": "Парк «Аллея Славы»",
+      "gtfs_stop_id": "9576",
+      "distance_m": 0.0
+    },
+    "stop_8d005159e1b4": {
+      "name": "Метро «Печатники»",
+      "gtfs_stop_id": "8488",
+      "distance_m": 0.0
+    },
+    "stop_6fb979281fce": {
+      "name": "Проектируемый проезд № 6161",
+      "gtfs_stop_id": "15816",
+      "distance_m": 0.0
+    },
+    "stop_3d87391992c5": {
+      "name": "Ул. Гришина",
+      "gtfs_stop_id": "2024",
+      "distance_m": 0.0
+    },
+    "stop_e3dd5c011060": {
+      "name": "Верейская ул.",
+      "gtfs_stop_id": "2113",
+      "distance_m": 0.0
+    },
+    "stop_366a9de1e58e": {
+      "name": "93-й квартал Кунцева",
+      "gtfs_stop_id": "2040",
+      "distance_m": 0.0
+    },
+    "stop_f0a3922c0bc9": {
+      "name": "93-й квартал Кунцева",
+      "gtfs_stop_id": "2111",
+      "distance_m": 0.0
+    },
+    "stop_88f48ab5b465": {
+      "name": "Метро «Пятницкое шоссе»",
+      "gtfs_stop_id": "8884",
+      "distance_m": 0.0
+    },
+    "stop_462b552a6741": {
+      "name": "Улица Перерва",
+      "gtfs_stop_id": "5856",
+      "distance_m": 0.0
+    },
+    "stop_e585a4cb6680": {
+      "name": "15-й автобусный парк",
+      "gtfs_stop_id": "544",
+      "distance_m": 0.0
+    },
+    "stop_6ff48c0e8703": {
+      "name": "15-й автобусный парк",
+      "gtfs_stop_id": "559",
+      "distance_m": 0.0
+    },
+    "stop_983422a50a1d": {
+      "name": "Болотная площадь",
+      "gtfs_stop_id": "2652",
+      "distance_m": 0.0
+    },
+    "stop_65d870b4d796": {
+      "name": "Болотная площадь",
+      "gtfs_stop_id": "7562",
+      "distance_m": 0.0
+    },
+    "stop_2336b8f63802": {
+      "name": "Торговый комплекс",
+      "gtfs_stop_id": "1002120",
+      "distance_m": 0.0
+    },
+    "stop_c7e2c3a73e5a": {
+      "name": "Санаторий «Энергия»",
+      "gtfs_stop_id": "1001539",
+      "distance_m": 0.0
+    },
+    "stop_08c6a21278bd": {
+      "name": "Школа",
+      "gtfs_stop_id": "1001540",
+      "distance_m": 0.0
+    },
+    "stop_285d474c6ed7": {
+      "name": "Школа",
+      "gtfs_stop_id": "1001541",
+      "distance_m": 0.0
+    },
+    "stop_6486136dfa5a": {
+      "name": "Метро «Ломоносовский проспект»",
+      "gtfs_stop_id": "7711",
+      "distance_m": 0.0
+    },
+    "stop_d66fe577860e": {
+      "name": "Метро «Раменки»",
+      "gtfs_stop_id": "7434",
+      "distance_m": 0.0
+    },
+    "stop_e8abdec6aeb0": {
+      "name": "Метро «Раменки»",
+      "gtfs_stop_id": "7440",
+      "distance_m": 0.0
+    },
+    "stop_597f0ab08022": {
+      "name": "Профсоюзная улица (МКАД)",
+      "gtfs_stop_id": "8283",
+      "distance_m": 0.0
+    },
+    "stop_2460a63da112": {
+      "name": "Профсоюзная улица (МКАД)",
+      "gtfs_stop_id": "8284",
+      "distance_m": 0.0
+    },
+    "stop_40d49ba8ca3b": {
+      "name": "Метро «Раменки»",
+      "gtfs_stop_id": "7435",
+      "distance_m": 0.0
+    },
+    "stop_a0f1107ab5bb": {
+      "name": "Метро «Петровский парк»",
+      "gtfs_stop_id": "1002121",
+      "distance_m": 0.0
+    },
+    "stop_10b60145334a": {
+      "name": "Метро «Беляево»",
+      "gtfs_stop_id": "4914",
+      "distance_m": 0.0
+    },
+    "stop_df4e31aaffe7": {
+      "name": "Сосенки",
+      "gtfs_stop_id": "9418",
+      "distance_m": 0.0
+    },
+    "stop_a0ecb3095d2c": {
+      "name": "Боровское ш., 20",
+      "gtfs_stop_id": "9036",
+      "distance_m": 0.0
+    },
+    "stop_e5b2174ef0f0": {
+      "name": "Улица 50 лет Октября",
+      "gtfs_stop_id": "8303",
+      "distance_m": 0.0
+    },
+    "stop_50ce9c514674": {
+      "name": "МЦД Перерва",
+      "gtfs_stop_id": "8581",
+      "distance_m": 0.0
+    },
+    "stop_f881a918df52": {
+      "name": "Московский",
+      "gtfs_stop_id": "17995",
+      "distance_m": 0.0
+    },
+    "stop_4be7c9830859": {
+      "name": "Улица Миклухо-Маклая",
+      "gtfs_stop_id": "2633",
+      "distance_m": 0.0
+    },
+    "stop_e865739066a2": {
+      "name": "Метро «Красногвардейская»",
+      "gtfs_stop_id": "7255",
+      "distance_m": 0.0
+    },
+    "stop_6a0bfcab629d": {
+      "name": "Шипиловская ул., 44",
+      "gtfs_stop_id": "7272",
+      "distance_m": 0.0
+    },
+    "stop_9b5445e318be": {
+      "name": "Шипиловская ул., 44",
+      "gtfs_stop_id": "7278",
+      "distance_m": 0.0
+    },
+    "stop_61d79446a10a": {
+      "name": "Метро «Печатники»",
+      "gtfs_stop_id": "1000246",
+      "distance_m": 0.0
+    },
+    "stop_77abdbbb04cb": {
+      "name": "Ул. Василия Ботылева",
+      "gtfs_stop_id": "10709",
+      "distance_m": 0.0
+    },
+    "stop_551cef8eb048": {
+      "name": "Марьино - 2",
+      "gtfs_stop_id": "8663",
+      "distance_m": 0.0
+    },
+    "stop_b3eca607dc0e": {
+      "name": "Площадь Гагарина",
+      "gtfs_stop_id": "13525",
+      "distance_m": 0.0
+    },
+    "stop_9af7aac0bdb5": {
+      "name": "Площадь Гагарина",
+      "gtfs_stop_id": "13526",
+      "distance_m": 0.0
+    },
+    "stop_be7091a25bec": {
+      "name": "Лесная сторожка",
+      "gtfs_stop_id": "1003218",
+      "distance_m": 0.0
+    },
+    "stop_06b1912ac90d": {
+      "name": "Ликова",
+      "gtfs_stop_id": "9969",
+      "distance_m": 0.0
+    },
+    "stop_924f089d844d": {
+      "name": "Метро «Каширская»",
+      "gtfs_stop_id": "15237",
+      "distance_m": 0.0
+    },
+    "stop_e654ef770245": {
+      "name": "Метро «Коньково»",
+      "gtfs_stop_id": "6136",
+      "distance_m": 0.0
+    },
+    "stop_8bba8ede3349": {
+      "name": "Ликова",
+      "gtfs_stop_id": "10369",
+      "distance_m": 0.0
+    },
+    "stop_8e4e94109bb6": {
+      "name": "Метро «Алма-Атинская»",
+      "gtfs_stop_id": "17090",
+      "distance_m": 0.0
+    },
+    "stop_7ebadb33943f": {
+      "name": "Метро «Озёрная»",
+      "gtfs_stop_id": "1002748",
+      "distance_m": 0.0
+    },
+    "stop_ffec7bbf8e5c": {
+      "name": "Коттеджный посёлок",
+      "gtfs_stop_id": "1002781",
+      "distance_m": 0.0
+    },
+    "stop_5f5706cba714": {
+      "name": "Коттеджный посёлок",
+      "gtfs_stop_id": "1002782",
+      "distance_m": 0.0
+    },
+    "stop_4b5dc78ca5c4": {
+      "name": "Парк «Борисовские Пруды»",
+      "gtfs_stop_id": "1002792",
+      "distance_m": 0.0
+    },
+    "stop_726f171a1301": {
+      "name": "Метро «Мичуринский проспект»",
+      "gtfs_stop_id": "10129",
+      "distance_m": 0.0
+    },
+    "stop_7eded270ccf7": {
+      "name": "Метро «Мичуринский проспект»",
+      "gtfs_stop_id": "10130",
+      "distance_m": 0.0
+    },
+    "stop_97c0260c1f96": {
+      "name": "Большаково",
+      "gtfs_stop_id": "1003220",
+      "distance_m": 0.0
+    },
+    "stop_8143c7ad006b": {
+      "name": "Метро «Новаторская»",
+      "gtfs_stop_id": "2637",
+      "distance_m": 0.0
+    },
+    "stop_2c0d73d9bf01": {
+      "name": "Лечебный корпус",
+      "gtfs_stop_id": "15259",
+      "distance_m": 0.0
+    },
+    "stop_e04d600a6737": {
+      "name": "Большаково",
+      "gtfs_stop_id": "1003221",
+      "distance_m": 0.0
+    },
+    "stop_be2569e48636": {
+      "name": "Братеево",
+      "gtfs_stop_id": "1000307",
+      "distance_m": 0.0
+    },
+    "stop_cdfd94e7a776": {
+      "name": "Районный центр «Орбита»",
+      "gtfs_stop_id": "3233",
+      "distance_m": 0.0
+    },
+    "stop_779f68cd6dca": {
+      "name": "Боровская улица",
+      "gtfs_stop_id": "15829",
+      "distance_m": 0.0
+    },
+    "stop_6399e815f942": {
+      "name": "1-й микрорайон Московского",
+      "gtfs_stop_id": "17993",
+      "distance_m": 0.0
+    },
+    "stop_41b2cbf0e463": {
+      "name": "1-й микрорайон Московского",
+      "gtfs_stop_id": "17994",
+      "distance_m": 0.0
+    },
+    "stop_3d5e8736f442": {
+      "name": "3-й микрорайон Московского",
+      "gtfs_stop_id": "18020",
+      "distance_m": 0.0
+    },
+    "stop_7e6414fe65d8": {
+      "name": "Парк «Борисовские Пруды»",
+      "gtfs_stop_id": "1002793",
+      "distance_m": 0.0
+    },
+    "stop_1bf00a0bf9f4": {
+      "name": "Спортивный комплекс",
+      "gtfs_stop_id": "6630",
+      "distance_m": 0.0
+    },
+    "stop_f8c9303ca2b9": {
+      "name": "Спортивный комплекс",
+      "gtfs_stop_id": "6639",
+      "distance_m": 0.0
+    },
+    "stop_005731e68c7e": {
+      "name": "Мосфильм",
+      "gtfs_stop_id": "5562",
+      "distance_m": 0.0
+    },
+    "stop_4afd6c1efaf0": {
+      "name": "Улица Пудовкина",
+      "gtfs_stop_id": "2273",
+      "distance_m": 0.0
+    },
+    "stop_7c232b63a132": {
+      "name": "Мосфильм",
+      "gtfs_stop_id": "2274",
+      "distance_m": 0.0
+    },
+    "stop_98584d52344e": {
+      "name": "Троицкое-Голенищево",
+      "gtfs_stop_id": "2275",
+      "distance_m": 0.0
+    },
+    "stop_c7228ef9898d": {
+      "name": "Белорусский вокзал",
+      "gtfs_stop_id": "1001849",
+      "distance_m": 0.0
+    },
+    "stop_a6cb1d0c4ef4": {
+      "name": "Ул. Пудовкина",
+      "gtfs_stop_id": "5563",
+      "distance_m": 0.0
+    },
+    "stop_e0f8ec85889c": {
+      "name": "Метро «Борисово»",
+      "gtfs_stop_id": "16409",
+      "distance_m": 0.0
+    },
+    "stop_02024b1f5470": {
+      "name": "Метро «Нагатинская»",
+      "gtfs_stop_id": "3069",
+      "distance_m": 0.0
+    },
+    "stop_195d70c60fdb": {
+      "name": "МЦД Трикотажная",
+      "gtfs_stop_id": "15366",
+      "distance_m": 0.0
+    },
+    "stop_ddc3e83c03b4": {
+      "name": "Матвеевская ул.",
+      "gtfs_stop_id": "5491",
+      "distance_m": 0.0
+    },
+    "stop_fbdc6510d0b0": {
+      "name": "Матвеевская улица",
+      "gtfs_stop_id": "1001236",
+      "distance_m": 0.0
+    },
+    "stop_eb80b02bbdc1": {
+      "name": "МЦД Трикотажная",
+      "gtfs_stop_id": "15367",
+      "distance_m": 0.0
+    },
+    "stop_04167f005a27": {
+      "name": "Митинский радиорынок",
+      "gtfs_stop_id": "8875",
+      "distance_m": 0.0
+    },
+    "stop_9c85c536d10a": {
+      "name": "Аминьево",
+      "gtfs_stop_id": "2118",
+      "distance_m": 0.0
+    },
+    "stop_dcf128e27de9": {
+      "name": "Радужная улица, 10",
+      "gtfs_stop_id": "1007272",
+      "distance_m": 0.0
+    },
+    "stop_133f4e067f81": {
+      "name": "Радужный проезд",
+      "gtfs_stop_id": "1010424",
+      "distance_m": 0.0
+    },
+    "stop_37cbedfe4337": {
+      "name": "1-й микрорайон Митина",
+      "gtfs_stop_id": "8872",
+      "distance_m": 0.0
+    },
+    "stop_807e8a16e286": {
+      "name": "1-й микрорайон Митина",
+      "gtfs_stop_id": "8873",
+      "distance_m": 0.0
+    },
+    "stop_601b1bbb4a1f": {
+      "name": "Боровицкая пл.",
+      "gtfs_stop_id": "5081",
+      "distance_m": 0.0
+    },
+    "stop_793a8c363075": {
+      "name": "Метро «Серпуховская»",
+      "gtfs_stop_id": "1001930",
+      "distance_m": 0.0
+    },
+    "stop_3fce6cc0a05d": {
+      "name": "Театральная площадь",
+      "gtfs_stop_id": "6463",
+      "distance_m": 0.0
+    },
+    "stop_d5f137ec4887": {
+      "name": "Полоцкая улица, 8",
+      "gtfs_stop_id": "5051",
+      "distance_m": 0.0
+    },
+    "stop_24d25b9f42dc": {
+      "name": "Партизанская ул.",
+      "gtfs_stop_id": "5016",
+      "distance_m": 0.0
+    },
+    "stop_bd7722fd6c70": {
+      "name": "Рублёво",
+      "gtfs_stop_id": "5043",
+      "distance_m": 0.0
+    },
+    "stop_0e09c89ad1e0": {
+      "name": "Рублево",
+      "gtfs_stop_id": "5019",
+      "distance_m": 12.9
+    },
+    "stop_e29f45f48ee5": {
+      "name": "Улица Василия Ботылёва",
+      "gtfs_stop_id": "10710",
+      "distance_m": 0.0
+    },
+    "stop_1fe2075211d0": {
+      "name": "МЦД Рабочий Посёлок",
+      "gtfs_stop_id": "5015",
+      "distance_m": 0.0
+    },
+    "stop_7c26f7ac8279": {
+      "name": "Академия при Президенте РФ",
+      "gtfs_stop_id": "8743",
+      "distance_m": 0.0
+    },
+    "stop_5c27e8fa29ff": {
+      "name": "Кутузовское шоссе, 1",
+      "gtfs_stop_id": "1002452",
+      "distance_m": 0.0
+    },
+    "stop_fcee42d94347": {
+      "name": "Кутузовское шоссе, 1",
+      "gtfs_stop_id": "1002453",
+      "distance_m": 0.0
+    },
+    "stop_e9e72edaf155": {
+      "name": "3-й микрорайон Новокосина",
+      "gtfs_stop_id": "9769",
+      "distance_m": 0.0
+    },
+    "stop_c562b8dae3af": {
+      "name": "Хлебозаводский пр.",
+      "gtfs_stop_id": "3267",
+      "distance_m": 0.0
+    },
+    "stop_5af794913277": {
+      "name": "Хлебозаводский пр.",
+      "gtfs_stop_id": "3270",
+      "distance_m": 0.0
+    },
+    "stop_ba8a22aac7f6": {
+      "name": "Музыкальная школа имени Гайдна",
+      "gtfs_stop_id": "9228",
+      "distance_m": 0.0
+    },
+    "stop_68f8cffedd35": {
+      "name": "Метро «Добрынинская»",
+      "gtfs_stop_id": "1001929",
+      "distance_m": 0.0
+    },
+    "stop_c28c3be2bedd": {
+      "name": "Метро «Новопеределкино»",
+      "gtfs_stop_id": "1002571",
+      "distance_m": 0.0
+    },
+    "stop_9062692593e8": {
+      "name": "Метро «Новопеределкино»",
+      "gtfs_stop_id": "1002572",
+      "distance_m": 0.0
+    },
+    "stop_a63a0b45e8fc": {
+      "name": "Аэропорт Внуково",
+      "gtfs_stop_id": "9977",
+      "distance_m": 0.0
+    },
+    "stop_61fc03aa9099": {
+      "name": "Метро «Рассказовка»",
+      "gtfs_stop_id": "1002680",
+      "distance_m": 0.0
+    },
+    "stop_ce7525ae1991": {
+      "name": "Ленинградский просп., 26",
+      "gtfs_stop_id": "1016",
+      "distance_m": 0.0
+    },
+    "stop_349c36d4161d": {
+      "name": "Батюнинская улица",
+      "gtfs_stop_id": "1009425",
+      "distance_m": 0.0
+    },
+    "stop_893c923d0a35": {
+      "name": "Батюнинская улица",
+      "gtfs_stop_id": "1009424",
+      "distance_m": 0.0
+    },
+    "stop_6ebc39afeb37": {
+      "name": "Борисовский пр., 26",
+      "gtfs_stop_id": "1009454",
+      "distance_m": 0.0
+    },
+    "stop_249df8c80993": {
+      "name": "Детская стоматологическая поликлиника",
+      "gtfs_stop_id": "1009596",
+      "distance_m": 0.0
+    },
+    "stop_38f79d46ffda": {
+      "name": "Парк «Рассказовка»",
+      "gtfs_stop_id": "1009625",
+      "distance_m": 0.0
+    },
+    "stop_db64a107ee0b": {
+      "name": "Парк «Рассказовка»",
+      "gtfs_stop_id": "1009626",
+      "distance_m": 0.0
+    },
+    "stop_01d92c4268e1": {
+      "name": "Сосенки-2",
+      "gtfs_stop_id": "1009636",
+      "distance_m": 0.0
+    },
+    "stop_64a5d6d3c234": {
+      "name": "Метро «Рассказовка»",
+      "gtfs_stop_id": "1002672",
+      "distance_m": 0.0
+    },
+    "stop_bb9e62776f10": {
+      "name": "Метро «Корниловская»",
+      "gtfs_stop_id": "1002886",
+      "distance_m": 0.0
+    },
+    "stop_6af9a54eed9d": {
+      "name": "Улица Николая Старостина",
+      "gtfs_stop_id": "9770",
+      "distance_m": 0.0
+    },
+    "stop_215fbd22c763": {
+      "name": "3-й мкр. Новокосина",
+      "gtfs_stop_id": "9328",
+      "distance_m": 0.0
+    },
+    "stop_97f71762ebdc": {
+      "name": "Улица Николая Старостина",
+      "gtfs_stop_id": "9771",
+      "distance_m": 0.0
+    },
+    "stop_8c5910c7a777": {
+      "name": "Культурно-просветительский центр",
+      "gtfs_stop_id": "1003097",
+      "distance_m": 0.0
+    },
+    "stop_38cedbc9a62e": {
+      "name": "Культурно-просветительский центр",
+      "gtfs_stop_id": "1003098",
+      "distance_m": 0.0
+    },
+    "stop_6370704ec129": {
+      "name": "Метро «Ольховая»",
+      "gtfs_stop_id": "1003100",
+      "distance_m": 0.0
+    },
+    "stop_a74e29778375": {
+      "name": "Административный центр",
+      "gtfs_stop_id": "1003103",
+      "distance_m": 0.0
+    },
+    "stop_b6072d4d75a1": {
+      "name": "Административный центр",
+      "gtfs_stop_id": "1003104",
+      "distance_m": 0.0
+    },
+    "stop_2022f808b076": {
+      "name": "Мякинино",
+      "gtfs_stop_id": "1003690",
+      "distance_m": 0.0
+    },
+    "stop_0eecbc978035": {
+      "name": "Радужная ул., 2",
+      "gtfs_stop_id": "1007273",
+      "distance_m": 0.0
+    },
+    "stop_36e3cd0c21eb": {
+      "name": "Микрорайон Град Московский",
+      "gtfs_stop_id": "1007274",
+      "distance_m": 0.0
+    },
+    "stop_229ce0bb98ac": {
+      "name": "Социальный фонд России",
+      "gtfs_stop_id": "1007275",
+      "distance_m": 0.0
+    },
+    "stop_6f2c2bee8fbe": {
+      "name": "Метро «Ольховая»",
+      "gtfs_stop_id": "1003099",
+      "distance_m": 0.0
+    },
+    "stop_1357e1f0c3c6": {
+      "name": "Сосенское",
+      "gtfs_stop_id": "1003105",
+      "distance_m": 0.0
+    },
+    "stop_15489b623e14": {
+      "name": "Сосенское",
+      "gtfs_stop_id": "1003106",
+      "distance_m": 0.0
+    },
+    "stop_4650a56d1cac": {
+      "name": "Храм",
+      "gtfs_stop_id": "15260",
+      "distance_m": 0.0
+    },
+    "stop_ccb61469d5ff": {
+      "name": "Метро «ЦСКА»",
+      "gtfs_stop_id": "1000790",
+      "distance_m": 0.0
+    },
+    "stop_1c0147e2ce22": {
+      "name": "Ул. Маргелова",
+      "gtfs_stop_id": "1002109",
+      "distance_m": 0.0
+    },
+    "stop_2deae9780f3c": {
+      "name": "Метро «ЦСКА»",
+      "gtfs_stop_id": "1002176",
+      "distance_m": 0.0
+    },
+    "stop_f0ce4d495c3a": {
+      "name": "Ул. Маргелова",
+      "gtfs_stop_id": "1002812",
+      "distance_m": 0.0
+    },
+    "stop_391f671fc0f6": {
+      "name": "17-й микрорайон",
+      "gtfs_stop_id": "1009116",
+      "distance_m": 0.0
+    },
+    "stop_20bc8753e5aa": {
+      "name": "17-й микрорайон",
+      "gtfs_stop_id": "1009115",
+      "distance_m": 0.0
+    },
+    "stop_d87be0f0ffc7": {
+      "name": "Георгиевский проспект",
+      "gtfs_stop_id": "1009119",
+      "distance_m": 0.0
+    },
+    "stop_c20bd48d7b67": {
+      "name": "Детская школа искусств",
+      "gtfs_stop_id": "1010474",
+      "distance_m": 0.0
+    },
+    "stop_1cdc6eb50ffa": {
+      "name": "Метро «Кленовый бульвар»",
+      "gtfs_stop_id": "3235",
+      "distance_m": 0.0
+    },
+    "stop_54bf1640321b": {
+      "name": "Затонная улица, 14",
+      "gtfs_stop_id": "21460",
+      "distance_m": 0.0
+    },
+    "stop_5c9f0f7b35b3": {
+      "name": "Мемориал",
+      "gtfs_stop_id": "1010269",
+      "distance_m": 0.0
+    },
+    "stop_20a5997b038f": {
+      "name": "МЦД Москворечье",
+      "gtfs_stop_id": "8529",
+      "distance_m": 0.0
+    },
+    "stop_49419724c083": {
+      "name": "Аэропорт Внуково",
+      "gtfs_stop_id": "9978",
+      "distance_m": 0.0
+    },
+    "stop_e1d912284424": {
+      "name": "Яблоневый сад",
+      "gtfs_stop_id": "21281",
+      "distance_m": 0.0
+    },
+    "stop_0df43f16b03a": {
+      "name": "Яблоневый сад",
+      "gtfs_stop_id": "21282",
+      "distance_m": 0.0
+    },
+    "stop_8c8658c5b1ab": {
+      "name": "Матвеевская улица, 10",
+      "gtfs_stop_id": "21417",
+      "distance_m": 0.0
+    },
+    "stop_a7223bb1c08b": {
+      "name": "Сабурово",
+      "gtfs_stop_id": "9413",
+      "distance_m": 0.0
+    },
+    "stop_4c722ba757e2": {
+      "name": "Рублёво",
+      "gtfs_stop_id": "10318",
+      "distance_m": 0.0
+    },
+    "stop_878091974a9e": {
+      "name": "Метро «Беляево»",
+      "gtfs_stop_id": "7947",
+      "distance_m": 0.0
+    },
+    "stop_e6fa1c24c678": {
+      "name": "Метро «Красногвардейская»",
+      "gtfs_stop_id": "7261",
+      "distance_m": 0.0
+    },
+    "stop_6799656d0380": {
+      "name": "Метро «Озёрная»",
+      "gtfs_stop_id": "7455",
+      "distance_m": 0.0
+    },
+    "stop_e8fa98c3cafe": {
+      "name": "17-й микрорайон",
+      "gtfs_stop_id": "1009117",
+      "distance_m": 0.0
+    },
+    "stop_d1ef45ec1fb4": {
+      "name": "МЦД Курьяново",
+      "gtfs_stop_id": "21173",
+      "distance_m": 0.0
+    },
+    "stop_011260268818": {
+      "name": "66-й квартал Кунцева",
+      "gtfs_stop_id": "9805",
+      "distance_m": 0.0
+    },
+    "stop_9084431109d8": {
+      "name": "Метро «Молодёжная»",
+      "gtfs_stop_id": "5694",
+      "distance_m": 0.0
+    },
+    "stop_796c8d4f5d4f": {
+      "name": "Благовещенка",
+      "gtfs_stop_id": "1003223",
+      "distance_m": 0.0
+    },
+    "stop_d77e4484106e": {
+      "name": "Аристово",
+      "gtfs_stop_id": "1003230",
+      "distance_m": 0.0
+    },
+    "stop_91cc39b93217": {
+      "name": "Аристово",
+      "gtfs_stop_id": "1003231",
+      "distance_m": 0.0
+    },
+    "stop_b9316ce7ed4f": {
+      "name": "Благовещенка",
+      "gtfs_stop_id": "1003222",
+      "distance_m": 0.0
+    },
+    "stop_92749b74d792": {
+      "name": "Нагатинский Затон",
+      "gtfs_stop_id": "1008765",
+      "distance_m": 27.0
+    },
+    "stop_0ab9b670a249": {
+      "name": "Метро «Рассказовка»",
+      "gtfs_stop_id": "1002665",
+      "distance_m": 0.0
+    },
+    "stop_826c077ebead": {
+      "name": "Метро «Алма-Атинская»",
+      "gtfs_stop_id": "17089",
+      "distance_m": 0.0
+    },
+    "stop_a6c4445f302c": {
+      "name": "Метро «Тёплый Стан»",
+      "gtfs_stop_id": "7909",
+      "distance_m": 0.0
+    },
+    "stop_2b37e3a6309a": {
+      "name": "Метро «Петровский парк»",
+      "gtfs_stop_id": "1002178",
+      "distance_m": 0.0
+    },
+    "stop_807b99d1bd75": {
+      "name": "ЖК «Спутник»",
+      "gtfs_stop_id": "21814",
+      "distance_m": 0.0
+    },
+    "stop_87215d537fa3": {
+      "name": "Липовая роща",
+      "gtfs_stop_id": "21815",
+      "distance_m": 0.0
+    },
+    "stop_fa013462eebc": {
+      "name": "Липовая роща",
+      "gtfs_stop_id": "21816",
+      "distance_m": 95.3
+    },
+    "stop_9a5227857312": {
+      "name": "МЦД Аминьевская",
+      "gtfs_stop_id": "21926",
+      "distance_m": 0.0
+    },
+    "stop_43554bc40123": {
+      "name": "Поликлиника",
+      "gtfs_stop_id": "21978",
+      "distance_m": 0.0
+    },
+    "stop_311ab096d79b": {
+      "name": "Поликлиника",
+      "gtfs_stop_id": "21979",
+      "distance_m": 0.0
+    },
+    "stop_0cdd5ec7b938": {
+      "name": "Метро «Коммунарка»",
+      "gtfs_stop_id": "22102",
+      "distance_m": 0.0
+    },
+    "stop_0053e99efc36": {
+      "name": "Метро «Корниловская»",
+      "gtfs_stop_id": "22347",
+      "distance_m": 0.0
+    },
+    "stop_c533142870a8": {
+      "name": "МЦД Курьяново",
+      "gtfs_stop_id": "22500",
+      "distance_m": 0.0
+    },
+    "stop_fd26b20315cf": {
+      "name": "МЦД Курьяново",
+      "gtfs_stop_id": "22501",
+      "distance_m": 0.0
+    },
+    "stop_2efe775cb0a0": {
+      "name": "Метро «Новаторская»",
+      "gtfs_stop_id": "22512",
+      "distance_m": 0.0
+    }
+  },
+  "routes": {
+    "route_pattern_1e2366da6e91": {
+      "number": "310",
+      "name": "Метро «Щукинская» - Метро «Щукинская»",
+      "match_quality": "confirmed",
+      "confidence": 0.722
+    },
+    "route_pattern_1fbff68becd0": {
+      "number": "451",
+      "name": "8-й микрорайон Митина - Метро «Речной вокзал»",
+      "match_quality": "confirmed",
+      "confidence": 0.608
+    },
+    "route_pattern_32496aad6eea": {
+      "number": "446",
+      "name": "Мега - Оби - Микрорайон Град Московский",
+      "match_quality": "probable",
+      "confidence": 0.719
+    },
+    "route_pattern_40b8ff7108ff": {
+      "number": "785к",
+      "name": "Тропарёво - Тропарево",
+      "match_quality": "probable",
+      "confidence": 0.754
+    },
+    "route_pattern_45e07cd14aa2": {
+      "number": "899",
+      "name": "Метро «Красногвардейская» - Метро «Коломенская»",
+      "match_quality": "confirmed",
+      "confidence": 0.614
+    },
+    "route_pattern_60b8436a1607": {
+      "number": "361",
+      "name": "Метро «Беляево» - Метро «Юго-Западная»",
+      "match_quality": "confirmed",
+      "confidence": 0.783
+    },
+    "route_pattern_772dfd9efd61": {
+      "number": "770",
+      "name": "Метро «Каширская» - Метро «Каширская» (северный вход)",
+      "match_quality": "probable",
+      "confidence": 0.678
+    },
+    "route_pattern_ad368331d97f": {
+      "number": "361",
+      "name": "Метро «Беляево» - Метро «Юго-Западная»",
+      "match_quality": "confirmed",
+      "confidence": 0.762
+    },
+    "route_pattern_ad52c4e5cab6": {
+      "number": "502",
+      "name": "Метро «Выхино» - Метро «Выхино»",
+      "match_quality": "probable",
+      "confidence": 0.669
+    },
+    "route_pattern_b06bbbf003b0": {
+      "number": "553",
+      "name": "Метро «Ленинский проспект» - Мега - Оби",
+      "match_quality": "confirmed",
+      "confidence": 0.712
+    }
+  }
+}

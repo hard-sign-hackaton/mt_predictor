@@ -1,4 +1,4 @@
-import type { MatchStatus, VehicleState } from '../api/types'
+import type { MatchStatus, RoutePattern, Stop, StopReference, VehicleState } from '../api/types'
 
 export type RouteVehicleFilter = 'all' | 'on_route' | 'not_on_route'
 export type DelayVehicleFilter = 'all' | 'delayed' | 'on_time'
@@ -15,6 +15,23 @@ const matchStatusLabels: Record<MatchStatus, string> = {
 
 export function vehicleName(vehicle: VehicleState) {
   return `ТС ${vehicle.unitId}`
+}
+
+export function routeDisplayName(route?: RoutePattern) {
+  if (!route?.officialRouteId) return 'Маршрут не определён'
+  return `Маршрут №${route.officialRouteId}`
+}
+
+export function routeDirection(route?: RoutePattern) {
+  return route?.officialRouteName || 'Направление не определено'
+}
+
+export function stopDisplayName(stop?: Stop | StopReference) {
+  return stop?.address?.trim() || 'Название остановки неизвестно'
+}
+
+export function vehicleRouteName(vehicle: VehicleState, routesByID: Map<string, RoutePattern>) {
+  return routeDisplayName(vehicle.routePatternId ? routesByID.get(vehicle.routePatternId) : undefined)
 }
 
 export function matchStatusLabel(status: MatchStatus) {

@@ -45,6 +45,10 @@ export interface RoutePattern {
   id: string
   /** Публичный ID маршрута после подключения внешнего справочника. */
   officialRouteId?: string
+  /** Человекочитаемое направление из открытого GTFS-справочника. */
+  officialRouteName?: string
+  /** confirmed — уверенное сопоставление, probable — наиболее вероятное. */
+  officialMatchQuality?: 'confirmed' | 'probable'
   /** Канонический порядок остановок одного круга. */
   stopIds: string[]
   /** Линия маршрута из GPS либо fallback только по остановкам. */
@@ -165,6 +169,7 @@ export interface DelayPrediction {
   unitId: number
   trId: number
   routePatternId: string
+  occurrenceId: string
   targetActionItemId: number
   targetStop: StopReference
   /** Момент расчёта T; входы модели обязаны иметь event_time <= T. */
@@ -178,28 +183,51 @@ export interface DelayPrediction {
   confidence?: number
   /** Необязательное объяснение backend/ML; frontend не должен его придумывать. */
   reason?: string
+  reasonCode?: string
+  evidence?: Record<string, number>
+  scenarioId?: string
   /** Необязательно, пока ML фактически не передаёт значение. */
   modelVersion?: string
 }
 
 export type IncidentEventType = 'new' | 'updated' | 'closed'
+export type IncidentStatus = 'active' | 'awaiting_result' | 'resolved' | 'cancelled'
+export type IncidentOutcome = 'occurred' | 'not_occurred'
 
 export interface Incident {
   /** Стабильный ID всех событий одного непрерывного инцидента. */
   id: string
   /** Команда добавить, заменить или удалить элемент активной очереди. */
   eventType: IncidentEventType
+  status: IncidentStatus
   unitId: number
   trId: number
   routePatternId: string
+  occurrenceId: string
   predictionId: string
   targetActionItemId: number
   targetStop: StopReference
   /** Входное значение для расчёта критичности на frontend. */
   predictedDelaySeconds: number
   predictionTime: string
+  targetPlannedAt: string
+  firstPredictedDelaySeconds: number
+  actualArrivalAt?: string
+  actualDelaySeconds?: number
+  outcome?: IncidentOutcome
+  reasonCode?: string
+  reason?: string
+  evidence?: Record<string, number>
+  scenarioId?: string
   createdAt: string
   updatedAt: string
+}
+
+export interface IncidentHistoryPage {
+  items: Incident[]
+  total: number
+  limit: number
+  offset: number
 }
 
 export interface DashboardSnapshot {

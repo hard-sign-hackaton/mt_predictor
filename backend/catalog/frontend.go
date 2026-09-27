@@ -29,7 +29,7 @@ func (c *Catalog) DashboardInit(catalogVersion string, thresholds models.RiskThr
 	}
 
 	result := models.DashboardInit{
-		SchemaVersion:   "1",
+		SchemaVersion:   "2",
 		CatalogVersion:  catalogVersion,
 		Stops:           make([]models.Stop, 0, len(c.Stops)),
 		Routes:          make([]models.RoutePattern, 0, len(c.RoutePatterns)),
@@ -60,12 +60,16 @@ func (c *Catalog) DashboardInit(catalogVersion string, thresholds models.RiskThr
 				Position: models.GeoPoint{Lon: point.Lon, Lat: point.Lat}, OccurrenceCount: point.OccurrenceCount,
 			})
 		}
+		publicRouteID, publicRouteName, publicMatchQuality := optionalString(pattern.OfficialRouteID), optionalString(pattern.OfficialRouteName), optionalString(pattern.OfficialMatchQuality)
 		result.Routes = append(result.Routes, models.RoutePattern{
-			ID:              pattern.RoutePatternID,
-			StopIDs:         append([]string(nil), pattern.StopIDs...),
-			Polyline:        polyline,
-			FrequentPoints:  frequentPoints,
-			GeometryQuality: models.GeometryQuality(pattern.GeometryQuality),
+			ID:                   pattern.RoutePatternID,
+			OfficialRouteID:      publicRouteID,
+			OfficialRouteName:    publicRouteName,
+			OfficialMatchQuality: publicMatchQuality,
+			StopIDs:              append([]string(nil), pattern.StopIDs...),
+			Polyline:             polyline,
+			FrequentPoints:       frequentPoints,
+			GeometryQuality:      models.GeometryQuality(pattern.GeometryQuality),
 			Quality: models.RouteGeometryQuality{
 				OccurrenceCount:        pattern.Quality.OccurrenceCount,
 				GoodGPSOccurrenceCount: pattern.Quality.GoodGPSOccurrenceCount,
@@ -142,3 +146,10 @@ func VehicleState(telemetry Telemetry, match MatchResult, freshness models.Telem
 }
 
 func pointer[T any](value T) *T { return &value }
+
+func optionalString(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
+}
