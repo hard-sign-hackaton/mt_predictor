@@ -21,27 +21,27 @@ type TelemetryPoint struct {
 	VehicleID  uint32
 	Nav        NavCell
 	ReceivedAt time.Time
-	// CellsTrailing is how many cells followed the navigation cell. It is
-	// reported for observability only; the navigation cell is what the delay
-	// model consumes.
+	// CellsTrailing — сколько ячеек шло после навигационной. Поле нужно только для
+	// наблюдаемости: модель задержки использует навигационную ячейку.
 	CellsTrailing int
 }
 
-// Options configures a Server.
+// Options задаёт параметры приёмника.
 type Options struct {
-	// Addr is the TCP address to listen on, for example ":9201". The emulator
-	// connects to this port.
+	// Addr — TCP-адрес прослушивания, например ":9201". К нему подключается эмулятор.
 	Addr string
-	// OnTelemetry is called for every realtime frame that yields a navigation
-	// cell. It runs on the connection's goroutine and must not block.
+	// OnTelemetry вызывается для каждого realtime-кадра, из которого удалось
+	// получить навигационную ячейку. Функция выполняется в горутине
+	// соединения и не должна блокировать.
 	OnTelemetry func(TelemetryPoint)
-	// Logger receives connection lifecycle and decode warnings. Defaults to
-	// slog.Default().
+	// Logger получает события жизненного цикла соединений и предупреждения декодера.
+	// По умолчанию используется slog.Default().
 	Logger *slog.Logger
-	// IdleTimeout closes a connection that has sent nothing for this long.
-	// Zero disables the deadline.
+	// IdleTimeout закрывает соединение, из которого столько времени не было данных.
+	// Нулевое значение отключает дедлайн.
 	IdleTimeout time.Duration
-	// WriteTimeout bounds the best-effort handshake reply. Defaults to 5s.
+	// WriteTimeout ограничивает ответ на рукопожатие по принципу «попробовать и забыть».
+	// По умолчанию 5 секунд.
 	WriteTimeout time.Duration
 }
 
@@ -50,7 +50,7 @@ const (
 	defaultWriteTimeout = 5 * time.Second
 )
 
-// Stats is a snapshot of receiver counters.
+// Stats — снимок счётчиков приёмника.
 type Stats struct {
 	AcceptedConnections int64
 	ClosedConnections   int64
@@ -85,13 +85,15 @@ type counters struct {
 	startedAt time.Time
 }
 
-// Server accepts NDTP connections and turns realtime frames into
+// Server принимает соединения NDTP и превращает realtime-кадры в
+// TelemetryPoint.
 // TelemetryPoints.
 //
-// The emulator is the TCP client and opens one connection per unitId, so the
-// server is a plain listener with a read loop per connection. A broken
-// connection is never fatal: the emulator reconnects and re-handshakes, and
-// the receiver simply starts a new session.
+// Эмулятор выступает TCP-клиентом и открывает по соединению на каждый unitId,
+// поэтому приёмник устроен как обычный слушатель с циклом чтения на
+// соединение. Оборванное соединение никогда не считается фатальным:
+// эмулятор переподключается и заново проходит рукопожатие, а приёмник
+// просто начинает новую сессию.
 type Server struct {
 	opts     Options
 	logger   *slog.Logger
@@ -104,7 +106,7 @@ type Server struct {
 	wg       sync.WaitGroup
 }
 
-// NewServer creates a receiver. Call Listen, then Serve.
+// NewServer создаёт приёмник. Сначала вызывается Listen, затем Serve.
 func NewServer(opts Options) *Server {
 	if opts.Logger == nil {
 		opts.Logger = slog.Default()
@@ -122,8 +124,8 @@ func NewServer(opts Options) *Server {
 	}
 }
 
-// Listen binds the TCP address. It is separate from Serve so tests can learn
-// the port chosen by the kernel.
+// Listen занимает TCP-адрес. Вынесено отдельно от Serve, чтобы тесты могли узнать
+// порт, выбранный ядром.
 func (s *Server) Listen() error {
 	listener, err := net.Listen("tcp", s.opts.Addr)
 	if err != nil {
@@ -140,7 +142,7 @@ func (s *Server) Listen() error {
 	return nil
 }
 
-// Addr reports the bound address, or nil before Listen succeeds.
+// Addr сообщает занятый адрес либо nil, если Listen ещё не отработал успешно.
 func (s *Server) Addr() net.Addr {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -150,7 +152,7 @@ func (s *Server) Addr() net.Addr {
 	return s.listener.Addr()
 }
 
-// Serve accepts connections until ctx is cancelled or the server is closed.
+// Serve принимает соединения, пока не отменён ctx или не закрыт приёмник.
 func (s *Server) Serve(ctx context.Context) error {
 	s.mu.Lock()
 	listener := s.listener
@@ -187,8 +189,8 @@ func (s *Server) Serve(ctx context.Context) error {
 	}
 }
 
-// Close stops the listener and tears down every live connection. It is safe to
-// call more than once.
+// Close останавливает слушатель и закрывает все живые соединения. Повторный вызов
+// безопасен.
 func (s *Server) Close() error {
 	s.mu.Lock()
 	if s.closed {
@@ -207,7 +209,7 @@ func (s *Server) Close() error {
 	if listener != nil {
 		err = listener.Close()
 	}
-	// Unblock the read loops.
+	// Разблокировать циклы чтения.
 	for _, conn := range conns {
 		conn.Close()
 	}
@@ -221,7 +223,7 @@ func (s *Server) isClosed() bool {
 	return s.closed
 }
 
-// Stats returns a snapshot of the receiver counters.
+// Stats возвращает снимок счётчиков приёмника.
 func (s *Server) Stats() Stats {
 	c := &s.counters
 	return Stats{
@@ -258,7 +260,7 @@ func (s *Server) untrackConn(conn net.Conn) {
 	s.mu.Unlock()
 }
 
-// handle runs the read loop for one connection until it fails or is closed.
+// handle выполняет цикл чтения одного соединения до сбоя или закрытия.
 func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	defer func() {
 		s.untrackConn(conn)
@@ -276,8 +278,8 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	reader := NewHeaderReader(conn)
 	var vehicle uint32
 	var haveVehicle bool
-	// Byte and resync counters live on the reader, so track how much of them
-	// has already been added to the shared totals.
+	// Счётчики байт и повторных синхронизаций живут в читателе, поэтому
+	// запоминаем, сколько из них уже учтено в общих итогах.
 	var countedBytes, countedResyncs int64
 
 	for {
@@ -285,7 +287,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 			return
 		}
 		if s.opts.IdleTimeout > 0 {
-			// Best effort: a dead peer must not hold a goroutine forever.
+			// Попытка сделать хорошо: мёртвый узел не должен удерживать горутину.
 			_ = conn.SetReadDeadline(time.Now().Add(s.opts.IdleTimeout))
 		}
 
@@ -323,8 +325,8 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 		case frame.IsRealtime():
 			s.counters.realtime.Add(1)
 			if !haveVehicle {
-				// The specification has the emulator handshake first, but a
-				// realtime frame still carries the peer, so keep going.
+				// По спецификации эмулятор сначала здоровается, однако
+				// realtime-кадр всё равно несёт peer, поэтому продолжаем работу.
 				vehicle, haveVehicle = frame.Peer, true
 			}
 			s.handleRealtime(remote, vehicle, frame)
@@ -336,11 +338,12 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	}
 }
 
-// handleRealtime extracts the navigation cell and hands it to the consumer.
+// handleRealtime извлекает навигационную ячейку и передаёт её получателю.
 func (s *Server) handleRealtime(remote string, vehicle uint32, frame Frame) {
 	cells, err := DecodeCells(frame.Body)
 	if err != nil {
-		// The navigation cell is always first, so cells may still be usable.
+		// Навигационная ячейка всегда первая, поэтому разобранные ячейки
+		// могут ещё пригодиться.
 		s.counters.cellError.Add(1)
 		s.logger.Warn("ndtp cell decode stopped early",
 			"remote", remote, "vehicle", vehicle, "cells", len(cells), "error", err)
@@ -373,9 +376,9 @@ func (s *Server) handleRealtime(remote string, vehicle uint32, frame Frame) {
 	})
 }
 
-// flushReaderCounters folds a connection's cumulative byte and resync counts
-// into the server totals, so concurrent connections add up instead of racing to
-// overwrite each other.
+// flushReaderCounters переносит накопленные счётчики байт и повторных
+// синхронизаций одного соединения в общие итоги, чтобы параллельные соединения
+// складывались, а не затирали друг друга.
 func (s *Server) flushReaderCounters(reader *HeaderReader, countedBytes, countedResyncs *int64) {
 	if n := reader.BytesRead(); n > *countedBytes {
 		s.counters.bytes.Add(n - *countedBytes)
@@ -387,11 +390,11 @@ func (s *Server) flushReaderCounters(reader *HeaderReader, countedBytes, counted
 	}
 }
 
-// replyHandshake sends one best-effort acknowledgement. The emulator does not
-// parse replies, but the specification expects the receiver to answer, and
-// writing the bytes confirms the socket is live. Exactly one reply is sent per
-// connection: the emulator never reads again, so writing more would only risk
-// filling the socket buffer.
+// replyHandshake отправляет один ответ на рукопожатие по принципу «попробовать и
+// забыть». Эмулятор ответы не разбирает, однако по спецификации приёмник
+// обязан ответить, а запись байт подтверждает, что сокет жив. Ровно один ответ
+// отправляется на соединение: эмулятор больше не читает, поэтому лишняя запись
+// лишь рискует заполнить буфер сокета.
 func (s *Server) replyHandshake(conn net.Conn, frame Frame) {
 	_ = conn.SetWriteDeadline(time.Now().Add(s.opts.WriteTimeout))
 	defer conn.SetWriteDeadline(time.Time{})
@@ -403,7 +406,7 @@ func (s *Server) replyHandshake(conn net.Conn, frame Frame) {
 	}
 }
 
-// handshakePeer reads peerAddress out of an 18-byte handshake body.
+// handshakePeer читает peerAddress из 18-байтового тела рукопожатия.
 func handshakePeer(body []byte) (uint32, bool) {
 	if len(body) < handshakeBodySize {
 		return 0, false

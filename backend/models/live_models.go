@@ -151,12 +151,15 @@ type DashboardSnapshot struct {
 type LiveEventType string
 
 const (
-	LiveVehicleUpdated    LiveEventType = "vehicle_updated"
+	// LiveVehicleUpdated — обновилось состояние ТС на карте.
+	LiveVehicleUpdated LiveEventType = "vehicle_updated"
+	// LivePredictionUpdated — обновился прогноз задержки.
 	LivePredictionUpdated LiveEventType = "prediction_updated"
-	LiveIncidentUpdated   LiveEventType = "incident_updated"
+	// LiveIncidentUpdated — изменилась очередь инцидентов.
+	LiveIncidentUpdated LiveEventType = "incident_updated"
 )
 
-// LiveEvent — версионированный конверт WebSocket. EventID и Sequence позволяют
+// LiveEvent — версионированный конверт SSE-события. EventID и Sequence позволяют
 // frontend отбрасывать дубли и обнаруживать разрывы, требующие нового snapshot.
 type LiveEvent struct {
 	// EventID глобально уникален в пределах сохраняемого потока.

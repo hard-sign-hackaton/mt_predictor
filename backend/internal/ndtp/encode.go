@@ -5,19 +5,18 @@ import (
 	"math"
 )
 
-// BuildFrame assembles a complete frame: NPL header, NPH header and body, with
-// the CRC-16/MODBUS of "NPH + body" stored byte-swapped in the NPL.
+// BuildFrame собирает полный кадр: заголовок NPL, заголовок NPH и тело, причём
+// CRC-16/MODBUS от «NPH плюс тело» кладётся в NPL с переставленными байтами.
 //
-// The frame is marked as a request, which is what the emulator sends. The
-// receiver's handshake reply uses buildFrame with the request bit cleared.
+// Кадр помечается как запрос, именно так отправляет эмулятор. Ответ приёмника на
+// рукопожатие собирается через buildFrame со сброшенным битом запроса.
 //
-// Frames are produced for the feeder tool, for tests, and to answer a
-// handshake.
+// Кадры нужны инструменту-фидеру, тестам и для ответа на рукопожатие.
 func BuildFrame(peer uint32, serviceID, msgType uint16, requestID uint32, body []byte) []byte {
 	return buildFrame(peer, serviceID, msgType, requestID, 1, body)
 }
 
-// nphFlagRequest is bit 0 of the NPH flags word.
+// nphFlagRequest — бит 0 слова флагов NPH.
 const nphFlagRequest uint16 = 1
 
 func buildFrame(peer uint32, serviceID, msgType uint16, requestID uint32, flags uint16, body []byte) []byte {
@@ -31,7 +30,7 @@ func buildFrame(peer uint32, serviceID, msgType uint16, requestID uint32, flags 
 	frame := make([]byte, nplSize+len(nphAndBody))
 	binary.LittleEndian.PutUint16(frame[0:2], Signature)
 	binary.LittleEndian.PutUint16(frame[2:4], uint16(len(nphAndBody)))
-	// frame[4:6] flags: encryption, crc, delay all zero
+	// frame[4:6] флаги: шифрование, crc, задержка — все нулевые
 	binary.LittleEndian.PutUint16(frame[6:8], SwapBytes16(CRC16Modbus(nphAndBody)))
 	frame[8] = TypeNPH
 	binary.LittleEndian.PutUint32(frame[9:13], peer)
@@ -40,27 +39,25 @@ func buildFrame(peer uint32, serviceID, msgType uint16, requestID uint32, flags 
 	return frame
 }
 
-// BuildHandshakeBody builds the 18-byte NPH_SGC_CONN_REQUEST body.
+// BuildHandshakeBody собирает 18-байтовое тело NPH_SGC_CONN_REQUEST.
 func BuildHandshakeBody(peer uint32) []byte {
 	body := make([]byte, handshakeBodySize)
 	binary.LittleEndian.PutUint16(body[0:2], protoVersionHigh)
 	binary.LittleEndian.PutUint16(body[2:4], protoVersionLow)
-	binary.LittleEndian.PutUint16(body[4:6], 0) // flags: encryption, crc, simulate
+	// флаги: шифрование, crc, simulate
 	binary.LittleEndian.PutUint32(body[6:10], peer)
-	binary.LittleEndian.PutUint32(body[10:14], 65535) // maxPacketSize
-	binary.LittleEndian.PutUint32(body[14:18], 0)     // reserved
+	// максимальный размер пакета
+	binary.LittleEndian.PutUint32(body[14:18], 0) // reserved
 	return body
 }
 
-// AppendCell appends a cell header and payload to dst.
+// AppendCell дописывает в dst заголовок ячейки и её полезную часть.
 func AppendCell(dst []byte, cellType byte, number uint8, payload []byte) []byte {
 	dst = append(dst, cellType, number)
 	return append(dst, payload...)
 }
 
-// EncodeNavCell encodes a NavCell into its 26 wire bytes. Coordinates are
-// stored as absolute values scaled by 1e7, with the hemisphere carried in the
-// extraDop bits.
+// EncodeNavCell кодирует NavCell в 26 байт, которые уходят на провод.
 func EncodeNavCell(nav NavCell) []byte {
 	data := make([]byte, navCellSize)
 	binary.LittleEndian.PutUint32(data[0:4], uint32(nav.Timestamp.Unix()))
@@ -104,8 +101,8 @@ func EncodeNavCell(nav NavCell) []byte {
 	return data
 }
 
-// putCoord writes the unsigned fixed-point coordinate. The hemisphere is not
-// encoded here: it travels in extraDopBit5/extraDopBit6.
+// putCoord записывает беззнаковую координату в фиксированной точке. Полушарие
+// здесь не кодируется: оно передаётся битами extraDop 5 и 6.
 func putCoord(dst []byte, value float64) {
 	scaled := uint32(math.Abs(value)*coordScale + 0.5)
 	binary.LittleEndian.PutUint32(dst, scaled)

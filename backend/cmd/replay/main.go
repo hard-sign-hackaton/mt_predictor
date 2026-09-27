@@ -8,6 +8,7 @@ import (
 	"mt_predictor/catalog"
 )
 
+// main разбирает флаги, загружает каталог и прогоняет трафик в offline-режиме.
 func main() {
 	catalogPath := flag.String("catalog", "data/generated/route_catalog.json", "derived route catalog")
 	trafficPath := flag.String("traffic", "", "decoded traffic.csv to replay")

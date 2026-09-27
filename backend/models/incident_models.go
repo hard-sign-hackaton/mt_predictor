@@ -16,19 +16,29 @@ const (
 	IncidentClosed IncidentEventType = "closed"
 )
 
+// IncidentStatus — состояние инцидента в очереди диспетчера.
 type IncidentStatus string
 
 const (
-	IncidentActive         IncidentStatus = "active"
+	// IncidentActive — задержка обнаружена, инцидент ждёт прибытия на цель.
+	IncidentActive IncidentStatus = "active"
+	// IncidentAwaitingResult — цель вышла из окна прогноза, но инцидент всё ещё
+	// ждёт фактического прибытия.
 	IncidentAwaitingResult IncidentStatus = "awaiting_result"
-	IncidentResolved       IncidentStatus = "resolved"
-	IncidentCancelled      IncidentStatus = "cancelled"
+	// IncidentResolved — прибытие зафиксировано, фактическая задержка измерена.
+	IncidentResolved IncidentStatus = "resolved"
+	// IncidentCancelled — задержка перестала быть критичной, инцидент снят без
+	// факта прибытия.
+	IncidentCancelled IncidentStatus = "cancelled"
 )
 
+// IncidentOutcome — подтвердился ли прогноз задержки по факту прибытия.
 type IncidentOutcome string
 
 const (
-	IncidentOccurred    IncidentOutcome = "occurred"
+	// IncidentOccurred — фактическая задержка превысила порог.
+	IncidentOccurred IncidentOutcome = "occurred"
+	// IncidentNotOccurred — фактическая задержка порог не превысила.
 	IncidentNotOccurred IncidentOutcome = "not_occurred"
 )
 
@@ -74,6 +84,8 @@ type Incident struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+// IncidentHistoryPage — страница закрытых инцидентов для журнала.
+// Total задаёт размер выборки до применения Limit и Offset.
 type IncidentHistoryPage struct {
 	Items  []Incident `json:"items"`
 	Total  int        `json:"total"`
@@ -81,14 +93,18 @@ type IncidentHistoryPage struct {
 	Offset int        `json:"offset"`
 }
 
+// OperatorActionStatus — состояние исходящего сообщения оператору.
 type OperatorActionStatus string
 
 const (
-	OperatorActionPending  OperatorActionStatus = "pending"
+	// OperatorActionPending — действие создано, но ещё не забрано доставкой.
+	OperatorActionPending OperatorActionStatus = "pending"
+	// OperatorActionConsumed — действие забрано внешним сервисом доставки.
+	// Backend сам этот статус не выставляет.
 	OperatorActionConsumed OperatorActionStatus = "consumed"
 )
 
-// IncidentActionOption is a server-approved dispatcher reaction for an incident.
+// IncidentActionOption — разрешённая backend реакция диспетчера на инцидент.
 type IncidentActionOption struct {
 	Code      string `json:"code"`
 	Label     string `json:"label"`
@@ -96,8 +112,8 @@ type IncidentActionOption struct {
 	Message   string `json:"message"`
 }
 
-// OperatorAction is both the incident reaction history and an outbox message
-// for the external service that delivers instructions to drivers or HQ.
+// OperatorAction — запись об истории реакции и исходящее сообщение для
+// внешнего сервиса, который передаёт указания водителям или диспетчеру.
 type OperatorAction struct {
 	ID             string               `json:"id"`
 	IncidentID     string               `json:"incidentId"`
@@ -112,7 +128,11 @@ type OperatorAction struct {
 	ConsumedAt     *time.Time           `json:"consumedAt,omitempty"`
 }
 
+// IncidentActions — ответа на запрос доступных и предыдущих действий по
+// инциденту.
 type IncidentActions struct {
+	// Available — действия, которые backend разрешает применить сейчас.
 	Available []IncidentActionOption `json:"available"`
-	History   []OperatorAction       `json:"history"`
+	// History — ранее созданные действия по этому инциденту.
+	History []OperatorAction `json:"history"`
 }

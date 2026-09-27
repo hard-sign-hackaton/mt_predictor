@@ -6,27 +6,27 @@ import (
 	"time"
 )
 
-// Cell identifiers as used on the wire (see the specification, §7).
+// Идентификаторы ячеек в том виде, в каком они идут по проводу, раздел 7 спецификации.
 const (
-	CellNav00       byte = 0  // navigation, always first in a realtime body
-	CellIntSensor02 byte = 2  // internal sensors
-	CellUsi08       byte = 8  // UZI-M fuel level sensor
-	CellCan10       byte = 10 // CAN bus
-	CellLls15       byte = 15 // LLS level gauge
-	CellTermo16     byte = 16 // temperature probe
+	CellNav00       byte = 0  // навигация, всегда первая в realtime теле
+	CellIntSensor02 byte = 2  // внутренние датчики
+	CellUsi08       byte = 8  // датчик уровня топлива UZI-M
+	CellCan10       byte = 10 // шина CAN
+	CellLls15       byte = 15 // датчик уровня LLS
+	CellTermo16     byte = 16 // датчик температуры
 	navCellSize          = 26
-	cellHeaderSize       = 2 // type u8 + number u8
+	cellHeaderSize       = 2 // тип u8 плюс номер u8
 )
 
-// cellSizes maps a cell type to its fixed payload size in bytes.
+// cellSizes сопоставляет тип ячейки с фиксированным размером полезной части.
 //
-// Only types whose size the specification states explicitly are listed: sizes
-// are needed to walk to the *next* cell, and a wrong guess would corrupt every
-// cell after it. This set covers the whole cell set the emulator generates
-// (Nav00, Usi08, Termo16, IntSensor02, Can10) plus LLS.
+// Перечислены только типы, размер которых спецификация задаёт явно: по размерам
+// выполняется переход к следующей ячейке, и неверная догадка испортила бы все
+// последующие ячейки. Набор покрывает все ячейки, которые генерирует эмулятор
+// (Nav00, Usi08, Termo16, IntSensor02, Can10), плюс LLS.
 //
-// Decoding deliberately stops at any other type rather than guessing; see
-// DecodeCells.
+// Декодирование на любом другом типе намеренно останавливается, а не гадает;
+// см. DecodeCells.
 var cellSizes = map[byte]int{
 	CellNav00:       navCellSize,
 	CellIntSensor02: 26,
@@ -36,16 +36,16 @@ var cellSizes = map[byte]int{
 	CellTermo16:     8,
 }
 
-// Cell is one raw cell from a realtime body. Data aliases the frame buffer and
-// is only valid until the frame is reused.
+// Cell — одна необработанная ячейка из тела realtime. Поле Data ссылается на
+// буфер кадра и действительно только до повторного использования кадра.
 type Cell struct {
 	Type   byte
 	Number uint8
 	Data   []byte
 }
 
-// ErrUnknownCellType reports a cell type this decoder has no payload size for.
-// Because the payload length is unknown, the rest of the body cannot be walked.
+// ErrUnknownCellType — тип ячейки, для которого у декодера нет размера полезной
+// части. Длина неизвестна, поэтому пройти дальше по телу нельзя.
 type ErrUnknownCellType struct {
 	Type byte
 }
@@ -54,7 +54,7 @@ func (e *ErrUnknownCellType) Error() string {
 	return fmt.Sprintf("ndtp: unknown cell type %d, cannot walk past it", e.Type)
 }
 
-// ErrTruncatedCell reports a body that ended in the middle of a cell.
+// ErrTruncatedCell — тело кадра оборвалось посередине ячейки.
 type ErrTruncatedCell struct {
 	Type   byte
 	Want   int
@@ -67,11 +67,11 @@ func (e *ErrTruncatedCell) Error() string {
 		e.Type, e.Offset, e.Want, e.Got)
 }
 
-// DecodeCells splits a realtime body into its cells.
+// DecodeCells разбивает тело realtime на ячейки.
 //
-// G6CellNav00 is always the first cell of a realtime body, so a caller can rely
-// on cells[0] being navigation even when this function reports a non-nil error
-// and stops early at a cell type of unknown size.
+// G6CellNav00 всегда идёт первой ячейкой, поэтому вызывающий код может полагаться
+// на cells[0] как на навигацию даже тогда, когда функция вернула ошибку и
+// остановилась на типе ячейки неизвестного размера.
 func DecodeCells(body []byte) ([]Cell, error) {
 	var cells []Cell
 	for offset := 0; offset < len(body); {
@@ -95,9 +95,9 @@ func DecodeCells(body []byte) ([]Cell, error) {
 	return cells, nil
 }
 
-// NavFlags holds the eight extraDop bits of a navigation cell. Bits 0-4 are
-// device state, bit5 the latitude hemisphere, bit6 the longitude hemisphere and
-// bit7 coordinate validity.
+// NavFlags — восемь бит extraDop навигационной ячейки. Биты 0-4 описывают
+// состояние устройства, бит 5 — полушарие широты, бит 6 — полушарие долготы,
+// бит 7 — достоверность координат.
 type NavFlags struct {
 	VoiceRequest    bool
 	Alarm           bool
@@ -120,8 +120,9 @@ const (
 	dopValid           byte = 1 << 7
 )
 
-// ParseNavFlags unpacks the packed extraDop byte. Bit 5 set means northern
-// latitude, bit 6 eastern longitude, bit 7 that the coordinates are trustworthy.
+// ParseNavFlags распаковывает упакованный байт extraDop. Установленный бит 5
+// означает северную широту, бит 6 — восточную долготу, бит 7 — что координатам
+// можно доверять.
 func ParseNavFlags(b byte) NavFlags {
 	return NavFlags{
 		VoiceRequest:    b&dopVoiceRequest != 0,
@@ -135,8 +136,8 @@ func ParseNavFlags(b byte) NavFlags {
 	}
 }
 
-// NavCell is a decoded G6CellNav00 record, the wire equivalent of one
-// traffic.csv row.
+// NavCell — декодированная запись G6CellNav00, эквивалент одной строки
+// traffic.csv на проводе.
 type NavCell struct {
 	Timestamp  time.Time
 	Longitude  float64 // signed degrees
@@ -148,18 +149,18 @@ type NavCell struct {
 	Track      uint16  // metres travelled, mod 65535
 	Satellites uint8
 	PDOP       uint8
-	// BatteryVoltage is decoded from the raw unit where 1 unit = 20 mV.
+	// BatteryVoltage — напряжение, пересчитанное из единицы 20 мВ.
 	BatteryVoltage float64
 	Flags          NavFlags
 }
 
-// coordScale is the NDTP fixed-point scale for longitude and latitude.
+// coordScale — фиксированная точка NDTP для долготы и широты.
 const coordScale = 1e7
 
-// batteryUnitVolts is the voltage of one raw batVoltage unit (20 mV).
+// batteryUnitVolts — напряжение одной сырой единицы batVoltage, то есть 20 мВ.
 const batteryUnitVolts = 0.02
 
-// DecodeNavCell decodes a 26-byte G6CellNav00 payload.
+// DecodeNavCell декодирует полезную часть G6CellNav00 длиной 26 байт.
 func DecodeNavCell(data []byte) (NavCell, error) {
 	if len(data) < navCellSize {
 		return NavCell{}, &ErrTruncatedCell{Type: CellNav00, Want: navCellSize, Got: len(data)}
@@ -189,12 +190,12 @@ func DecodeNavCell(data []byte) (NavCell, error) {
 	}, nil
 }
 
-// Position returns the coordinates only when the navigation cell marked them
-// valid.
+// Position возвращает координаты, только если навигационная ячейка отметила их
+// достоверными.
 //
-// This mirrors traffic.csv, where rows with location_valid=False still carry
-// coordinates that are stale or zeroed; callers must not treat those as a real
-// position.
+// Это повторяет поведение traffic.csv, где строки с location_valid=False всё
+// равно несут устаревшие или обнулённые координаты; считать их реальной
+// позицией нельзя.
 func (n NavCell) Position() (lon, lat float64, ok bool) {
 	if !n.Flags.Valid {
 		return 0, 0, false

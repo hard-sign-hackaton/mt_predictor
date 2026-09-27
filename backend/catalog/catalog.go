@@ -9,8 +9,9 @@ import (
 	"time"
 )
 
-// Catalog is static, derived reference data. RoutePatternID is an internal
-// geometry identifier and must not be presented as an official route number.
+// Catalog — статические производные справочные данные, загружаемые один раз
+// при старте. RoutePatternID является внутренним идентификатором геометрии и
+// не должен показываться как официальный номер московского маршрута.
 type Catalog struct {
 	SchemaVersion   int               `json:"schema_version"`
 	SourceHashes    map[string]string `json:"source_hashes"`
@@ -25,6 +26,8 @@ type Catalog struct {
 	assignmentsByTR map[int64][]RouteAssignment
 }
 
+// VehicleBinding — соответствие между unit_id телеметрии и tr_id расписания.
+// SourceSplits перечисляет файлы-источники, из которых взята связка.
 type VehicleBinding struct {
 	UnitID       uint32   `json:"unit_id"`
 	TRID         int64    `json:"tr_id"`
@@ -33,6 +36,8 @@ type VehicleBinding struct {
 	Synthetic    bool     `json:"synthetic"`
 }
 
+// Stop — физическая остановка, дедуплицированная по округлённым координатам.
+// Address заполняется из справочника и может отсутствовать.
 type Stop struct {
 	StopID  string  `json:"stop_id"`
 	Lon     float64 `json:"lon"`
@@ -40,8 +45,11 @@ type Stop struct {
 	Address string  `json:"address"`
 }
 
+// Point — пара координат в полилинии паттерна, в порядке долготы и широты.
 type Point [2]float64
 
+// RoutePattern — повторяющийся путь, вычисленный по расписанию и GPS.
+// Поля OfficialRoute помечены json:"-" и заполняются из внешнего справочника.
 type RoutePattern struct {
 	RoutePatternID       string          `json:"route_pattern_id"`
 	OfficialRouteID      string          `json:"-"`
@@ -70,12 +78,15 @@ type publicRouteReference struct {
 	MatchQuality string `json:"match_quality"`
 }
 
+// FrequentPoint — повторяющаяся GPS-ячейка, посчитанная для диагностики.
 type FrequentPoint struct {
 	Lon             float64 `json:"lon"`
 	Lat             float64 `json:"lat"`
 	OccurrenceCount int     `json:"occurrence_count"`
 }
 
+// PatternQuality — числовые показатели качества вычисленной линии паттерна.
+// MedianStopToGPSMeters отсутствует, если пригодного GPS-прохода не было.
 type PatternQuality struct {
 	OccurrenceCount        int      `json:"occurrence_count"`
 	GoodGPSOccurrenceCount int      `json:"good_gps_occurrence_count"`
@@ -85,6 +96,7 @@ type PatternQuality struct {
 	PolylinePointCount     int      `json:"polyline_point_count"`
 }
 
+// RouteAssignment — один рейс расписания в границах ValidFrom и ValidTo.
 type RouteAssignment struct {
 	OccurrenceID   string          `json:"occurrence_id"`
 	TRID           int64           `json:"tr_id"`
@@ -94,6 +106,8 @@ type RouteAssignment struct {
 	Events         []ScheduleEvent `json:"events"`
 }
 
+// ScheduleEvent — плановое прибытие на остановку в составе рейса.
+// Lon и Lat скопированы из остановки, чтобы выбор цели не требовал поиска.
 type ScheduleEvent struct {
 	ActionItemID int64     `json:"action_item_id"`
 	StopID       string    `json:"stop_id"`
@@ -102,6 +116,9 @@ type ScheduleEvent struct {
 	Lat          float64   `json:"lat"`
 }
 
+// Load читает каталог, проверяет версию схемы, подставляет внешний справочник
+// маршрутов и строит индексы. Отсутствующий public_transport_reference.json
+// допустим: тогда официальные номера и названия остаются пустыми.
 func Load(path string) (*Catalog, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -186,15 +203,18 @@ func (c *Catalog) buildIndexes() error {
 	return nil
 }
 
+// TRIDForUnit возвращает tr_id по unit_id телеметрии.
 func (c *Catalog) TRIDForUnit(unitID uint32) (int64, bool) {
 	trID, ok := c.unitToTR[unitID]
 	return trID, ok
 }
 
+// AssignmentsForTR возвращает все рейсы tr_id, отсортированные по времени начала.
 func (c *Catalog) AssignmentsForTR(trID int64) []RouteAssignment {
 	return c.assignmentsByTR[trID]
 }
 
+// Pattern возвращает вычисленный паттерн по его идентификатору геометрии.
 func (c *Catalog) Pattern(patternID string) (RoutePattern, bool) {
 	pattern, ok := c.patternByID[patternID]
 	return pattern, ok

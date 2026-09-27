@@ -21,6 +21,8 @@ type API struct {
 	incidentThreshold float64
 }
 
+// APIOptions задаёт порог инцидента, источник прогнозов и переключатель
+// mock-сценариев. Пустой набор даёт значения по умолчанию.
 type APIOptions struct {
 	EnableMockScenarios bool
 	IncidentThreshold   float64

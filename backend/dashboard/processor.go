@@ -54,6 +54,9 @@ type predictionCandidate struct {
 	targetStop     models.StopReference
 }
 
+// ProcessorOptions задаёт периодичность прогноза, таймаут вызова ML и порог,
+// при превышении которого задержка превращается в инцидент. Нулевые
+// значения заменяются значениями по умолчанию.
 type ProcessorOptions struct {
 	PredictionEvery   time.Duration
 	PredictionTimeout time.Duration

@@ -47,6 +47,7 @@ type Client struct {
 	service    delayv1.DelayPredictionServiceClient
 }
 
+// New создаёт клиента и лениво поднимает gRPC-соединение с address.
 func New(address string) (*Client, error) {
 	connection, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -55,8 +56,11 @@ func New(address string) (*Client, error) {
 	return &Client{connection: connection, service: delayv1.NewDelayPredictionServiceClient(connection)}, nil
 }
 
+// Close разрывает соединение.
 func (c *Client) Close() error { return c.connection.Close() }
 
+// PredictBatch отправляет точки и телеметрию в ML и возвращает задержки в секундах
+// по SampleID.
 func (c *Client) PredictBatch(ctx context.Context, points []PredictionPoint, telemetry []TelemetryPoint) (map[string]float64, error) {
 	request := &delayv1.BatchPredictRequest{
 		Points:    make([]*delayv1.PredictionPoint, 0, len(points)),

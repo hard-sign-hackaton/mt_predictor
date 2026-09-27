@@ -1,24 +1,24 @@
-// Package ndtp implements the receiver side of the NDTP ("GrAnit") telematics
-// wire protocol: framing, CRC validation and telemetry cell decoding.
+// Package ndtp реализует приёмную часть протокола телематики NDTP: разбор
+// кадров, проверку CRC и декодирование ячеек телеметрии.
 //
-// Layout of a single frame, all fields little-endian, structures packed:
+// Устройство одного кадра, все поля little-endian, структуры без выравнивания:
 //
-//	[ NPL 15 bytes ][ NPH 10 bytes ][ body ]
+//	[ NPL 15 байт ][ NPH 10 байт ][ тело ]
 //
-// See docs/Emulator-and-Telematic-Packets-Specification.md.
+// Подробности протокола: docs/Emulator-and-Telematic-Packets-Specification.md.
 package ndtp
 
-// CRC-16/MODBUS parameters: polynomial 0xA001 (reversed 0x8005), init 0xFFFF,
-// no reflection of the input, no final XOR.
+// Параметры CRC-16/MODBUS: полином 0xA001 (перевёрнутый 0x8005), инициализация
+// 0xFFFF, без отражения входа и без финального XOR.
 const (
 	crcInit = 0xFFFF
 	crcPoly = 0xA001
-	// crcTableBits is how many times a table entry is shifted while being
-	// built: one iteration per bit of the byte index.
+	// crcTableBits — число сдвигов при построении элемента таблицы, по одному
+	// на каждый бит индекса байта.
 	crcTableBits = 8
 )
 
-// crcTable is the standard MODBUS lookup table, built once at init.
+// crcTable — стандартная таблица MODBUS, строится один раз при инициализации.
 var crcTable = buildCRCTable()
 
 func buildCRCTable() [256]uint16 {
@@ -37,10 +37,10 @@ func buildCRCTable() [256]uint16 {
 	return table
 }
 
-// CRC16Modbus returns the CRC-16/MODBUS checksum of data.
+// CRC16Modbus возвращает контрольную сумму CRC-16/MODBUS для данных.
 //
-// NDTP stores this value in the NPL header with its two bytes swapped, so
-// callers comparing against the wire value need SwapBytes16.
+// В заголовке NPL это значение хранится с переставленными байтами, поэтому при
+// сравнении с байтами на проводе нужен SwapBytes16.
 func CRC16Modbus(data []byte) uint16 {
 	crc := uint16(crcInit)
 	for _, b := range data {
@@ -49,8 +49,8 @@ func CRC16Modbus(data []byte) uint16 {
 	return crc
 }
 
-// SwapBytes16 returns v with its two bytes exchanged. The NPL header carries
-// the frame CRC in this swapped form.
+// SwapBytes16 меняет местами два байта значения. В таком виде заголовок NPL
+// хранит CRC кадра.
 func SwapBytes16(v uint16) uint16 {
 	return v>>8 | v<<8
 }
