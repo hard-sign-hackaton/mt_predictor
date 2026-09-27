@@ -3,8 +3,8 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd "${script_dir}/.." && pwd)"
-emulator_archive="${project_dir}/../../dataset/ndtp-telemetry-emulator.tar"
-traffic_file="${project_dir}/../../dataset/validate/traffic.csv"
+emulator_archive="${project_dir}/../ndtp-telemetry-emulator.tar"
+traffic_file="${project_dir}/../validate/traffic.csv"
 
 cd "${project_dir}"
 

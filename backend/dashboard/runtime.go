@@ -77,6 +77,10 @@ func (r *Runtime) PublishVehicle(vehicle models.VehicleState, occurredAt time.Ti
 	if exists && vehicle.EventTime.Before(current.EventTime) {
 		return current, false
 	}
+	if exists && vehicle.CurrentDelaySeconds == nil && current.CurrentDelaySeconds != nil {
+		delay := *current.CurrentDelaySeconds
+		vehicle.CurrentDelaySeconds = &delay
+	}
 	r.vehicles[vehicle.UnitID] = vehicle
 	r.publishLocked(models.LiveEvent{
 		Type: models.LiveVehicleUpdated, OccurredAt: occurredAt, Vehicle: &vehicle,
@@ -90,6 +94,24 @@ func (r *Runtime) Vehicle(unitID uint32) (models.VehicleState, bool) {
 	defer r.mu.RUnlock()
 	vehicle, ok := r.vehicles[unitID]
 	return vehicle, ok
+}
+
+// SetVehicleDelay дополняет последнее состояние ТС рассчитанной задержкой.
+// Метод нужен контролируемому replay, где EventTime переносится на текущую дату
+// и историческое расписание уже нельзя использовать для честного live-расчёта.
+func (r *Runtime) SetVehicleDelay(unitID uint32, delay float64, occurredAt time.Time) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	vehicle, ok := r.vehicles[unitID]
+	if !ok {
+		return false
+	}
+	vehicle.CurrentDelaySeconds = &delay
+	r.vehicles[unitID] = vehicle
+	r.publishLocked(models.LiveEvent{
+		Type: models.LiveVehicleUpdated, OccurredAt: occurredAt, Vehicle: &vehicle,
+	}, fmt.Sprintf("vehicle-delay-%d", unitID))
+	return true
 }
 
 // ApplyPrediction публикует прогноз и синхронно поддерживает минимальную
@@ -109,7 +131,8 @@ func (r *Runtime) ApplyPrediction(prediction models.DelayPrediction, incidentThr
 	}, "prediction-"+prediction.ID)
 
 	existing, active := r.incidents[key]
-	if prediction.PredictedDelaySeconds > incidentThreshold {
+	currentDelayExceedsThreshold := prediction.CurrentDelaySeconds != nil && *prediction.CurrentDelaySeconds > incidentThreshold
+	if prediction.PredictedDelaySeconds > incidentThreshold || currentDelayExceedsThreshold {
 		eventType := models.IncidentNew
 		createdAt := now
 		if active {
@@ -121,6 +144,7 @@ func (r *Runtime) ApplyPrediction(prediction models.DelayPrediction, incidentThr
 			EventType: eventType, UnitID: prediction.UnitID, TRID: prediction.TRID,
 			Status: models.IncidentActive, RoutePatternID: prediction.RoutePatternID, OccurrenceID: prediction.OccurrenceID, PredictionID: prediction.ID,
 			TargetActionItemID: prediction.TargetActionItemID, TargetStop: prediction.TargetStop,
+			CurrentDelaySeconds:   prediction.CurrentDelaySeconds,
 			PredictedDelaySeconds: prediction.PredictedDelaySeconds, PredictionTime: prediction.PredictionTime,
 			TargetPlannedAt: prediction.TargetPlannedAt, FirstPredictedDelaySeconds: prediction.PredictedDelaySeconds,
 			ReasonCode: prediction.ReasonCode, Reason: prediction.Reason, Evidence: prediction.Evidence, ScenarioID: prediction.ScenarioID,

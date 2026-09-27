@@ -19,3 +19,22 @@ func TestSnapshotMarksOldVehicleStale(t *testing.T) {
 		t.Fatalf("ожидался stale-маркер: %+v", snapshot)
 	}
 }
+
+func TestSetVehicleDelayUpdatesPublishedVehicle(t *testing.T) {
+	runtime := &Runtime{
+		vehicles:    map[uint32]models.VehicleState{1099984: {UnitID: 1099984}},
+		subscribers: make(map[uint64]chan models.LiveEvent),
+	}
+	if ok := runtime.SetVehicleDelay(1099984, 150, time.Now()); !ok {
+		t.Fatal("existing vehicle was not updated")
+	}
+	vehicle, ok := runtime.Vehicle(1099984)
+	if !ok || vehicle.CurrentDelaySeconds == nil || *vehicle.CurrentDelaySeconds != 150 {
+		t.Fatalf("vehicle delay was not stored: %+v", vehicle)
+	}
+	runtime.PublishVehicle(models.VehicleState{UnitID: 1099984, EventTime: time.Now()}, time.Now())
+	vehicle, _ = runtime.Vehicle(1099984)
+	if vehicle.CurrentDelaySeconds == nil || *vehicle.CurrentDelaySeconds != 150 {
+		t.Fatalf("telemetry update erased known delay: %+v", vehicle)
+	}
+}

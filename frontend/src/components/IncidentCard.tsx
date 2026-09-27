@@ -34,6 +34,7 @@ export function IncidentCard({ incidentId, fallback, onClose }: { incidentId: st
           <dt>Маршрут</dt><dd>{routeDisplayName(route)}<small>{routeDirection(route)}</small></dd>
           <dt>Остановка</dt><dd>{stopDisplayName(incident.targetStop)}</dd>
           <dt>Прогноз</dt><dd>{formatIncidentDelay(incident.predictedDelaySeconds)}</dd>
+          <dt>Текущая задержка</dt><dd>{formatIncidentDelay(incident.currentDelaySeconds)}</dd>
           <dt>Плановое прибытие</dt><dd>{formatIncidentDate(incident.targetPlannedAt)}</dd>
           <dt>Создан</dt><dd>{formatIncidentDate(incident.createdAt)}</dd>
           {incident.status === 'resolved' ? <>

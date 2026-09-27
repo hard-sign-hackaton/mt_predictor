@@ -76,7 +76,7 @@ services:
       - -timestamp-mode
       - source
     volumes:
-      - ../../dataset:/dataset:ro
+      - ..:/dataset:ro
     depends_on:
       - backend
     restart: on-failure
@@ -94,9 +94,10 @@ services:
       - -vehicles
       - "7"
       - -speed
-      - "2"
+      - "25"
+      - -loop
       - -timestamp-mode
-      - source
+      - rebased
     volumes:
       - ./backend/data/mock_telemetry.csv:/demo/mock_telemetry.csv:ro
     depends_on:

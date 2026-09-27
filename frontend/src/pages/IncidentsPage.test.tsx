@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { LiveMapContext, type LiveMapState } from '../live/liveMapContext'
 import { IncidentsPage } from './IncidentsPage'
 
@@ -15,7 +15,16 @@ const state: LiveMapState = {
 afterEach(cleanup)
 
 function renderPage() {
-  return render(<MemoryRouter><LiveMapContext.Provider value={state}><IncidentsPage /></LiveMapContext.Provider></MemoryRouter>)
+  return render(
+    <MemoryRouter initialEntries={['/incidents']}>
+      <LiveMapContext.Provider value={state}>
+        <Routes>
+          <Route path="/incidents" element={<IncidentsPage />} />
+          <Route path="/incidents/:incidentId" element={<IncidentsPage />} />
+        </Routes>
+      </LiveMapContext.Provider>
+    </MemoryRouter>,
+  )
 }
 
 describe('IncidentsPage', () => {

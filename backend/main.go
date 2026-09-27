@@ -98,7 +98,10 @@ func run(ndtpAddr, httpAddr, catalogPath string, telemetryTTL time.Duration, mlA
 	}
 
 	httpServer := &http.Server{
-		Addr: httpAddr, Handler: dashboard.NewAPI(initPayload, runtime, dashboard.APIOptions{EnableMockScenarios: enableMockScenarios, IncidentThreshold: incidentAt}),
+		Addr: httpAddr, Handler: dashboard.NewAPI(initPayload, runtime, dashboard.APIOptions{
+			EnableMockScenarios: enableMockScenarios, IncidentThreshold: incidentAt,
+			Predictor: predictor, PredictionTimeout: mlTimeout,
+		}),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

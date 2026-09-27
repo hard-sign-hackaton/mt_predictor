@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"mt_predictor/internal/mlclient"
 	"mt_predictor/models"
 )
 
@@ -15,12 +16,16 @@ import (
 type API struct {
 	init              models.DashboardInit
 	runtime           *Runtime
+	predictor         mlclient.Predictor
+	predictionTimeout time.Duration
 	incidentThreshold float64
 }
 
 type APIOptions struct {
 	EnableMockScenarios bool
 	IncidentThreshold   float64
+	Predictor           mlclient.Predictor
+	PredictionTimeout   time.Duration
 }
 
 // NewAPI создаёт HTTP handler без запуска отдельного listener.
@@ -32,7 +37,13 @@ func NewAPI(init models.DashboardInit, runtime *Runtime, options ...APIOptions) 
 			config.IncidentThreshold = 120
 		}
 	}
-	api := &API{init: init, runtime: runtime, incidentThreshold: config.IncidentThreshold}
+	if config.PredictionTimeout <= 0 {
+		config.PredictionTimeout = 3 * time.Second
+	}
+	api := &API{
+		init: init, runtime: runtime, predictor: config.Predictor,
+		predictionTimeout: config.PredictionTimeout, incidentThreshold: config.IncidentThreshold,
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/map/init", api.handleInit)
 	mux.HandleFunc("GET /api/v1/map/snapshot", api.handleSnapshot)

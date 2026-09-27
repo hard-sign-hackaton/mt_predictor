@@ -116,6 +116,21 @@ func TestIncidentLifecycleUsesStrictThresholdAndStableID(t *testing.T) {
 	}
 }
 
+func TestCurrentDelayAboveThresholdCreatesIncidentWhenMLForecastIsLower(t *testing.T) {
+	runtime := NewRuntime(catalog.NewMatcher(nil), time.Minute)
+	currentDelay := 180.0
+	prediction := models.DelayPrediction{
+		ID: "p-current-delay", UnitID: 7, TRID: 42, RoutePatternID: "pattern",
+		TargetActionItemID: 9, TargetStop: models.StopReference{ID: "stop"},
+		CurrentDelaySeconds: &currentDelay, PredictedDelaySeconds: 90,
+	}
+	require.NoError(t, runtime.ApplyPrediction(prediction, 120, time.Now()))
+	incidents := runtime.DashboardSnapshot(time.Now()).Incidents
+	require.Len(t, incidents, 1)
+	require.NotNil(t, incidents[0].CurrentDelaySeconds)
+	require.Equal(t, 180.0, *incidents[0].CurrentDelaySeconds)
+}
+
 func TestIncidentAwaitsArrivalAndMovesToHistory(t *testing.T) {
 	runtime := NewRuntime(catalog.NewMatcher(nil), time.Minute)
 	now := time.Date(2026, 1, 6, 10, 0, 0, 0, time.UTC)

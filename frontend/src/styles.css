@@ -13,7 +13,7 @@
 }
 
 * { box-sizing: border-box; }
-html, body, #root { margin: 0; min-width: 1024px; min-height: 100%; height: 100%; }
+html, body, #root { margin: 0; min-width: 0; min-height: 100%; height: 100%; }
 body { overflow: hidden; }
 button, input, select { font: inherit; color: inherit; }
 button { border: 1px solid #777; background: #eee; padding: 5px 8px; cursor: pointer; }
@@ -51,7 +51,8 @@ h2, h3 { margin: 0; font-size: 13px; }
 .vehicle-filters label { display: grid; grid-template-columns: 74px minmax(0, 1fr); }
 .data-note { color: var(--muted); font-size: 10px; }
 .data-note--missing { color: var(--warn); }
-.control-section--routes { min-height: 0; flex: 1; grid-template-rows: auto auto minmax(0, 1fr); }
+.control-section--routes { min-height: 0; flex: 1; grid-template-rows: auto auto auto minmax(0, 1fr); }
+.control-section--routes > select { min-height: 32px; }
 .section-heading, .vehicle-panel > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .route-list, .vehicle-list { min-height: 0; overflow: auto; display: grid; align-content: start; }
 .route-row, .vehicle-row { border: 0; border-bottom: 1px solid #bbb; background: transparent; padding: 9px 7px; text-align: left; display: grid; gap: 3px; }
@@ -138,4 +139,21 @@ h2, h3 { margin: 0; font-size: 13px; }
 @media (max-width: 1180px) {
   .map-workspace { grid-template-columns: 220px minmax(0, 1fr) 250px; }
   .live-header__facts span:nth-child(2) { display: none; }
+}
+
+@media (max-width: 900px) {
+  .live-header { gap: 8px; padding: 0 8px; }
+  .live-header > div:first-child { gap: 8px; min-width: 0; }
+  .live-header strong { font-size: 14px; white-space: nowrap; }
+  .live-nav a { padding: 0 7px; }
+  .live-header__facts { gap: 8px; }
+  .live-header__facts span:not(:last-child) { display: none; }
+  .map-workspace { grid-template-columns: 190px minmax(0, 1fr) 210px; }
+  .control-section { padding: 9px; }
+  .vehicle-filters label { grid-template-columns: 68px minmax(0, 1fr); }
+  .vehicle-detail { padding: 8px; }
+  .vehicle-detail dl { grid-template-columns: 76px minmax(0, 1fr); }
+  .map-stage__status { left: 44px; gap: 7px; padding: 6px 8px; }
+  .map-stage__status span:nth-child(2),
+  .map-stage__status span:nth-child(4) { display: none; }
 }

@@ -55,15 +55,15 @@ func (s *Store) Close() { s.pool.Close() }
 func (s *Store) Save(ctx context.Context, i models.Incident) error {
 	_, err := s.pool.Exec(ctx, `INSERT INTO incidents (
 id,unit_id,tr_id,route_pattern_id,occurrence_id,prediction_id,target_action_item_id,target_stop_id,target_stop_address,target_planned_at,
-first_predicted_delay_seconds,predicted_delay_seconds,prediction_time,status,actual_arrival_at,actual_delay_seconds,outcome,created_at,updated_at,
+first_predicted_delay_seconds,current_delay_seconds,predicted_delay_seconds,prediction_time,status,actual_arrival_at,actual_delay_seconds,outcome,created_at,updated_at,
 reason_code,reason,evidence,scenario_id)
-VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
 ON CONFLICT (id) DO UPDATE SET prediction_id=EXCLUDED.prediction_id,predicted_delay_seconds=EXCLUDED.predicted_delay_seconds,
-prediction_time=EXCLUDED.prediction_time,status=EXCLUDED.status,actual_arrival_at=EXCLUDED.actual_arrival_at,
+current_delay_seconds=EXCLUDED.current_delay_seconds,prediction_time=EXCLUDED.prediction_time,status=EXCLUDED.status,actual_arrival_at=EXCLUDED.actual_arrival_at,
 actual_delay_seconds=EXCLUDED.actual_delay_seconds,outcome=EXCLUDED.outcome,updated_at=EXCLUDED.updated_at,
 reason_code=EXCLUDED.reason_code,reason=EXCLUDED.reason,evidence=EXCLUDED.evidence,scenario_id=EXCLUDED.scenario_id`,
 		i.ID, i.UnitID, i.TRID, i.RoutePatternID, i.OccurrenceID, i.PredictionID, i.TargetActionItemID, i.TargetStop.ID, i.TargetStop.Address,
-		i.TargetPlannedAt, i.FirstPredictedDelaySeconds, i.PredictedDelaySeconds, i.PredictionTime, i.Status, i.ActualArrivalAt, i.ActualDelaySeconds, i.Outcome, i.CreatedAt, i.UpdatedAt,
+		i.TargetPlannedAt, i.FirstPredictedDelaySeconds, i.CurrentDelaySeconds, i.PredictedDelaySeconds, i.PredictionTime, i.Status, i.ActualArrivalAt, i.ActualDelaySeconds, i.Outcome, i.CreatedAt, i.UpdatedAt,
 		i.ReasonCode, i.Reason, nonNilEvidence(i.Evidence), i.ScenarioID)
 	return err
 }
@@ -75,14 +75,14 @@ func nonNilEvidence(value map[string]float64) map[string]float64 {
 	return value
 }
 
-const columns = `id::text,unit_id,tr_id,route_pattern_id,occurrence_id,prediction_id,target_action_item_id,target_stop_id,target_stop_address,target_planned_at,first_predicted_delay_seconds,predicted_delay_seconds,prediction_time,status,actual_arrival_at,actual_delay_seconds,outcome,created_at,updated_at,reason_code,reason,evidence,scenario_id`
+const columns = `id::text,unit_id,tr_id,route_pattern_id,occurrence_id,prediction_id,target_action_item_id,target_stop_id,target_stop_address,target_planned_at,first_predicted_delay_seconds,current_delay_seconds,predicted_delay_seconds,prediction_time,status,actual_arrival_at,actual_delay_seconds,outcome,created_at,updated_at,reason_code,reason,evidence,scenario_id`
 
 type scanner interface{ Scan(...any) error }
 
 func scanIncident(row scanner) (models.Incident, error) {
 	var i models.Incident
 	err := row.Scan(&i.ID, &i.UnitID, &i.TRID, &i.RoutePatternID, &i.OccurrenceID, &i.PredictionID, &i.TargetActionItemID, &i.TargetStop.ID, &i.TargetStop.Address,
-		&i.TargetPlannedAt, &i.FirstPredictedDelaySeconds, &i.PredictedDelaySeconds, &i.PredictionTime, &i.Status, &i.ActualArrivalAt, &i.ActualDelaySeconds, &i.Outcome, &i.CreatedAt, &i.UpdatedAt,
+		&i.TargetPlannedAt, &i.FirstPredictedDelaySeconds, &i.CurrentDelaySeconds, &i.PredictedDelaySeconds, &i.PredictionTime, &i.Status, &i.ActualArrivalAt, &i.ActualDelaySeconds, &i.Outcome, &i.CreatedAt, &i.UpdatedAt,
 		&i.ReasonCode, &i.Reason, &i.Evidence, &i.ScenarioID)
 	i.EventType = models.IncidentUpdated
 	return i, err

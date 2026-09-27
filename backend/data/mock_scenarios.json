@@ -1,20 +1,32 @@
 {
+  "replaySpeed": 25,
+  "bindToLiveVehicle": true,
   "scenarios": [
     {
       "scenarioId": "door-hold-01",
-      "unitId": 990000101,
-      "trId": 99000101,
-      "routePatternId": "mock-route-door-hold",
+      "unitId": 1012706,
+      "trId": 132430,
+      "routePatternId": "route_pattern_1e2366da6e91",
       "targetActionItemId": 9900101,
       "targetStop": {
-        "id": "mock-stop-101",
-        "address": "Тестовая остановка «Площадь»"
+        "id": "stop_0a3251c80e6b",
+        "address": "Метро «Щукинская»"
       },
-      "predictionTime": "2026-06-10T08:00:00Z",
-      "targetPlannedAt": "2026-06-10T08:12:00Z",
-      "currentDelaySeconds": 75,
+      "predictionTime": "2026-01-06T06:29:00Z",
+      "currentPlannedAt": "2026-01-06T06:27:45Z",
+      "targetPlannedAt": "2026-01-06T06:41:00Z",
       "predictedDelaySeconds": 300,
       "expectedReasonCode": "door_hold_delay",
+      "telemetryHistory": [
+        {"secondsBefore":600,"speedKmh":25,"headingDegrees":80},
+        {"secondsBefore":480,"speedKmh":22,"headingDegrees":80},
+        {"secondsBefore":360,"speedKmh":18,"headingDegrees":80},
+        {"secondsBefore":240,"speedKmh":10,"headingDegrees":80},
+        {"secondsBefore":180,"speedKmh":4,"headingDegrees":80},
+        {"secondsBefore":120,"speedKmh":0,"headingDegrees":80},
+        {"secondsBefore":60,"speedKmh":0,"headingDegrees":80},
+        {"secondsBefore":0,"speedKmh":0,"headingDegrees":80}
+      ],
       "evidence": {
         "door_open_duration_s": 142,
         "stationary_duration_s": 150,
@@ -23,19 +35,29 @@
     },
     {
       "scenarioId": "traffic-slowdown-01",
-      "unitId": 990000102,
-      "trId": 99000102,
-      "routePatternId": "mock-route-traffic",
+      "unitId": 1076894,
+      "trId": 133300,
+      "routePatternId": "route_pattern_1fbff68becd0",
       "targetActionItemId": 9900102,
       "targetStop": {
-        "id": "mock-stop-102",
-        "address": "Тестовая остановка «Улица Центральная»"
+        "id": "stop_589c0763fbcc",
+        "address": "Метро «Тушинская»"
       },
-      "predictionTime": "2026-06-10T08:01:00Z",
-      "targetPlannedAt": "2026-06-10T08:13:00Z",
-      "currentDelaySeconds": 150,
+      "predictionTime": "2026-01-06T06:30:00Z",
+      "currentPlannedAt": "2026-01-06T06:27:30Z",
+      "targetPlannedAt": "2026-01-06T06:42:00Z",
       "predictedDelaySeconds": 480,
       "expectedReasonCode": "traffic_slowdown",
+      "telemetryHistory": [
+        {"secondsBefore":600,"speedKmh":31,"headingDegrees":205},
+        {"secondsBefore":480,"speedKmh":26,"headingDegrees":205},
+        {"secondsBefore":360,"speedKmh":20,"headingDegrees":205},
+        {"secondsBefore":240,"speedKmh":14,"headingDegrees":205},
+        {"secondsBefore":180,"speedKmh":11,"headingDegrees":205},
+        {"secondsBefore":120,"speedKmh":9,"headingDegrees":205},
+        {"secondsBefore":60,"speedKmh":7,"headingDegrees":205},
+        {"secondsBefore":0,"speedKmh":6,"headingDegrees":205}
+      ],
       "evidence": {
         "speed_mean_5m_kmh": 11.4,
         "congestion_index": 0.84,
@@ -44,19 +66,29 @@
     },
     {
       "scenarioId": "gps-quality-01",
-      "unitId": 990000103,
-      "trId": 99000103,
-      "routePatternId": "mock-route-gps",
+      "unitId": 913870,
+      "trId": 122613,
+      "routePatternId": "route_pattern_32496aad6eea",
       "targetActionItemId": 9900103,
       "targetStop": {
-        "id": "mock-stop-103",
-        "address": "Тестовая остановка «Вокзал»"
+        "id": "stop_4f28dee137ef",
+        "address": "Ульяновский лесопарк"
       },
-      "predictionTime": "2026-06-10T08:02:00Z",
-      "targetPlannedAt": "2026-06-10T08:14:00Z",
-      "currentDelaySeconds": 30,
+      "predictionTime": "2026-01-06T06:31:00Z",
+      "currentPlannedAt": "2026-01-06T06:30:30Z",
+      "targetPlannedAt": "2026-01-06T06:43:00Z",
       "predictedDelaySeconds": 180,
       "expectedReasonCode": "poor_gps_quality",
+      "telemetryHistory": [
+        {"secondsBefore":600,"speedKmh":24,"headingDegrees":310},
+        {"secondsBefore":480,"speedKmh":22,"headingDegrees":310},
+        {"secondsBefore":360,"speedKmh":20,"headingDegrees":310},
+        {"secondsBefore":240,"speedKmh":18,"headingDegrees":310},
+        {"secondsBefore":180,"speedKmh":17,"headingDegrees":310},
+        {"secondsBefore":120,"speedKmh":16,"headingDegrees":310,"locationValid":false},
+        {"secondsBefore":60,"speedKmh":15,"headingDegrees":310,"locationValid":false},
+        {"secondsBefore":0,"speedKmh":14,"headingDegrees":310,"locationValid":false}
+      ],
       "evidence": {
         "last_gps_age_s": 165,
         "valid_gps_points_5m": 1,
@@ -65,19 +97,29 @@
     },
     {
       "scenarioId": "route-deviation-01",
-      "unitId": 990000104,
-      "trId": 99000104,
-      "routePatternId": "mock-route-deviation",
+      "unitId": 1099984,
+      "trId": 133957,
+      "routePatternId": "route_pattern_40b8ff7108ff",
       "targetActionItemId": 9900104,
       "targetStop": {
-        "id": "mock-stop-104",
-        "address": "Тестовая остановка «Парк»"
+        "id": "stop_54d839717a97",
+        "address": "Метро «Новаторская»"
       },
-      "predictionTime": "2026-06-10T08:03:00Z",
-      "targetPlannedAt": "2026-06-10T08:15:00Z",
-      "currentDelaySeconds": 95,
+      "predictionTime": "2026-01-06T06:32:00Z",
+      "currentPlannedAt": "2026-01-06T06:30:25Z",
+      "targetPlannedAt": "2026-01-06T06:44:00Z",
       "predictedDelaySeconds": 360,
       "expectedReasonCode": "route_deviation",
+      "telemetryHistory": [
+        {"secondsBefore":600,"speedKmh":20,"headingDegrees":15},
+        {"secondsBefore":480,"speedKmh":21,"headingDegrees":20},
+        {"secondsBefore":360,"speedKmh":22,"headingDegrees":30},
+        {"secondsBefore":240,"speedKmh":23,"headingDegrees":48},
+        {"secondsBefore":180,"speedKmh":23,"headingDegrees":62},
+        {"secondsBefore":120,"speedKmh":22,"headingDegrees":78},
+        {"secondsBefore":60,"speedKmh":21,"headingDegrees":92},
+        {"secondsBefore":0,"speedKmh":20,"headingDegrees":108}
+      ],
       "evidence": {
         "route_deviation_m": 185,
         "speed_mean_5m_kmh": 22
@@ -85,19 +127,29 @@
     },
     {
       "scenarioId": "long-stop-01",
-      "unitId": 990000105,
-      "trId": 99000105,
-      "routePatternId": "mock-route-stop",
+      "unitId": 1105498,
+      "trId": 134040,
+      "routePatternId": "route_pattern_45e07cd14aa2",
       "targetActionItemId": 9900105,
       "targetStop": {
-        "id": "mock-stop-105",
-        "address": "Тестовая остановка «Школа»"
+        "id": "stop_cf10dfa21301",
+        "address": "Метромост"
       },
-      "predictionTime": "2026-06-10T08:04:00Z",
-      "targetPlannedAt": "2026-06-10T08:16:00Z",
-      "currentDelaySeconds": 65,
+      "predictionTime": "2026-01-06T06:33:00Z",
+      "currentPlannedAt": "2026-01-06T06:31:55Z",
+      "targetPlannedAt": "2026-01-06T06:45:00Z",
       "predictedDelaySeconds": 240,
       "expectedReasonCode": "stop_dwell",
+      "telemetryHistory": [
+        {"secondsBefore":600,"speedKmh":28,"headingDegrees":145},
+        {"secondsBefore":480,"speedKmh":24,"headingDegrees":145},
+        {"secondsBefore":360,"speedKmh":18,"headingDegrees":145},
+        {"secondsBefore":240,"speedKmh":7,"headingDegrees":145},
+        {"secondsBefore":180,"speedKmh":0,"headingDegrees":145},
+        {"secondsBefore":120,"speedKmh":0,"headingDegrees":145},
+        {"secondsBefore":60,"speedKmh":0,"headingDegrees":145},
+        {"secondsBefore":0,"speedKmh":0,"headingDegrees":145}
+      ],
       "evidence": {
         "stationary_duration_s": 188,
         "door_open_duration_s": 22,
@@ -106,19 +158,29 @@
     },
     {
       "scenarioId": "schedule-slippage-01",
-      "unitId": 990000106,
-      "trId": 99000106,
-      "routePatternId": "mock-route-schedule",
+      "unitId": 1133091,
+      "trId": 135081,
+      "routePatternId": "route_pattern_60b8436a1607",
       "targetActionItemId": 9900106,
       "targetStop": {
-        "id": "mock-stop-106",
-        "address": "Тестовая остановка «Бульвар»"
+        "id": "stop_233d34c6bdab",
+        "address": "Коньковские пруды"
       },
-      "predictionTime": "2026-06-10T08:05:00Z",
-      "targetPlannedAt": "2026-06-10T08:17:00Z",
-      "currentDelaySeconds": 225,
+      "predictionTime": "2026-01-06T06:34:00Z",
+      "currentPlannedAt": "2026-01-06T06:30:15Z",
+      "targetPlannedAt": "2026-01-06T06:46:00Z",
       "predictedDelaySeconds": 420,
       "expectedReasonCode": "schedule_slippage",
+      "telemetryHistory": [
+        {"secondsBefore":600,"speedKmh":19,"headingDegrees":265},
+        {"secondsBefore":480,"speedKmh":20,"headingDegrees":265},
+        {"secondsBefore":360,"speedKmh":19,"headingDegrees":265},
+        {"secondsBefore":240,"speedKmh":21,"headingDegrees":265},
+        {"secondsBefore":180,"speedKmh":20,"headingDegrees":265},
+        {"secondsBefore":120,"speedKmh":19,"headingDegrees":265},
+        {"secondsBefore":60,"speedKmh":20,"headingDegrees":265},
+        {"secondsBefore":0,"speedKmh":20,"headingDegrees":265}
+      ],
       "evidence": {
         "speed_mean_5m_kmh": 20,
         "route_deviation_m": 18
@@ -126,19 +188,29 @@
     },
     {
       "scenarioId": "normal-control-01",
-      "unitId": 990000107,
-      "trId": 99000107,
-      "routePatternId": "mock-route-control",
+      "unitId": 896671,
+      "trId": 130072,
+      "routePatternId": "route_pattern_1e2366da6e91",
       "targetActionItemId": 9900107,
       "targetStop": {
-        "id": "mock-stop-107",
-        "address": "Тестовая остановка «Контрольная»"
+        "id": "stop_0a3251c80e6b",
+        "address": "Метро «Щукинская»"
       },
-      "predictionTime": "2026-06-10T08:06:00Z",
-      "targetPlannedAt": "2026-06-10T08:18:00Z",
-      "currentDelaySeconds": -20,
+      "predictionTime": "2026-01-06T06:35:00Z",
+      "currentPlannedAt": "2026-01-06T06:35:20Z",
+      "targetPlannedAt": "2026-01-06T06:47:00Z",
       "predictedDelaySeconds": -35,
       "expectedReasonCode": "insufficient_evidence",
+      "telemetryHistory": [
+        {"secondsBefore":600,"speedKmh":22,"headingDegrees":350},
+        {"secondsBefore":480,"speedKmh":23,"headingDegrees":350},
+        {"secondsBefore":360,"speedKmh":24,"headingDegrees":350},
+        {"secondsBefore":240,"speedKmh":24,"headingDegrees":350},
+        {"secondsBefore":180,"speedKmh":25,"headingDegrees":350},
+        {"secondsBefore":120,"speedKmh":24,"headingDegrees":350},
+        {"secondsBefore":60,"speedKmh":25,"headingDegrees":350},
+        {"secondsBefore":0,"speedKmh":24,"headingDegrees":350}
+      ],
       "evidence": {
         "speed_mean_5m_kmh": 24,
         "route_deviation_m": 12,

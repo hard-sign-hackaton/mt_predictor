@@ -4,7 +4,7 @@
 
 ## Быстрый запуск
 
-Требуются Docker Desktop / Docker Engine с Compose и исходный датасет в `../../dataset` относительно репозитория. Весь демонстрационный контур запускается одной командой:
+Требуются Docker Desktop / Docker Engine с Compose и исходный датасет в родительской папке репозитория (`../train`, `../validate`, `../labels`). Весь демонстрационный контур запускается одной командой:
 
 ```bash
 cd mt_predictor
@@ -65,7 +65,7 @@ docker compose up --build
 Образ организаторов лежит вне репозитория и сначала загружается вручную:
 
 ```bash
-docker load -i ../../dataset/ndtp-telemetry-emulator.tar
+docker load -i ../ndtp-telemetry-emulator.tar
 docker compose --profile official-emulator up -d official-emulator
 curl -X POST http://localhost:18080/api/config \
   -H 'Content-Type: application/json' \

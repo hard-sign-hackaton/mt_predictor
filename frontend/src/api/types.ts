@@ -208,6 +208,7 @@ export interface Incident {
   targetActionItemId: number
   targetStop: StopReference
   /** Входное значение для расчёта критичности на frontend. */
+  currentDelaySeconds?: number
   predictedDelaySeconds: number
   predictionTime: string
   targetPlannedAt: string

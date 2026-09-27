@@ -55,7 +55,8 @@ type Incident struct {
 	// TargetStop — целевая остановка для строки или карточки инцидента.
 	TargetStop StopReference `json:"targetStop"`
 	// PredictedDelaySeconds — прогноз задержки; положительное значение означает опоздание.
-	PredictedDelaySeconds float64 `json:"predictedDelaySeconds"`
+	CurrentDelaySeconds   *float64 `json:"currentDelaySeconds,omitempty"`
+	PredictedDelaySeconds float64  `json:"predictedDelaySeconds"`
 	// PredictionTime — момент T, на который рассчитан связанный прогноз.
 	PredictionTime             time.Time          `json:"predictionTime"`
 	TargetPlannedAt            time.Time          `json:"targetPlannedAt"`

@@ -1,41 +1,62 @@
 package dashboard
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"math"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
+	"mt_predictor/internal/mlclient"
 	"mt_predictor/models"
 )
 
 const (
 	maxMockScenarioBytes = 1 << 20
 	maxMockScenarioCount = 32
-	mockUnitIDMin        = 990000000
-	mockUnitIDMax        = 999999999
 )
 
 type mockScenarioBatch struct {
-	Scenarios []mockScenario `json:"scenarios"`
+	ReplaySpeed       float64        `json:"replaySpeed,omitempty"`
+	BindToLiveVehicle bool           `json:"bindToLiveVehicle,omitempty"`
+	Scenarios         []mockScenario `json:"scenarios"`
+}
+
+type preparedMockScenario struct {
+	input     mockScenario
+	diagnosis mockDiagnosis
 }
 
 type mockScenario struct {
-	ScenarioID            string               `json:"scenarioId"`
-	UnitID                uint32               `json:"unitId"`
-	TRID                  int64                `json:"trId"`
-	RoutePatternID        string               `json:"routePatternId"`
-	TargetActionItemID    int64                `json:"targetActionItemId"`
-	TargetStop            models.StopReference `json:"targetStop"`
-	PredictionTime        time.Time            `json:"predictionTime"`
-	TargetPlannedAt       time.Time            `json:"targetPlannedAt"`
-	CurrentDelaySeconds   *float64             `json:"currentDelaySeconds,omitempty"`
-	PredictedDelaySeconds float64              `json:"predictedDelaySeconds"`
-	ExpectedReasonCode    string               `json:"expectedReasonCode,omitempty"`
-	Evidence              map[string]float64   `json:"evidence"`
+	ScenarioID            string                `json:"scenarioId"`
+	UnitID                uint32                `json:"unitId"`
+	TRID                  int64                 `json:"trId"`
+	RoutePatternID        string                `json:"routePatternId"`
+	TargetActionItemID    int64                 `json:"targetActionItemId"`
+	TargetStop            models.StopReference  `json:"targetStop"`
+	PredictionTime        time.Time             `json:"predictionTime"`
+	CurrentPlannedAt      time.Time             `json:"currentPlannedAt"`
+	TargetPlannedAt       time.Time             `json:"targetPlannedAt"`
+	CurrentDelaySeconds   *float64              `json:"-"`
+	PredictedDelaySeconds float64               `json:"predictedDelaySeconds"`
+	ExpectedReasonCode    string                `json:"expectedReasonCode,omitempty"`
+	Evidence              map[string]float64    `json:"evidence"`
+	TelemetryHistory      []mockTelemetrySample `json:"telemetryHistory"`
+}
+
+// mockTelemetrySample описывает реальную входную последовательность ML, а не
+// готовый прогноз. Координаты восстанавливаются назад от текущего положения ТС
+// по скорости и курсу, поэтому вся история согласована по времени и движению.
+type mockTelemetrySample struct {
+	SecondsBefore  int     `json:"secondsBefore"`
+	SpeedKmh       float64 `json:"speedKmh"`
+	HeadingDegrees float64 `json:"headingDegrees"`
+	LocationValid  *bool   `json:"locationValid,omitempty"`
 }
 
 type mockDiagnosis struct {
@@ -62,12 +83,12 @@ func (a *API) handleMockScenarios(response http.ResponseWriter, request *http.Re
 			fmt.Sprintf("число сценариев должно быть от 1 до %d", maxMockScenarioCount))
 		return
 	}
-
-	type preparedScenario struct {
-		input     mockScenario
-		diagnosis mockDiagnosis
+	if batch.ReplaySpeed < 0 || !finite(batch.ReplaySpeed) || batch.ReplaySpeed > 1000 {
+		writeJSONError(response, http.StatusBadRequest, "replaySpeed должен быть от 0 до 1000")
+		return
 	}
-	prepared := make([]preparedScenario, 0, len(batch.Scenarios))
+
+	prepared := make([]preparedMockScenario, 0, len(batch.Scenarios))
 	seen := make(map[string]struct{}, len(batch.Scenarios))
 	for _, scenario := range batch.Scenarios {
 		if err := scenario.validate(); err != nil {
@@ -80,6 +101,8 @@ func (a *API) handleMockScenarios(response http.ResponseWriter, request *http.Re
 			return
 		}
 		seen[scenario.ScenarioID] = struct{}{}
+		currentDelay := scenario.PredictionTime.Sub(scenario.CurrentPlannedAt).Seconds()
+		scenario.CurrentDelaySeconds = &currentDelay
 
 		diagnosis := diagnoseMockEvidence(scenario.Evidence, scenario.CurrentDelaySeconds)
 		if scenario.ExpectedReasonCode != "" && scenario.ExpectedReasonCode != diagnosis.code {
@@ -88,43 +111,179 @@ func (a *API) handleMockScenarios(response http.ResponseWriter, request *http.Re
 					scenario.ScenarioID, scenario.ExpectedReasonCode, diagnosis.code))
 			return
 		}
-		prepared = append(prepared, preparedScenario{input: scenario, diagnosis: diagnosis})
+		prepared = append(prepared, preparedMockScenario{input: scenario, diagnosis: diagnosis})
 	}
 
-	now := time.Now().UTC()
 	results := make([]map[string]string, 0, len(prepared))
 	for _, item := range prepared {
-		scenario := item.input
-		reason := item.diagnosis.message
-		prediction := models.DelayPrediction{
-			ID: "mock-" + scenario.ScenarioID, ScenarioID: scenario.ScenarioID,
-			UnitID: scenario.UnitID, TRID: scenario.TRID, RoutePatternID: scenario.RoutePatternID,
-			TargetActionItemID: scenario.TargetActionItemID, TargetStop: scenario.TargetStop,
-			PredictionTime: scenario.PredictionTime, TargetPlannedAt: scenario.TargetPlannedAt,
-			CurrentDelaySeconds:   scenario.CurrentDelaySeconds,
-			PredictedDelaySeconds: scenario.PredictedDelaySeconds, ReasonCode: item.diagnosis.code,
-			Reason: &reason, Evidence: scenario.Evidence,
-		}
-		if err := a.runtime.ApplyPrediction(prediction, a.incidentThreshold, now); err != nil {
-			writeJSONError(response, http.StatusInternalServerError, "не удалось сохранить сценарий")
-			return
-		}
 		results = append(results, map[string]string{
-			"scenarioId": scenario.ScenarioID, "reasonCode": item.diagnosis.code, "reason": reason,
+			"scenarioId": item.input.ScenarioID, "reasonCode": item.diagnosis.code, "reason": item.diagnosis.message,
 		})
 	}
+	if batch.ReplaySpeed == 0 {
+		now := time.Now().UTC()
+		for _, item := range prepared {
+			if err := a.applyMockScenario(item, now, batch.BindToLiveVehicle); err != nil {
+				writeJSONError(response, http.StatusInternalServerError, "не удалось сохранить сценарий")
+				return
+			}
+		}
+	} else {
+		a.scheduleMockScenarios(prepared, batch.ReplaySpeed, batch.BindToLiveVehicle)
+	}
 	writeJSON(response, http.StatusAccepted, map[string]any{
-		"accepted": len(results), "results": results,
+		"accepted": len(results), "replaySpeed": batch.ReplaySpeed, "results": results,
 	})
+}
+
+func (a *API) scheduleMockScenarios(prepared []preparedMockScenario, speed float64, bindToLiveVehicle bool) {
+	sort.SliceStable(prepared, func(i, j int) bool {
+		return prepared[i].input.PredictionTime.Before(prepared[j].input.PredictionTime)
+	})
+	startedAt := time.Now().UTC()
+	sourceStart := prepared[0].input.PredictionTime
+
+	apply := func(item preparedMockScenario) {
+		sourceHorizon := item.input.TargetPlannedAt.Sub(item.input.PredictionTime)
+		sourceCurrentOffset := item.input.CurrentPlannedAt.Sub(item.input.PredictionTime)
+		dueAt := startedAt.Add(scaleDuration(item.input.PredictionTime.Sub(sourceStart), speed))
+		item.input.PredictionTime = dueAt
+		// ReplaySpeed ускоряет появление новых ситуаций, но не меняет физический
+		// размер задержки и ML-горизонт 10–15 минут.
+		item.input.CurrentPlannedAt = dueAt.Add(sourceCurrentOffset)
+		item.input.TargetPlannedAt = dueAt.Add(sourceHorizon)
+		currentDelay := item.input.PredictionTime.Sub(item.input.CurrentPlannedAt).Seconds()
+		item.input.CurrentDelaySeconds = &currentDelay
+		if err := a.applyMockScenario(item, dueAt, bindToLiveVehicle); err != nil {
+			slog.Error("не удалось применить mock-сценарий", "scenario_id", item.input.ScenarioID, "error", err)
+		}
+	}
+
+	// Первый сценарий появляется вместе со стартом replay, остальные — только
+	// когда наступает их момент на ускоренной шкале времени.
+	apply(prepared[0])
+	go func() {
+		for _, item := range prepared[1:] {
+			dueAt := startedAt.Add(scaleDuration(item.input.PredictionTime.Sub(sourceStart), speed))
+			if wait := time.Until(dueAt); wait > 0 {
+				timer := time.NewTimer(wait)
+				<-timer.C
+			}
+			apply(item)
+		}
+	}()
+}
+
+func scaleDuration(value time.Duration, speed float64) time.Duration {
+	return time.Duration(float64(value) / speed)
+}
+
+func (a *API) applyMockScenario(item preparedMockScenario, occurredAt time.Time, bindToLiveVehicle bool) error {
+	scenario := item.input
+	var boundVehicle models.VehicleState
+	var hasBoundVehicle bool
+	if bindToLiveVehicle {
+		if vehicle, ok := a.runtime.Vehicle(scenario.UnitID); ok {
+			boundVehicle, hasBoundVehicle = vehicle, true
+			if vehicle.TRID != nil {
+				scenario.TRID = *vehicle.TRID
+			}
+			if vehicle.RoutePatternID != nil {
+				scenario.RoutePatternID = *vehicle.RoutePatternID
+			}
+			if vehicle.NextActionItemID != nil {
+				scenario.TargetActionItemID = *vehicle.NextActionItemID
+			}
+			if vehicle.NextStop != nil {
+				scenario.TargetStop = *vehicle.NextStop
+			}
+		} else {
+			routePatternID := scenario.RoutePatternID
+			trID := scenario.TRID
+			actionItemID := scenario.TargetActionItemID
+			vehicle := models.VehicleState{
+				UnitID: scenario.UnitID, TRID: &trID,
+				EventTime: occurredAt, ReceivedAt: occurredAt,
+				Freshness: models.TelemetryLive, MatchStatus: models.MatchMatchedSpatial,
+				RoutePatternID: &routePatternID, NextStop: &scenario.TargetStop,
+				NextActionItemID: &actionItemID,
+			}
+			if latest, ok := latestMockTelemetry(scenario.TelemetryHistory); ok {
+				vehicle.SpeedKmh = latest.SpeedKmh
+				vehicle.HeadingDegrees = latest.HeadingDegrees
+			}
+			for _, stop := range a.init.Stops {
+				if stop.ID == scenario.TargetStop.ID {
+					position := stop.Position
+					vehicle.Position = &position
+					break
+				}
+			}
+			boundVehicle, _ = a.runtime.PublishVehicle(vehicle, occurredAt)
+			hasBoundVehicle = true
+		}
+	}
+	predictedDelay := scenario.PredictedDelaySeconds
+	if a.predictor != nil {
+		point := mlclient.PredictionPoint{
+			SampleID: "mock-" + scenario.ScenarioID, TRID: scenario.TRID,
+			PredictionTime: scenario.PredictionTime, TargetStopID: scenario.TargetActionItemID,
+			TargetTime: scenario.TargetPlannedAt,
+		}
+		if scenario.CurrentDelaySeconds != nil {
+			point.CurrentDelay = *scenario.CurrentDelaySeconds
+		}
+		telemetry := buildMockTelemetry(scenario, boundVehicle, hasBoundVehicle)
+		if len(telemetry) == 0 && hasBoundVehicle {
+			row := mlclient.TelemetryPoint{
+				TRID: scenario.TRID, EventTime: scenario.PredictionTime,
+				LocationValid: boundVehicle.Position != nil,
+			}
+			if boundVehicle.Position != nil {
+				lon, lat := boundVehicle.Position.Lon, boundVehicle.Position.Lat
+				row.Lon, row.Lat = &lon, &lat
+			}
+			speed, heading := boundVehicle.SpeedKmh, boundVehicle.HeadingDegrees
+			row.Speed, row.Heading = &speed, &heading
+			telemetry = append(telemetry, row)
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), a.predictionTimeout)
+		results, err := a.predictor.PredictBatch(ctx, []mlclient.PredictionPoint{point}, telemetry)
+		cancel()
+		if err != nil {
+			return fmt.Errorf("ML-прогноз mock-сценария %q: %w", scenario.ScenarioID, err)
+		}
+		value, ok := results[point.SampleID]
+		if !ok {
+			return fmt.Errorf("ML не вернул sample_id %q", point.SampleID)
+		}
+		predictedDelay = value
+	}
+	reason := item.diagnosis.message
+	prediction := models.DelayPrediction{
+		ID: "mock-" + scenario.ScenarioID, ScenarioID: scenario.ScenarioID,
+		UnitID: scenario.UnitID, TRID: scenario.TRID, RoutePatternID: scenario.RoutePatternID,
+		TargetActionItemID: scenario.TargetActionItemID, TargetStop: scenario.TargetStop,
+		PredictionTime: scenario.PredictionTime, TargetPlannedAt: scenario.TargetPlannedAt,
+		CurrentDelaySeconds:   scenario.CurrentDelaySeconds,
+		PredictedDelaySeconds: predictedDelay, ReasonCode: item.diagnosis.code,
+		Reason: &reason, Evidence: scenario.Evidence,
+	}
+	if err := a.runtime.AwaitOtherTargets(scenario.UnitID, scenario.TargetActionItemID, occurredAt); err != nil {
+		return err
+	}
+	if scenario.CurrentDelaySeconds != nil {
+		a.runtime.SetVehicleDelay(scenario.UnitID, *scenario.CurrentDelaySeconds, occurredAt)
+	}
+	return a.runtime.ApplyPrediction(prediction, a.incidentThreshold, occurredAt)
 }
 
 func (scenario mockScenario) validate() error {
 	if !validScenarioID(scenario.ScenarioID) {
 		return fmt.Errorf("scenarioId %q имеет неверный формат", scenario.ScenarioID)
 	}
-	if scenario.UnitID < mockUnitIDMin || scenario.UnitID > mockUnitIDMax {
-		return fmt.Errorf("unitId должен быть в зарезервированном диапазоне %d..%d",
-			mockUnitIDMin, mockUnitIDMax)
+	if scenario.UnitID == 0 {
+		return fmt.Errorf("unitId должен быть положительным")
 	}
 	if scenario.TRID <= 0 || scenario.TargetActionItemID <= 0 {
 		return fmt.Errorf("trId и targetActionItemId должны быть положительными")
@@ -138,8 +297,8 @@ func (scenario mockScenario) validate() error {
 	if len(scenario.TargetStop.Address) > 256 {
 		return fmt.Errorf("targetStop.address должен быть не длиннее 256 символов")
 	}
-	if scenario.PredictionTime.IsZero() || scenario.TargetPlannedAt.IsZero() {
-		return fmt.Errorf("predictionTime и targetPlannedAt обязательны")
+	if scenario.PredictionTime.IsZero() || scenario.CurrentPlannedAt.IsZero() || scenario.TargetPlannedAt.IsZero() {
+		return fmt.Errorf("predictionTime, currentPlannedAt и targetPlannedAt обязательны")
 	}
 	horizon := scenario.TargetPlannedAt.Sub(scenario.PredictionTime)
 	if horizon < 10*time.Minute || horizon > 15*time.Minute {
@@ -148,12 +307,29 @@ func (scenario mockScenario) validate() error {
 	if !finite(scenario.PredictedDelaySeconds) || math.Abs(scenario.PredictedDelaySeconds) > 900 {
 		return fmt.Errorf("predictedDelaySeconds должен быть конечным числом в диапазоне -900..900")
 	}
-	if scenario.CurrentDelaySeconds != nil &&
-		(!finite(*scenario.CurrentDelaySeconds) || math.Abs(*scenario.CurrentDelaySeconds) > 900) {
-		return fmt.Errorf("currentDelaySeconds должен быть конечным числом в диапазоне -900..900")
+	currentDelay := scenario.PredictionTime.Sub(scenario.CurrentPlannedAt).Seconds()
+	if !finite(currentDelay) || math.Abs(currentDelay) > 900 {
+		return fmt.Errorf("разница predictionTime и currentPlannedAt должна быть в диапазоне -900..900 секунд")
 	}
 	if len(scenario.Evidence) > 16 {
 		return fmt.Errorf("evidence не может содержать больше 16 признаков")
+	}
+	if len(scenario.TelemetryHistory) < 2 || len(scenario.TelemetryHistory) > 32 {
+		return fmt.Errorf("telemetryHistory должен содержать от 2 до 32 точек")
+	}
+	seenOffsets := make(map[int]struct{}, len(scenario.TelemetryHistory))
+	for _, sample := range scenario.TelemetryHistory {
+		if sample.SecondsBefore < 0 || sample.SecondsBefore > 600 {
+			return fmt.Errorf("telemetryHistory.secondsBefore должен быть в диапазоне 0..600")
+		}
+		if _, exists := seenOffsets[sample.SecondsBefore]; exists {
+			return fmt.Errorf("telemetryHistory содержит повторный secondsBefore=%d", sample.SecondsBefore)
+		}
+		seenOffsets[sample.SecondsBefore] = struct{}{}
+		if !finite(sample.SpeedKmh) || sample.SpeedKmh < 0 || sample.SpeedKmh > 150 ||
+			!finite(sample.HeadingDegrees) || sample.HeadingDegrees < 0 || sample.HeadingDegrees > 360 {
+			return fmt.Errorf("telemetryHistory содержит неверную скорость или курс")
+		}
 	}
 	for name, value := range scenario.Evidence {
 		if strings.TrimSpace(name) == "" || len(name) > 64 || !finite(value) {
@@ -164,6 +340,52 @@ func (scenario mockScenario) validate() error {
 		return fmt.Errorf("неизвестный expectedReasonCode %q", scenario.ExpectedReasonCode)
 	}
 	return nil
+}
+
+func latestMockTelemetry(history []mockTelemetrySample) (mockTelemetrySample, bool) {
+	if len(history) == 0 {
+		return mockTelemetrySample{}, false
+	}
+	latest := history[0]
+	for _, sample := range history[1:] {
+		if sample.SecondsBefore < latest.SecondsBefore {
+			latest = sample
+		}
+	}
+	return latest, true
+}
+
+func buildMockTelemetry(scenario mockScenario, vehicle models.VehicleState, hasVehicle bool) []mlclient.TelemetryPoint {
+	if len(scenario.TelemetryHistory) == 0 || !hasVehicle {
+		return nil
+	}
+	history := append([]mockTelemetrySample(nil), scenario.TelemetryHistory...)
+	sort.Slice(history, func(i, j int) bool { return history[i].SecondsBefore > history[j].SecondsBefore })
+	rows := make([]mlclient.TelemetryPoint, 0, len(history))
+	for _, sample := range history {
+		valid := sample.LocationValid == nil || *sample.LocationValid
+		row := mlclient.TelemetryPoint{
+			TRID: scenario.TRID, EventTime: scenario.PredictionTime.Add(-time.Duration(sample.SecondsBefore) * time.Second),
+			LocationValid: valid,
+		}
+		speed, heading := sample.SpeedKmh, sample.HeadingDegrees
+		row.Speed, row.Heading = &speed, &heading
+		if valid && vehicle.Position != nil {
+			// Приближение достаточно на городских дистанциях до 10 минут. Старые
+			// точки лежат позади текущей по курсу и образуют связный трек.
+			distanceM := speed / 3.6 * float64(sample.SecondsBefore)
+			headingRad := heading * math.Pi / 180
+			lat := vehicle.Position.Lat - distanceM*math.Cos(headingRad)/111_320
+			lonScale := 111_320 * math.Cos(vehicle.Position.Lat*math.Pi/180)
+			lon := vehicle.Position.Lon
+			if math.Abs(lonScale) > 1 {
+				lon -= distanceM * math.Sin(headingRad) / lonScale
+			}
+			row.Lon, row.Lat = &lon, &lat
+		}
+		rows = append(rows, row)
+	}
+	return rows
 }
 
 func validScenarioID(value string) bool {

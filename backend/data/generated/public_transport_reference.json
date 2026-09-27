@@ -4215,6 +4215,12 @@
       "match_quality": "confirmed",
       "confidence": 0.783
     },
+    "route_pattern_70a2e0131e38": {
+      "number": "361",
+      "name": "Метро «Беляево» - Метро «Юго-Западная»",
+      "match_quality": "confirmed",
+      "confidence": 0.762
+    },
     "route_pattern_772dfd9efd61": {
       "number": "770",
       "name": "Метро «Каширская» - Метро «Каширская» (северный вход)",
