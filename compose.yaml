@@ -74,7 +74,7 @@ services:
       - -vehicles
       - "8"
       - -speed
-      - "5"
+      - "50"
       - -timestamp-mode
       - source
     volumes:
