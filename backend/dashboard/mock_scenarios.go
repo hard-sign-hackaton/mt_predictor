@@ -53,10 +53,13 @@ type mockScenario struct {
 // готовый прогноз. Координаты восстанавливаются назад от текущего положения ТС
 // по скорости и курсу, поэтому вся история согласована по времени и движению.
 type mockTelemetrySample struct {
-	SecondsBefore  int     `json:"secondsBefore"`
-	SpeedKmh       float64 `json:"speedKmh"`
-	HeadingDegrees float64 `json:"headingDegrees"`
-	LocationValid  *bool   `json:"locationValid,omitempty"`
+	SecondsBefore        int      `json:"secondsBefore"`
+	SpeedKmh             float64  `json:"speedKmh"`
+	HeadingDegrees       float64  `json:"headingDegrees"`
+	LocationValid        *bool    `json:"locationValid,omitempty"`
+	DoorOpen             bool     `json:"doorOpen,omitempty"`
+	CongestionIndex      *float64 `json:"congestionIndex,omitempty"`
+	RouteDeviationMeters *float64 `json:"routeDeviationMeters,omitempty"`
 }
 
 type mockDiagnosis struct {
@@ -104,6 +107,7 @@ func (a *API) handleMockScenarios(response http.ResponseWriter, request *http.Re
 		currentDelay := scenario.PredictionTime.Sub(scenario.CurrentPlannedAt).Seconds()
 		scenario.CurrentDelaySeconds = &currentDelay
 
+		scenario.Evidence = deriveMockEvidence(scenario.TelemetryHistory, scenario.CurrentDelaySeconds)
 		diagnosis := diagnoseMockEvidence(scenario.Evidence, scenario.CurrentDelaySeconds)
 		if scenario.ExpectedReasonCode != "" && scenario.ExpectedReasonCode != diagnosis.code {
 			writeJSONError(response, http.StatusUnprocessableEntity,
@@ -119,6 +123,10 @@ func (a *API) handleMockScenarios(response http.ResponseWriter, request *http.Re
 		results = append(results, map[string]string{
 			"scenarioId": item.input.ScenarioID, "reasonCode": item.diagnosis.code, "reason": item.diagnosis.message,
 		})
+	}
+	if err := a.runtime.ResetMockScenarios(seen, time.Now().UTC()); err != nil {
+		writeJSONError(response, http.StatusInternalServerError, "не удалось сбросить предыдущие demo-сценарии")
+		return
 	}
 	if batch.ReplaySpeed == 0 {
 		now := time.Now().UTC()
@@ -408,6 +416,67 @@ func knownReasonCode(code string) bool {
 	default:
 		return false
 	}
+}
+
+// deriveMockEvidence повторяет агрегацию диагностического сервиса над
+// расширенной mock-телеметрией. Готовая причина в сценарии не передаётся.
+func deriveMockEvidence(history []mockTelemetrySample, currentDelay *float64) map[string]float64 {
+	evidence := map[string]float64{}
+	if len(history) == 0 {
+		return evidence
+	}
+	sorted := append([]mockTelemetrySample(nil), history...)
+	sort.Slice(sorted, func(i, j int) bool { return sorted[i].SecondsBefore > sorted[j].SecondsBefore })
+	var speedSum float64
+	valid := 0
+	lastValidAge := math.Inf(1)
+	var doorStart, stationaryStart *int
+	for index := range sorted {
+		sample := sorted[index]
+		speedSum += sample.SpeedKmh
+		isValid := sample.LocationValid == nil || *sample.LocationValid
+		if isValid {
+			valid++
+			if float64(sample.SecondsBefore) < lastValidAge {
+				lastValidAge = float64(sample.SecondsBefore)
+			}
+		}
+		if sample.DoorOpen {
+			if doorStart == nil {
+				value := sample.SecondsBefore
+				doorStart = &value
+			}
+		} else {
+			doorStart = nil
+		}
+		if sample.SpeedKmh < 1 {
+			if stationaryStart == nil {
+				value := sample.SecondsBefore
+				stationaryStart = &value
+			}
+		} else {
+			stationaryStart = nil
+		}
+		if sample.CongestionIndex != nil {
+			evidence["congestion_index"] = *sample.CongestionIndex
+		}
+		if sample.RouteDeviationMeters != nil {
+			evidence["route_deviation_m"] = *sample.RouteDeviationMeters
+		}
+		if doorStart != nil {
+			evidence["door_open_duration_s"] = float64(*doorStart - sample.SecondsBefore)
+		}
+		if stationaryStart != nil {
+			evidence["stationary_duration_s"] = float64(*stationaryStart - sample.SecondsBefore)
+		}
+	}
+	evidence["speed_mean_5m_kmh"] = speedSum / float64(len(sorted))
+	evidence["valid_gps_points_5m"] = float64(valid)
+	if !math.IsInf(lastValidAge, 1) {
+		evidence["last_gps_age_s"] = lastValidAge
+	}
+	_ = currentDelay
+	return evidence
 }
 
 func diagnoseMockEvidence(evidence map[string]float64, currentDelay *float64) mockDiagnosis {

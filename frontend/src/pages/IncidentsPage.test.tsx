@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { LiveMapContext, type LiveMapState } from '../live/liveMapContext'
 import { IncidentsPage } from './IncidentsPage'
@@ -12,7 +12,10 @@ const state: LiveMapState = {
   incidents: [{ id: 'incident-1', eventType: 'new', status: 'active', unitId: 893159, trId: 122048, routePatternId: 'route_pattern_demo', occurrenceId: 'run-1', predictionId: 'prediction-1', targetActionItemId: 55, targetStop: { id: 'stop-1', address: 'Тестовая остановка' }, predictedDelaySeconds: 240, firstPredictedDelaySeconds: 240, predictionTime: '2026-01-06T10:00:00Z', targetPlannedAt: '2026-01-06T10:12:00Z', createdAt: '2026-01-06T10:00:01Z', updatedAt: '2026-01-06T10:00:02Z', reasonCode: 'door_hold_delay', reason: 'Длительная стоянка с открытыми дверями.', evidence: { door_open_duration_s: 142, speed_mean_5m_kmh: 1.2, custom_demo_metric: 7 }, scenarioId: 'door-test' }],
 }
 
-afterEach(cleanup)
+beforeEach(() => {
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ available: [{ code: 'reduce_stop_dwell', label: 'Сократить время на остановках', recipient: 'driver', message: 'Сократите стоянку.' }], history: [] }) }))
+})
+afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 function renderPage() {
   return render(
@@ -63,5 +66,18 @@ describe('IncidentsPage', () => {
   it('показывает нейтральный текст при отсутствии причины', () => {
     render(<MemoryRouter><LiveMapContext.Provider value={{ ...state, incidents: [{ ...state.incidents[0], reason: undefined, evidence: undefined, scenarioId: undefined }] }}><IncidentsPage /></LiveMapContext.Provider></MemoryRouter>)
     expect(screen.getByText('Причина не определена')).toBeInTheDocument()
+  })
+
+  it('отправляет осмысленную реакцию и добавляет её в историю', async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.mocked(fetch)
+    fetchMock.mockResolvedValueOnce({ ok: true, json: async () => ({ available: [{ code: 'reduce_stop_dwell', label: 'Сократить время на остановках', recipient: 'driver', message: 'Сократите стоянку.' }], history: [] }) } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'action-1', incidentId: 'incident-1', unitId: 893159, routePatternId: 'route_pattern_demo', actionCode: 'reduce_stop_dwell', label: 'Сократить время на остановках', recipient: 'driver', message: 'Сократите стоянку.', status: 'pending', createdAt: '2026-01-06T10:01:00Z' }) } as Response)
+    renderPage()
+    await user.click(screen.getByText('ТС 893159'))
+    await user.click(await screen.findByRole('button', { name: /Сократить время на остановках/ }))
+    expect(await screen.findByText('Сообщение отправлено')).toBeInTheDocument()
+    expect(screen.getByText('Сократите стоянку.')).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/v1/incidents/incident-1/actions', expect.objectContaining({ method: 'POST' }))
   })
 })

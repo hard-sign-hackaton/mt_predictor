@@ -75,7 +75,7 @@ func nonNilEvidence(value map[string]float64) map[string]float64 {
 	return value
 }
 
-const columns = `id::text,unit_id,tr_id,route_pattern_id,occurrence_id,prediction_id,target_action_item_id,target_stop_id,target_stop_address,target_planned_at,first_predicted_delay_seconds,current_delay_seconds,predicted_delay_seconds,prediction_time,status,actual_arrival_at,actual_delay_seconds,outcome,created_at,updated_at,reason_code,reason,evidence,scenario_id`
+const columns = `id::text,unit_id,tr_id,route_pattern_id,occurrence_id,prediction_id,target_action_item_id,target_stop_id,target_stop_address,target_planned_at,first_predicted_delay_seconds,current_delay_seconds,predicted_delay_seconds,prediction_time,status,actual_arrival_at,actual_delay_seconds,outcome,created_at,updated_at,COALESCE(reason_code,''),reason,COALESCE(evidence,'{}'::jsonb),COALESCE(scenario_id,'')`
 
 type scanner interface{ Scan(...any) error }
 
@@ -139,4 +139,30 @@ func (s *Store) History(ctx context.Context, outcome *models.IncidentOutcome, li
 		items = append(items, i)
 	}
 	return models.IncidentHistoryPage{Items: items, Total: total, Limit: limit, Offset: offset}, rows.Err()
+}
+
+func (s *Store) SaveAction(ctx context.Context, action models.OperatorAction) error {
+	_, err := s.pool.Exec(ctx, `INSERT INTO operator_actions
+(id,incident_id,unit_id,route_pattern_id,action_code,label,recipient,message,status,created_at,consumed_at)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, action.ID, action.IncidentID, action.UnitID,
+		action.RoutePatternID, action.ActionCode, action.Label, action.Recipient, action.Message, action.Status, action.CreatedAt, action.ConsumedAt)
+	return err
+}
+
+func (s *Store) Actions(ctx context.Context, incidentID string) ([]models.OperatorAction, error) {
+	rows, err := s.pool.Query(ctx, `SELECT id::text,incident_id::text,unit_id,route_pattern_id,action_code,label,recipient,message,status,created_at,consumed_at
+FROM operator_actions WHERE incident_id=$1 ORDER BY created_at DESC`, incidentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	result := []models.OperatorAction{}
+	for rows.Next() {
+		var action models.OperatorAction
+		if err := rows.Scan(&action.ID, &action.IncidentID, &action.UnitID, &action.RoutePatternID, &action.ActionCode, &action.Label, &action.Recipient, &action.Message, &action.Status, &action.CreatedAt, &action.ConsumedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, action)
+	}
+	return result, rows.Err()
 }

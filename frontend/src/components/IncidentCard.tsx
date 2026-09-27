@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { Incident } from '../api/types'
+import type { Incident, IncidentActions, OperatorAction } from '../api/types'
 import { routeDisplayName, routeDirection, stopDisplayName } from '../domain/vehiclePresentation'
 import { useLiveMap } from '../live/liveMapContext'
 import { formatIncidentDate, formatIncidentDelay, formatIncidentEvidence, incidentReason } from '../domain/incidentPresentation'
@@ -10,6 +10,8 @@ export function IncidentCard({ incidentId, fallback, onClose }: { incidentId: st
   const { catalog } = useLiveMap()
   const [loadedIncident, setLoadedIncident] = useState<Incident>()
   const [notice, setNotice] = useState('')
+  const [actions, setActions] = useState<IncidentActions>({ available: [], history: [] })
+  const [sending, setSending] = useState('')
   const incident = fallback ?? loadedIncident
   useEffect(() => {
     if (fallback) return
@@ -21,9 +23,32 @@ export function IncidentCard({ incidentId, fallback, onClose }: { incidentId: st
       .catch(() => { if (mounted) setNotice('Не удалось загрузить инцидент') })
     return () => { mounted = false }
   }, [fallback, incidentId])
+  useEffect(() => {
+    let mounted = true
+    fetch(`/api/v1/incidents/${incidentId}/actions`).then((response) => {
+      if (!response.ok) throw new Error()
+      return response.json() as Promise<IncidentActions>
+    }).then((value) => { if (mounted) setActions(value) })
+      .catch(() => { if (mounted) setNotice('Не удалось загрузить историю действий') })
+    return () => { mounted = false }
+  }, [incidentId])
   const route = catalog?.routes.find((item) => item.id === incident?.routePatternId)
   const evidence = formatIncidentEvidence(incident?.evidence, Boolean(incident?.scenarioId))
-  const mock = () => setNotice('Функция будет подключена позже')
+  const sendAction = async (actionCode: string) => {
+    setSending(actionCode)
+    setNotice('')
+    try {
+      const response = await fetch(`/api/v1/incidents/${incidentId}/actions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ actionCode }) })
+      if (!response.ok) throw new Error()
+      const action = await response.json() as OperatorAction
+      setActions((current) => ({ ...current, history: [action, ...current.history] }))
+      setNotice('Сообщение отправлено')
+    } catch {
+      setNotice('Не удалось отправить сообщение')
+    } finally {
+      setSending('')
+    }
+  }
 
   return <div className="incident-card-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
     <aside className="incident-card">
@@ -49,7 +74,8 @@ export function IncidentCard({ incidentId, fallback, onClose }: { incidentId: st
           {incident.scenarioId ? <span className="incident-card__demo">Тестовый сценарий</span> : null}
           {evidence.length ? <dl>{evidence.map((item) => <div key={item.key}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl> : null}
         </section>
-        {incident.status === 'resolved' ? <section><h3>Действия оператора</h3><p>Действия не зарегистрированы. Хранение будет добавлено позже.</p></section> : <section><h3>Реакция диспетчера</h3><div className="incident-card__actions"><button onClick={mock}>Связаться с водителем</button><button onClick={mock}>Скорректировать движение</button><button onClick={mock}>Запросить резерв</button></div></section>}
+        {actions.available.length ? <section><h3>Реакция диспетчера</h3><div className="incident-card__actions">{actions.available.map((action) => <button key={action.code} disabled={Boolean(sending)} onClick={() => sendAction(action.code)}>{sending === action.code ? 'Отправка…' : action.label}<small>{action.recipient === 'driver' ? 'Водителю' : 'В диспетчерский штаб'}</small></button>)}</div></section> : null}
+        <section className="incident-card__history"><h3>История действий</h3>{actions.history.length ? <ol>{actions.history.map((action) => <li key={action.id}><div><strong>{action.label}</strong><time>{formatIncidentDate(action.createdAt)}</time></div><p>{action.message}</p><small>{action.recipient === 'driver' ? 'Получатель: водитель' : 'Получатель: диспетчерский штаб'} · {action.status === 'pending' ? 'Ожидает обработки' : 'Обработано'}</small></li>)}</ol> : <p>Действия не зарегистрированы.</p>}</section>
       </> : null}
       {notice ? <div className="incident-card__notice">{notice}</div> : null}
     </aside>

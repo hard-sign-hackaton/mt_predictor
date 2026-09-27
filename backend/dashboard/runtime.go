@@ -24,6 +24,7 @@ type Runtime struct {
 	predictions     map[string]models.DelayPrediction
 	incidents       map[string]models.Incident
 	incidentArchive map[string]models.Incident
+	actionArchive   map[string][]models.OperatorAction
 	repository      IncidentRepository
 	subscribers     map[uint64]chan models.LiveEvent
 	nextSubID       uint64
@@ -35,7 +36,88 @@ func NewRuntime(matcher *catalog.Matcher, ttl time.Duration) *Runtime {
 		vehicles: make(map[uint32]models.VehicleState), predictions: make(map[string]models.DelayPrediction),
 		incidents: make(map[string]models.Incident), subscribers: make(map[uint64]chan models.LiveEvent),
 		incidentArchive: make(map[string]models.Incident),
+		actionArchive:   make(map[string][]models.OperatorAction),
 	}
+}
+
+var commonActionOptions = []models.IncidentActionOption{
+	{Code: "increase_speed", Label: "Попросить увеличить скорость", Recipient: "driver", Message: "По возможности увеличьте скорость движения в пределах ПДД."},
+	{Code: "decrease_speed", Label: "Попросить снизить скорость", Recipient: "driver", Message: "Снизьте скорость движения, соблюдая ПДД и требования безопасности."},
+}
+
+var reasonActionOptions = map[string]models.IncidentActionOption{
+	"door_hold_delay":       {Code: "reduce_stop_dwell", Label: "Сократить время на остановках", Recipient: "driver", Message: "По возможности сократите время стоянки и открытия дверей на следующих остановках."},
+	"traffic_slowdown":      {Code: "request_reserve", Label: "Запросить резервное ТС", Recipient: "dispatch_hq", Message: "Требуется оценить выпуск резервного ТС из-за высокой загруженности участка."},
+	"poor_gps_quality":      {Code: "check_gps", Label: "Проверить передачу геоданных", Recipient: "driver", Message: "Проверьте работу навигационного оборудования и передачу геоданных."},
+	"route_deviation":       {Code: "return_to_route", Label: "Уточнить возврат на маршрут", Recipient: "driver", Message: "Подтвердите отклонение и по возможности вернитесь на установленный маршрут."},
+	"stop_dwell":            {Code: "resume_movement", Label: "Уточнить длительную стоянку", Recipient: "driver", Message: "Сообщите причину длительной стоянки и возобновите движение, если это безопасно."},
+	"schedule_slippage":     {Code: "recover_schedule", Label: "Сократить отставание от графика", Recipient: "driver", Message: "По возможности сократите отставание от графика в пределах ПДД."},
+	"insufficient_evidence": {Code: "request_status", Label: "Запросить статус у водителя", Recipient: "driver", Message: "Сообщите текущую обстановку и возможную причину отклонения от графика."},
+}
+
+func availableActions(incident models.Incident) []models.IncidentActionOption {
+	if incident.Status != models.IncidentActive && incident.Status != models.IncidentAwaitingResult {
+		return []models.IncidentActionOption{}
+	}
+	result := append([]models.IncidentActionOption{}, commonActionOptions...)
+	if option, ok := reasonActionOptions[incident.ReasonCode]; ok {
+		result = append(result, option)
+	} else {
+		result = append(result, reasonActionOptions["insufficient_evidence"])
+	}
+	return result
+}
+
+func (r *Runtime) IncidentActions(ctx context.Context, incidentID string) (models.IncidentActions, bool, error) {
+	incident, ok, err := r.Incident(ctx, incidentID)
+	if err != nil || !ok {
+		return models.IncidentActions{}, ok, err
+	}
+	r.mu.RLock()
+	repository := r.repository
+	history := append([]models.OperatorAction{}, r.actionArchive[incidentID]...)
+	r.mu.RUnlock()
+	if repository != nil {
+		history, err = repository.Actions(ctx, incidentID)
+		if err != nil {
+			return models.IncidentActions{}, true, err
+		}
+	}
+	return models.IncidentActions{Available: availableActions(incident), History: history}, true, nil
+}
+
+func (r *Runtime) CreateOperatorAction(ctx context.Context, incidentID, code string, now time.Time) (models.OperatorAction, error) {
+	incident, ok, err := r.Incident(ctx, incidentID)
+	if err != nil {
+		return models.OperatorAction{}, err
+	}
+	if !ok {
+		return models.OperatorAction{}, fmt.Errorf("incident not found")
+	}
+	var selected *models.IncidentActionOption
+	for _, option := range availableActions(incident) {
+		if option.Code == code {
+			copy := option
+			selected = &copy
+			break
+		}
+	}
+	if selected == nil {
+		return models.OperatorAction{}, fmt.Errorf("action is not available for incident")
+	}
+	action := models.OperatorAction{ID: uuid.NewString(), IncidentID: incident.ID, UnitID: incident.UnitID, RoutePatternID: incident.RoutePatternID, ActionCode: selected.Code, Label: selected.Label, Recipient: selected.Recipient, Message: selected.Message, Status: models.OperatorActionPending, CreatedAt: now}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.repository != nil {
+		if err := r.repository.SaveAction(ctx, action); err != nil {
+			return models.OperatorAction{}, err
+		}
+	}
+	if r.actionArchive == nil {
+		r.actionArchive = make(map[string][]models.OperatorAction)
+	}
+	r.actionArchive[incidentID] = append(r.actionArchive[incidentID], action)
+	return action, nil
 }
 
 func (r *Runtime) SetIncidentRepository(ctx context.Context, repository IncidentRepository) error {
@@ -174,6 +256,33 @@ func (r *Runtime) ApplyPrediction(prediction models.DelayPrediction, incidentThr
 		delete(r.incidents, key)
 		r.incidentArchive[existing.ID] = existing
 		r.publishLocked(models.LiveEvent{Type: models.LiveIncidentUpdated, OccurredAt: now, Incident: &existing}, "incident-"+existing.ID)
+	}
+	return nil
+}
+
+// ResetMockScenarios убирает незавершённые записи предыдущего запуска того же
+// demo-набора. Реальные инциденты и история не затрагиваются.
+func (r *Runtime) ResetMockScenarios(scenarioIDs map[string]struct{}, now time.Time) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for key, prediction := range r.predictions {
+		if _, ok := scenarioIDs[prediction.ScenarioID]; ok {
+			delete(r.predictions, key)
+		}
+	}
+	for key, incident := range r.incidents {
+		if _, ok := scenarioIDs[incident.ScenarioID]; !ok {
+			continue
+		}
+		incident.Status = models.IncidentCancelled
+		incident.EventType = models.IncidentClosed
+		incident.UpdatedAt = now
+		if err := r.saveIncidentLocked(incident); err != nil {
+			return err
+		}
+		delete(r.incidents, key)
+		r.incidentArchive[incident.ID] = incident
+		r.publishLocked(models.LiveEvent{Type: models.LiveIncidentUpdated, OccurredAt: now, Incident: &incident}, "incident-"+incident.ID)
 	}
 	return nil
 }

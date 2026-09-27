@@ -231,6 +231,32 @@ export interface IncidentHistoryPage {
   offset: number
 }
 
+export interface IncidentActionOption {
+  code: string
+  label: string
+  recipient: 'driver' | 'dispatch_hq'
+  message: string
+}
+
+export interface OperatorAction {
+  id: string
+  incidentId: string
+  unitId: number
+  routePatternId: string
+  actionCode: string
+  label: string
+  recipient: 'driver' | 'dispatch_hq'
+  message: string
+  status: 'pending' | 'consumed'
+  createdAt: string
+  consumedAt?: string
+}
+
+export interface IncidentActions {
+  available: IncidentActionOption[]
+  history: OperatorAction[]
+}
+
 export interface DashboardSnapshot {
   /** Монотонная позиция live-потока, представленная этим snapshot. */
   version: number

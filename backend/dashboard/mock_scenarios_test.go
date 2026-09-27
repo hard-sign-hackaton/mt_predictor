@@ -38,14 +38,14 @@ func TestMockScenarioDatasetIsAcceptedAndDiagnosed(t *testing.T) {
 		t.Fatalf("dataset rejected: status=%d body=%s", response.Code, response.Body.String())
 	}
 	snapshot := runtime.DashboardSnapshot(time.Now())
-	if len(snapshot.Predictions) != 7 {
+	if len(snapshot.Predictions) != 5 {
 		t.Fatalf("want one prediction for each mock vehicle, got %d", len(snapshot.Predictions))
 	}
-	if len(snapshot.Incidents) != 6 {
-		t.Fatalf("want 6 active incidents, got %d", len(snapshot.Incidents))
+	if len(snapshot.Incidents) != 5 {
+		t.Fatalf("want 5 active incidents, got %d", len(snapshot.Incidents))
 	}
-	if got := len(runtime.Snapshot(time.Now()).Vehicles); got != 7 {
-		t.Fatalf("want 7 materialized mock vehicles, got %d", got)
+	if got := len(runtime.Snapshot(time.Now()).Vehicles); got != 5 {
+		t.Fatalf("want 5 materialized mock vehicles, got %d", got)
 	}
 	units := make(map[uint32]struct{}, len(snapshot.Predictions))
 	reasons := make(map[string]struct{}, len(snapshot.Predictions))
@@ -59,8 +59,8 @@ func TestMockScenarioDatasetIsAcceptedAndDiagnosed(t *testing.T) {
 			t.Errorf("test delay escaped bounded range: %v", prediction.PredictedDelaySeconds)
 		}
 	}
-	if len(units) != 7 || len(reasons) != 7 {
-		t.Fatalf("mock dataset must cover 7 vehicles and 7 reasons: units=%d reasons=%d", len(units), len(reasons))
+	if len(units) != 5 || len(reasons) != 5 {
+		t.Fatalf("mock dataset must cover 5 vehicles and 5 reasons: units=%d reasons=%d", len(units), len(reasons))
 	}
 	for _, incident := range snapshot.Incidents {
 		if incident.Reason == nil || incident.ReasonCode == "" || incident.ScenarioID == "" {
@@ -142,8 +142,11 @@ func TestMockDiagnosisUsesEvidenceRatherThanExpectedLabel(t *testing.T) {
 		CurrentPlannedAt:      time.Date(2026, 6, 10, 7, 59, 0, 0, time.UTC),
 		TargetPlannedAt:       time.Date(2026, 6, 10, 8, 12, 0, 0, time.UTC),
 		PredictedDelaySeconds: 300, ExpectedReasonCode: "door_hold_delay",
-		TelemetryHistory: testMockTelemetry(),
-		Evidence:         map[string]float64{"door_open_duration_s": 142},
+		TelemetryHistory: []mockTelemetrySample{
+			{SecondsBefore: 180, SpeedKmh: 0, DoorOpen: true},
+			{SecondsBefore: 90, SpeedKmh: 0, DoorOpen: true},
+			{SecondsBefore: 0, SpeedKmh: 0, DoorOpen: true},
+		},
 	}
 	encoded, err := json.Marshal(mockScenarioBatch{Scenarios: []mockScenario{input}})
 	if err != nil {

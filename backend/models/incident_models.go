@@ -80,3 +80,39 @@ type IncidentHistoryPage struct {
 	Limit  int        `json:"limit"`
 	Offset int        `json:"offset"`
 }
+
+type OperatorActionStatus string
+
+const (
+	OperatorActionPending  OperatorActionStatus = "pending"
+	OperatorActionConsumed OperatorActionStatus = "consumed"
+)
+
+// IncidentActionOption is a server-approved dispatcher reaction for an incident.
+type IncidentActionOption struct {
+	Code      string `json:"code"`
+	Label     string `json:"label"`
+	Recipient string `json:"recipient"`
+	Message   string `json:"message"`
+}
+
+// OperatorAction is both the incident reaction history and an outbox message
+// for the external service that delivers instructions to drivers or HQ.
+type OperatorAction struct {
+	ID             string               `json:"id"`
+	IncidentID     string               `json:"incidentId"`
+	UnitID         uint32               `json:"unitId"`
+	RoutePatternID string               `json:"routePatternId"`
+	ActionCode     string               `json:"actionCode"`
+	Label          string               `json:"label"`
+	Recipient      string               `json:"recipient"`
+	Message        string               `json:"message"`
+	Status         OperatorActionStatus `json:"status"`
+	CreatedAt      time.Time            `json:"createdAt"`
+	ConsumedAt     *time.Time           `json:"consumedAt,omitempty"`
+}
+
+type IncidentActions struct {
+	Available []IncidentActionOption `json:"available"`
+	History   []OperatorAction       `json:"history"`
+}

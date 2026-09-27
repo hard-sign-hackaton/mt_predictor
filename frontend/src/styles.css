@@ -130,7 +130,13 @@ h2, h3 { margin: 0; font-size: 13px; }
 .incident-card dd small { display: block; margin-top: 3px; font-weight: 400; }
 .incident-card section { margin-top: 20px; border-top: 1px solid #aaa; }
 .incident-card__actions { display: grid; gap: 8px; }
+.incident-card__actions button { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.incident-card__actions button small { opacity: .7; }
 .incident-card__notice { margin-top: 12px; padding: 9px; background: #eee2bd; border: 1px solid #a47d17; }
+.incident-card__history ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.incident-card__history li { border: 1px solid #ddd; border-radius: 8px; padding: 10px; }
+.incident-card__history li div { display: flex; justify-content: space-between; gap: 12px; }
+.incident-card__history li p { margin: 6px 0; }
 .incident-card__demo { display: inline-block; margin: 0 0 10px; padding: 3px 7px; border: 1px solid #7b5c12; background: #fff0bd; font-size: 11px; font-weight: 700; }
 .incident-card__reason dl { display: grid; grid-template-columns: 1fr; gap: 6px; }
 .incident-card__reason dl div { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 10px; padding: 7px 0; border-bottom: 1px solid #ddd; }

@@ -50,7 +50,9 @@ func NewAPI(init models.DashboardInit, runtime *Runtime, options ...APIOptions) 
 	mux.HandleFunc("GET /api/v1/dashboard/snapshot", api.handleDashboardSnapshot)
 	mux.HandleFunc("GET /api/v1/map/events", api.handleEvents)
 	mux.HandleFunc("GET /api/v1/incidents/history", api.handleIncidentHistory)
-	mux.HandleFunc("GET /api/v1/incidents/", api.handleIncident)
+	mux.HandleFunc("GET /api/v1/incidents/{id}", api.handleIncident)
+	mux.HandleFunc("GET /api/v1/incidents/{id}/actions", api.handleIncidentActions)
+	mux.HandleFunc("POST /api/v1/incidents/{id}/actions", api.handleIncidentActions)
 	if config.EnableMockScenarios {
 		mux.HandleFunc("POST /api/v1/demo/scenarios", api.handleMockScenarios)
 	}
@@ -89,8 +91,8 @@ func (a *API) handleIncidentHistory(response http.ResponseWriter, request *http.
 }
 
 func (a *API) handleIncident(response http.ResponseWriter, request *http.Request) {
-	id := strings.TrimPrefix(request.URL.Path, "/api/v1/incidents/")
-	if id == "" || strings.Contains(id, "/") {
+	id := request.PathValue("id")
+	if id == "" {
 		http.NotFound(response, request)
 		return
 	}
@@ -104,6 +106,46 @@ func (a *API) handleIncident(response http.ResponseWriter, request *http.Request
 		return
 	}
 	writeJSON(response, http.StatusOK, incident)
+}
+
+func (a *API) handleIncidentActions(response http.ResponseWriter, request *http.Request) {
+	id := request.PathValue("id")
+	if request.Method == http.MethodGet {
+		actions, ok, err := a.runtime.IncidentActions(request.Context(), id)
+		if err != nil {
+			http.Error(response, "incident actions unavailable", http.StatusInternalServerError)
+			return
+		}
+		if !ok {
+			http.NotFound(response, request)
+			return
+		}
+		writeJSON(response, http.StatusOK, actions)
+		return
+	}
+	var input struct {
+		ActionCode string `json:"actionCode"`
+	}
+	decoder := json.NewDecoder(http.MaxBytesReader(response, request.Body, 4096))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&input); err != nil || strings.TrimSpace(input.ActionCode) == "" {
+		http.Error(response, "invalid action", http.StatusBadRequest)
+		return
+	}
+	action, err := a.runtime.CreateOperatorAction(request.Context(), id, input.ActionCode, time.Now())
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			http.NotFound(response, request)
+			return
+		}
+		if strings.Contains(err.Error(), "not available") {
+			http.Error(response, err.Error(), http.StatusConflict)
+			return
+		}
+		http.Error(response, "action could not be saved", http.StatusInternalServerError)
+		return
+	}
+	writeJSON(response, http.StatusCreated, action)
 }
 
 func (a *API) handleInit(response http.ResponseWriter, _ *http.Request) {

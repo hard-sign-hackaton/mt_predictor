@@ -3,8 +3,9 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd "${script_dir}/.." && pwd)"
-emulator_archive="${project_dir}/../ndtp-telemetry-emulator.tar"
-traffic_file="${project_dir}/../validate/traffic.csv"
+dataset_dir="${DATASET_DIR:-${project_dir}/../../dataset}"
+emulator_archive="${dataset_dir}/ndtp-telemetry-emulator.tar"
+traffic_file="${dataset_dir}/validate/traffic.csv"
 
 cd "${project_dir}"
 
@@ -19,7 +20,7 @@ done
 
 if [[ "${mode}" != "mock" && ! -f "${traffic_file}" ]]; then
   echo "Не найден датасет для CSV replay: ${traffic_file}" >&2
-  echo "Репозиторий должен находиться в Project/mt_predictor рядом с каталогом dataset из раздачи." >&2
+  echo "По умолчанию ожидается ../../dataset/validate/traffic.csv; другой путь задаётся через DATASET_DIR." >&2
   exit 1
 fi
 

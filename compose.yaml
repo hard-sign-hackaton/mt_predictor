@@ -44,9 +44,11 @@ services:
       - -catalog
       - /app/data/generated/route_catalog.json
       - -enable-mock-scenarios
+      - -ml-timeout
+      - 15s
     depends_on:
       ml:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
 
@@ -76,7 +78,7 @@ services:
       - -timestamp-mode
       - source
     volumes:
-      - ..:/dataset:ro
+      - ${DATASET_DIR:-../../dataset}:/dataset:ro
     depends_on:
       - backend
     restart: on-failure
@@ -92,9 +94,9 @@ services:
       - -file
       - /demo/mock_telemetry.csv
       - -vehicles
-      - "7"
+      - "5"
       - -speed
-      - "25"
+      - "5"
       - -loop
       - -timestamp-mode
       - rebased

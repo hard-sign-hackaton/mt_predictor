@@ -11,4 +11,6 @@ type IncidentRepository interface {
 	LoadUnresolved(context.Context) ([]models.Incident, error)
 	Get(context.Context, string) (models.Incident, bool, error)
 	History(context.Context, *models.IncidentOutcome, int, int) (models.IncidentHistoryPage, error)
+	SaveAction(context.Context, models.OperatorAction) error
+	Actions(context.Context, string) ([]models.OperatorAction, error)
 }
