@@ -55,7 +55,9 @@ On Linux or macOS:
 
 The model dump is loaded from `delay_service/artifacts/delay_model.joblib`.
 Override its location using `DELAY_MODEL_PATH`. Server settings can be supplied
-with `GRPC_HOST`, `GRPC_PORT`, and `GRPC_MAX_WORKERS`.
+with `GRPC_HOST`, `GRPC_PORT`, and `GRPC_MAX_WORKERS`. Each server process loads
+one immutable model version at startup and is otherwise stateless, so it can be
+run as a replica behind a gRPC-capable load balancer.
 
 ### Docker
 
@@ -75,6 +77,66 @@ docker build -t mt-predictor-grpc \
   --build-arg TORCH_SUFFIX=+cu128 .
 docker run --rm --gpus all -e MODEL_DEVICE=cuda -p 50051:50051 mt-predictor-grpc
 ```
+
+## ONNX inference optimization (optional)
+
+The standard PyTorch path remains the default. To export the Transformer portion
+of a trained artifact as a dynamic-batch ONNX model, install the optional tools
+and export beside the model:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-onnx.txt
+.\.venv\Scripts\python.exe -m delay_service.optimize --model-path delay_service\artifacts\delay_model.joblib
+```
+
+The exporter checks the ONNX graph and reports prediction parity against
+PyTorch. Enable the ONNX Runtime CPU backend when launching the server:
+
+```powershell
+$env:TRANSFORMER_BACKEND = "onnx"
+.\.venv\Scripts\python.exe -m delay_service.grpc_server
+```
+
+By default, the ONNX sidecar is expected at the same path as the model bundle
+with the `.onnx` extension. Override it with `TRANSFORMER_ONNX_PATH`. ONNX
+Runtime uses one intra-op thread by default for low single-request latency;
+`ONNX_INTRA_OP_THREADS` and `ONNX_INTER_OP_THREADS` can be tuned for the target
+batch size and CPU.
+
+The Docker image can include ONNX Runtime with
+`--build-arg INSTALL_ONNX_RUNTIME=1`. Build with the already-exported model
+sidecar in the context and enable the backend at runtime:
+
+```powershell
+docker build -t mt-predictor-grpc --build-arg INSTALL_ONNX_RUNTIME=1 .
+docker run --rm -p 50051:50051 -e TRANSFORMER_BACKEND=onnx mt-predictor-grpc
+```
+
+Alternatively, mount the matching `.onnx` sidecar beside the model bundle and
+set `TRANSFORMER_ONNX_PATH`. Dynamic INT8 export is available with
+`--quantize-int8`; it produces an `.int8.onnx` sidecar. INT8 is experimental:
+compare its MAE and per-row errors on a held-out labeled dataset before using
+it. It is not the default because local measurements showed little latency
+benefit for small batches.
+
+TensorRT is not currently wired into the service. It requires a compatible
+NVIDIA/Linux TensorRT runtime and a TensorRT-enabled ONNX Runtime provider; the
+current ONNX backend deliberately selects CPUExecutionProvider only.
+
+Local microbenchmark (this workspace, synthetic requests with 32 telemetry
+records; predictor time only, excluding gRPC/network), median latency:
+
+| Backend | 1 prediction | 16 predictions | 64 predictions |
+|---|---:|---:|---:|
+| PyTorch CPU | 8.08 ms | 17.62 ms | 43.38 ms |
+| ONNX Runtime FP32 CPU | 6.91 ms | 16.30 ms | 44.84 ms |
+| ONNX Runtime INT8 CPU | 6.86 ms | 16.26 ms | 44.83 ms |
+
+On the labeled test split, FP32 ONNX matched the PyTorch CPU MAE (53.2738 sec);
+INT8 MAE was 53.3436 sec, but its per-row prediction delta reached 15.05 sec.
+These results suggest using FP32 ONNX for latency-sensitive single predictions
+on this CPU, while keeping PyTorch for larger batches unless hardware-specific
+benchmarks show otherwise. They are local measurements, not an SLA.
 
 The Protobuf service is `delay_service.v1.DelayPredictionService`:
 
@@ -125,19 +187,46 @@ with grpc.insecure_channel("localhost:50051") as channel:
 
 Use TLS credentials when connecting across an untrusted network.
 
-## Retrain and regenerate submission (optional)
+## Retrain and publish a model version (optional)
 
 Training requires the original dataset layout (`train/`, `test/`, `validate/`,
 and `labels/`) alongside this repository, or pass its location with
 `--data-dir`. The trained ensemble and validation `submission.csv` are written
-to the paths specified by the command:
+to the paths specified by the command. If `--model-out` is omitted, training
+publishes a timestamped artifact under `delay_service/artifacts/versions/`.
+Training uses the labeled training split; test labels are only used for
+evaluation. For retraining with new labels, build an updated cumulative dataset
+with a fresh vehicle-disjoint test split, then train and evaluate a new version:
 
 ```powershell
 .\.venv\Scripts\python.exe -m delay_service.train --data-dir "C:\path\to\dataset" --device auto
 ```
 
 Use `--device cuda` to require NVIDIA CUDA or `--device cpu` to force CPU.
-Training compares on the labeled test set; it does not fit on test labels.
+To select an explicit immutable version path, pass `--model-out`, for example:
+
+```powershell
+.\.venv\Scripts\python.exe -m delay_service.train --data-dir "C:\path\to\dataset" --model-out "C:\models\delay_model-v2.joblib"
+```
+
+Artifact publication uses a temporary file and atomic replacement, so a failed
+write cannot leave a truncated model at the published path. The running server
+does not hot-reload artifacts: validate the new version, then roll it out by
+restarting/replacing replicas with `DELAY_MODEL_PATH` set to that version. Keep
+the previous artifact available for rollback. Training is an offline full
+retrain on accumulated labeled data, not online learning from prediction
+requests.
+
+## Horizontal scaling
+
+The Docker image above includes the bundled model. To deploy a new model
+version, mount the artifact into each replica and set `DELAY_MODEL_PATH`. Run
+multiple replicas behind an external gRPC load balancer; give each replica
+enough CPU/RAM, and avoid overcommitting a shared GPU. `PredictBatch` supports
+up to 1,000 forecast points per request, and `GRPC_MAX_WORKERS` controls the
+per-process request worker pool. Benchmark the target hardware to choose replica
+and worker counts; increasing threads alone does not guarantee higher
+throughput.
 
 ## Tests
 
@@ -152,5 +241,6 @@ From the repository root:
 - `delay_service/` — service, model code, Protobuf contract/bindings, and model.
 - `tests/` — feature, model, and live in-process gRPC tests.
 - `requirements.txt` — runtime and training dependencies.
+- `requirements-onnx.txt` — optional ONNX exporter and CPU runtime.
 - `Dockerfile`, `.dockerignore` — container image for the gRPC service.
 - `.gitignore` — excludes local environments, caches, and copied dataset files.

@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 from pathlib import Path
 
-import joblib
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import GroupShuffleSplit
 
+from .model_artifacts import publish_model_artifact
 from .features import (
     DEFAULT_SEQUENCE_LENGTH,
     FEATURE_NAMES,
@@ -68,7 +69,7 @@ def _new_catboost() -> CatBoostRegressor:
 def fit_and_evaluate(
     data_dir: Path,
     model_out: Path,
-    submission_out: Path,
+    submission_out: Path | None,
     device: str = "auto",
 ) -> None:
     selected_device = select_torch_device(device)
@@ -146,10 +147,11 @@ def fit_and_evaluate(
     print(f"transformer: test MAE={transformer_test_mae:.2f} sec")
     print(f"ensemble: test MAE={ensemble_test_mae:.2f} sec")
 
-    model_out.parent.mkdir(parents=True, exist_ok=True)
-    joblib.dump(
+    publish_model_artifact(
         {
             "model_name": "catboost_transformer_ensemble",
+            "model_version": model_out.stem,
+            "created_at_utc": datetime.now(timezone.utc).isoformat(),
             "catboost_model": catboost_model,
             "transformer_model": transformer_model,
             "catboost_weight": catboost_weight,
@@ -168,38 +170,45 @@ def fit_and_evaluate(
         model_out,
     )
 
-    points_path = data_dir / "validate" / "points.csv"
-    validate_traffic_path = data_dir / "validate" / "traffic.csv"
-    validate_points = pd.read_csv(
-        points_path, parse_dates=["T", "target_time_begin"]
-    )
-    validate_traffic = pd.read_csv(
-        validate_traffic_path, parse_dates=["event_time"], low_memory=False
-    )
-    x_validate = make_training_features(validate_points, validate_traffic)
-    seq_validate = make_training_sequences(validate_points, validate_traffic)
-    validate_catboost_predictions = catboost_model.predict(x_validate)
-    validate_transformer_predictions = predict_sequence_artifact(
-        transformer_model,
-        x_validate.to_numpy(dtype=np.float32),
-        seq_validate,
-        device=selected_device.type,
-    )
-    validate_predictions = (
-        catboost_weight * validate_catboost_predictions
-        + (1.0 - catboost_weight) * validate_transformer_predictions
-    )
-    submission_out.parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(
-        {"sample_id": validate_points["sample_id"], "prediction": validate_predictions}
-    ).to_csv(submission_out, sep=";", index=False, float_format="%.3f")
+    validate_count = 0
+    if submission_out is not None:
+        points_path = data_dir / "validate" / "points.csv"
+        validate_traffic_path = data_dir / "validate" / "traffic.csv"
+        validate_points = pd.read_csv(
+            points_path, parse_dates=["T", "target_time_begin"]
+        )
+        validate_traffic = pd.read_csv(
+            validate_traffic_path, parse_dates=["event_time"], low_memory=False
+        )
+        x_validate = make_training_features(validate_points, validate_traffic)
+        seq_validate = make_training_sequences(validate_points, validate_traffic)
+        validate_catboost_predictions = catboost_model.predict(x_validate)
+        validate_transformer_predictions = predict_sequence_artifact(
+            transformer_model,
+            x_validate.to_numpy(dtype=np.float32),
+            seq_validate,
+            device=selected_device.type,
+        )
+        validate_predictions = (
+            catboost_weight * validate_catboost_predictions
+            + (1.0 - catboost_weight) * validate_transformer_predictions
+        )
+        submission_out.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(
+            {
+                "sample_id": validate_points["sample_id"],
+                "prediction": validate_predictions,
+            }
+        ).to_csv(submission_out, sep=";", index=False, float_format="%.3f")
+        validate_count = len(validate_predictions)
 
     print("Selected model: CatBoost + telemetry Transformer ensemble")
     print(f"Test MAE: {ensemble_test_mae:.2f} sec")
     print(f"Ensemble weights: CatBoost={catboost_weight:.2f}, Transformer={1-catboost_weight:.2f}")
     print(f"Training/inference device: {selected_device}")
-    print(f"Saved model: {model_out}")
-    print(f"Saved {len(validate_predictions)} validate predictions: {submission_out}")
+    print(f"Published model version {model_out.stem}: {model_out}")
+    if submission_out is not None:
+        print(f"Saved {validate_count} validate predictions: {submission_out}")
 
 
 def main() -> None:
@@ -208,17 +217,20 @@ def main() -> None:
         "--data-dir",
         type=Path,
         default=Path.cwd(),
-        help="Directory containing train/, test/, validate/, and labels/",
+        help="Directory containing train/, test/, and labels/; validate/ is optional",
     )
     parser.add_argument(
         "--model-out",
         type=Path,
-        default=Path(__file__).parent / "artifacts" / "delay_model.joblib",
+        help=(
+            "Output path for an immutable model version. If omitted, a "
+            "timestamped artifact is written under artifacts/versions/."
+        ),
     )
     parser.add_argument(
         "--submission-out",
         type=Path,
-        default=Path.cwd() / "submission.csv",
+        help="Optional output path for predictions on validate/",
     )
     parser.add_argument(
         "--device",
@@ -227,7 +239,16 @@ def main() -> None:
         help="Device for Transformer training and inference (default: auto)",
     )
     args = parser.parse_args()
-    fit_and_evaluate(args.data_dir, args.model_out, args.submission_out, args.device)
+    model_out = args.model_out
+    if model_out is None:
+        version = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+        model_out = (
+            Path(__file__).parent
+            / "artifacts"
+            / "versions"
+            / f"delay_model-{version}.joblib"
+        )
+    fit_and_evaluate(args.data_dir, model_out, args.submission_out, args.device)
 
 
 if __name__ == "__main__":

@@ -21,6 +21,7 @@ from .sequence_model import (
     restore_sequence_model,
     select_torch_device,
 )
+from .onnx_runtime import OnnxTransformerRuntime
 
 
 DEFAULT_MODEL_PATH = Path(__file__).parent / "artifacts" / "delay_model.joblib"
@@ -48,18 +49,35 @@ class DelayPredictor:
             raise ValueError(f"Sequence schema does not match {self.model_path}")
         if bundle.get("sequence_length") != DEFAULT_SEQUENCE_LENGTH:
             raise ValueError(f"Sequence length does not match {self.model_path}")
+        self.model_version = str(bundle.get("model_version", self.model_path.stem))
+        self.transformer_backend = os.environ.get(
+            "TRANSFORMER_BACKEND", "torch"
+        ).lower()
+        if self.transformer_backend not in {"torch", "onnx"}:
+            raise ValueError("TRANSFORMER_BACKEND must be 'torch' or 'onnx'")
         self.catboost_model = bundle["catboost_model"]
         self.transformer_artifact: SequenceModelArtifact = bundle[
             "transformer_model"
         ]
         self.catboost_weight = float(bundle["catboost_weight"])
-        self.device = select_torch_device(os.environ.get("MODEL_DEVICE", "auto"))
-        self.transformer_model, self.device = restore_sequence_model(
-            self.transformer_artifact,
-            tabular_features=len(FEATURE_NAMES),
-            sequence_features=len(SEQUENCE_FEATURE_NAMES),
-            device=self.device.type,
-        )
+        if self.transformer_backend == "onnx":
+            onnx_path = Path(
+                os.environ.get(
+                    "TRANSFORMER_ONNX_PATH", str(self.model_path.with_suffix(".onnx"))
+                )
+            )
+            self.transformer_model = None
+            self.onnx_transformer = OnnxTransformerRuntime(onnx_path)
+            self.device = select_torch_device("cpu")
+        else:
+            self.device = select_torch_device(os.environ.get("MODEL_DEVICE", "auto"))
+            self.transformer_model, self.device = restore_sequence_model(
+                self.transformer_artifact,
+                tabular_features=len(FEATURE_NAMES),
+                sequence_features=len(SEQUENCE_FEATURE_NAMES),
+                device=self.device.type,
+            )
+            self.onnx_transformer = None
         self.training_device = bundle.get("transformer_training_device", "unknown")
 
     def predict_one(
@@ -109,13 +127,22 @@ class DelayPredictor:
         catboost_predictions = np.asarray(
             self.catboost_model.predict(features), dtype=float
         )
-        transformer_predictions = predict_restored_sequence_model(
-            self.transformer_model,
-            self.device,
-            self.transformer_artifact,
-            tabular_values,
-            sequences,
-        )
+        if self.transformer_backend == "onnx":
+            if self.onnx_transformer is None:
+                raise RuntimeError("ONNX Transformer runtime was not initialized")
+            transformer_predictions = self.onnx_transformer.predict(
+                tabular_values, sequences
+            )
+        else:
+            if self.transformer_model is None:
+                raise RuntimeError("PyTorch Transformer model was not initialized")
+            transformer_predictions = predict_restored_sequence_model(
+                self.transformer_model,
+                self.device,
+                self.transformer_artifact,
+                tabular_values,
+                sequences,
+            )
         predictions = (
             self.catboost_weight * catboost_predictions
             + (1.0 - self.catboost_weight) * transformer_predictions

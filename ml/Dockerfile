@@ -11,11 +11,13 @@ ARG PYTHON_VERSION=3.12
 #   --build-arg TORCH_SUFFIX=+cu128 --runtime=nvidia
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
 ARG TORCH_SUFFIX
+ARG INSTALL_ONNX_RUNTIME=0
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS builder
 
 ARG TORCH_INDEX_URL
 ARG TORCH_SUFFIX
+ARG INSTALL_ONNX_RUNTIME
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1 \
     VIRTUAL_ENV=/opt/venv \
@@ -26,7 +28,8 @@ RUN python -m venv "$VIRTUAL_ENV"
 WORKDIR /build
 COPY requirements.txt ./
 RUN pip install --index-url "$TORCH_INDEX_URL" "torch>=2.9,<3${TORCH_SUFFIX}" \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt \
+    && if [ "$INSTALL_ONNX_RUNTIME" = "1" ]; then pip install "onnxruntime>=1.20,<2"; fi
 
 
 FROM python:${PYTHON_VERSION}-slim-bookworm AS runtime

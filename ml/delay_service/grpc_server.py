@@ -10,7 +10,8 @@ import grpc
 from pydantic import ValidationError
 
 from .predictor import DelayPredictor
-from .proto import delay_service_pb2, delay_service_pb2_grpc
+from .proto import delay_service_pb2_grpc
+from .proto import delay_service_pb2
 from .schemas import (
     PredictionPoint,
     TelemetryPoint,
@@ -122,10 +123,12 @@ def serve(host: str = "0.0.0.0", port: int = 50051) -> None:
         raise RuntimeError(f"Could not bind gRPC server to {host}:{port}")
     server.start()
     LOGGER.info(
-        "gRPC server listening on %s:%s; Transformer inference device=%s "
-        "(trained on %s)",
+        "gRPC server listening on %s:%s; model_version=%s; Transformer backend=%s; "
+        "Transformer inference device=%s (trained on %s)",
         host,
         bound_port,
+        predictor.model_version,
+        predictor.transformer_backend,
         predictor.device,
         predictor.training_device,
     )
