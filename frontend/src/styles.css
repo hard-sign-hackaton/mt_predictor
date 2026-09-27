@@ -116,3 +116,24 @@ h2, h3 { margin: 0; font-size: 13px; }
   .map-workspace { grid-template-columns: 220px minmax(0, 1fr) 250px; }
   .live-header__facts span:nth-child(2) { display: none; }
 }
+
+.whatif { padding: 9px 10px; border-bottom: 2px solid #777; background: #e9e9e9; max-height: 58%; overflow: auto; font-size: 11px; }
+.whatif h3 { font-size: 12px; }
+.whatif h4 { margin: 11px 0 3px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.whatif label { display: grid; gap: 3px; margin: 7px 0; font-size: 11px; }
+.whatif input[type='range'] { padding: 0; }
+.whatif__verdict { display: grid; gap: 2px; margin: 9px 0 0; padding: 7px 8px; border-left: 4px solid #777; background: #f4f4f4; font-size: 13px; font-weight: 700; }
+.whatif__verdict small { font-size: 10px; font-weight: 400; color: var(--muted); }
+.whatif__verdict--ok { border-left-color: var(--live); }
+.whatif__verdict--warn { border-left-color: var(--warn); }
+.whatif__verdict--bad { border-left-color: var(--error); }
+.whatif__verdict--missing { border-left-color: #8a8a8a; }
+.whatif__grid { display: grid; grid-template-columns: 128px minmax(0, 1fr); margin: 7px 0 0; }
+.whatif__grid dt, .whatif__grid dd { margin: 0; padding: 4px 3px; border-top: 1px solid #c4c4c4; overflow-wrap: anywhere; }
+.whatif__grid dt { color: var(--muted); }
+.whatif__stops { width: 100%; margin-top: 6px; border-collapse: collapse; font-size: 10px; }
+.whatif__stops th, .whatif__stops td { padding: 3px 4px; border-top: 1px solid #c4c4c4; text-align: right; }
+.whatif__stops th:first-child, .whatif__stops td:first-child { text-align: left; }
+.whatif__stops th { color: var(--muted); font-weight: 600; }
+.whatif__assumptions { margin-top: 8px; color: var(--muted); }
+.whatif__assumptions ul { margin: 4px 0 0; padding-left: 16px; }

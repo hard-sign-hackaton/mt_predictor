@@ -13,24 +13,6 @@
       "intervalMs": 1000,
       "autoGenerate": true,
       "cells": []
-    },
-    {
-      "unitId": 990000509,
-      "intervalMs": 1000,
-      "autoGenerate": true,
-      "cells": []
-    },
-    {
-      "unitId": 990000711,
-      "intervalMs": 1000,
-      "autoGenerate": true,
-      "cells": []
-    },
-    {
-      "unitId": 990000913,
-      "intervalMs": 1000,
-      "autoGenerate": true,
-      "cells": []
     }
   ]
 }

@@ -233,3 +233,118 @@ interface LiveEventEnvelope<TType extends string> {
   type: TType
   occurredAt: string
 }
+
+/**
+ * Режим сценария «выпуск дополнительного ТС».
+ *
+ * relieve делит рейс между двумя ТС: опубликованное расписание не меняется,
+ * поэтому интервал обслуживания остаётся прежним, а выигрыш есть только в
+ * объёме работы на одно ТС. duplicate выполняет те же события параллельно,
+ * поэтому интервал действительно сокращается, но работа дублируется.
+ */
+export type WhatIfMode = 'relieve' | 'duplicate'
+
+/**
+ * Вывод о выполнимости сценария. Значения, связанные с недоступностью данных,
+ * приходят вместо расчётных чисел, поэтому «нет данных» нельзя перепутать с
+ * нулевой задержкой.
+ */
+export type WhatIfVerdict =
+  | 'feasible'
+  | 'tight'
+  | 'infeasible'
+  | 'run_in_past'
+  | 'run_too_far'
+  | 'unknown_vehicle'
+  | 'no_position'
+  | 'stale_position'
+  | 'empty_occurrence'
+
+export interface WhatIfCandidate {
+  unitId: number
+  trId?: number
+  hasSchedule?: boolean
+  matchStatus: MatchStatus
+  freshness: TelemetryFreshness
+  position?: GeoPoint
+  eventTime: string
+}
+
+export interface WhatIfTarget {
+  occurrenceId: string
+  trId: number
+  routePatternId: string
+  /** Индекс события расписания, с которого кандидат ведёт рейс. */
+  joinCallIndex: number
+  joinActionItemId: number
+  joinStopId: string
+  joinStopAddress: string
+  joinPlannedAt: string
+  totalCalls: number
+  uniqueStops: number
+}
+
+export interface WhatIfDeadhead {
+  /** Отсутствует, если расстояние вычислить невозможно. */
+  verdict?: WhatIfVerdict
+  meters?: number
+  seconds?: number
+  slackSeconds?: number
+  assumedEmptySpeedKmh: number
+  availableFrom?: string
+  requiredBy?: string
+  unavailableReason?: string
+}
+
+export interface WhatIfConflict {
+  detected: boolean
+  occurrenceId?: string
+  trId?: number
+  validFrom?: string
+  validTo?: string
+}
+
+/** Как рейс делится между двумя ТС. Одинаково для обоих режимов. */
+export interface WhatIfPartition {
+  callsVehicleOne: number
+  callsVehicleTwo: number
+  stopsServedByOne: number
+  stopsServedByTwo: number
+  fullRunSeconds?: number
+  /** Единственная честная мера выигрыша в режиме relieve. */
+  longestVehicleRunSeconds?: number
+}
+
+/** Интервал обслуживания остановок. В режиме relieve значения равны. */
+export interface WhatIfServiceInterval {
+  meanHeadwayBeforeSeconds?: number
+  meanHeadwayAfterSeconds?: number
+  /** В режиме relieve список пуст, потому что интервалы не меняются. */
+  improvedStops: WhatIfStopImpact[]
+}
+
+export interface WhatIfStopImpact {
+  stopId: string
+  address?: string
+  visitsBefore: number
+  visitsAfter: number
+  headwayBeforeSeconds?: number
+  headwayAfterSeconds?: number
+  /** Доля сокращения интервала; в режиме relieve равна нулю. */
+  reduction?: number
+}
+
+export interface WhatIfReport {
+  mode: WhatIfMode
+  candidate: WhatIfCandidate
+  target: WhatIfTarget
+  deadhead: WhatIfDeadhead
+  conflict: WhatIfConflict
+  partition: WhatIfPartition
+  serviceInterval: WhatIfServiceInterval
+  /** Всегда null: сокращение задержки по графику не вычисляется. */
+  scheduleReliefSeconds: number | null
+  unavailableReason: string
+  assumptions: string[]
+  generatedAt: string
+}

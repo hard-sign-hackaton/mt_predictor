@@ -41,13 +41,13 @@ services:
       - -file
       - /dataset/validate/traffic.csv
       - -vehicles
-      - "8"
+      - "2"
       - -speed
-      - "50"
+      - "10"
       - -timestamp-mode
       - source
     volumes:
-      - ../../dataset:/dataset:ro
+      - ../dataset:/dataset:ro
     depends_on:
       - backend
     restart: on-failure

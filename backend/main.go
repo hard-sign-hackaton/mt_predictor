@@ -83,7 +83,7 @@ func run(ndtpAddr, httpAddr, catalogPath string, telemetryTTL time.Duration, mlA
 	}
 
 	httpServer := &http.Server{
-		Addr: httpAddr, Handler: dashboard.NewAPI(initPayload, runtime),
+		Addr: httpAddr, Handler: dashboard.NewAPI(initPayload, runtime, routeCatalog),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { LiveMap } from '../components/LiveMap'
+import { WhatIfPanel } from '../components/WhatIfPanel'
 import { useLiveMap } from '../live/liveMapContext'
 import type { GeometryQuality, VehicleState } from '../api/types'
 import {
@@ -47,6 +48,11 @@ export function NetworkPage() {
   const filteredRoutes = useMemo(() => catalog?.routes.filter((route) => route.id.toLowerCase().includes(search.toLowerCase())) ?? [], [catalog, search])
   const visibleVehicles = useMemo(() => filterVehicles(vehicles, routeFilter, delayFilter), [delayFilter, routeFilter, vehicles])
   const selectedVehicle = visibleVehicles.find((vehicle) => vehicle.unitId === selectedVehicleId)
+  const candidateHasSchedule = useMemo(
+    () => catalog?.vehicleBindings.find((binding) => binding.unitId === selectedVehicleId)?.hasSchedule,
+    [catalog, selectedVehicleId],
+  )
+  const schedulableOccurrences = useMemo(() => catalog?.occurrences ?? [], [catalog])
   const mappedCount = visibleVehicles.filter(isOnRoute).length
   const liveCount = visibleVehicles.filter((vehicle) => freshness(vehicle) === 'live').length
   const knownDelayCount = vehicles.filter((vehicle) => vehicle.currentDelaySeconds !== undefined).length
@@ -141,6 +147,12 @@ export function NetworkPage() {
           <dt>Пакет NDTP</dt><dd>{formatTime(selectedVehicle.eventTime)}</dd>
         </dl>
       </section>}
+      {selectedVehicle && <WhatIfPanel
+        vehicle={selectedVehicle}
+        vehicleName={vehicleName(selectedVehicle)}
+        occurrences={schedulableOccurrences}
+        hasSchedule={candidateHasSchedule ?? true}
+      />}
       <div className="vehicle-list">
         {visibleVehicles.map((vehicle) => <button key={vehicle.unitId} className={vehicle.unitId === selectedVehicleId ? 'vehicle-row vehicle-row--selected' : 'vehicle-row'} onClick={() => setSelectedVehicleId(vehicle.unitId)}>
           <span className={`freshness freshness--${freshness(vehicle)}`} />
