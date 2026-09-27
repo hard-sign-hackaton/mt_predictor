@@ -20,6 +20,7 @@ type Catalog struct {
 	unitToTR        map[uint32]int64
 	stopByID        map[string]Stop
 	patternByID     map[string]RoutePattern
+	assignmentByID  map[string]RouteAssignment
 	assignmentsByTR map[int64][]RouteAssignment
 }
 
@@ -103,6 +104,7 @@ func (c *Catalog) buildIndexes() error {
 	c.unitToTR = make(map[uint32]int64, len(c.VehicleBindings))
 	c.stopByID = make(map[string]Stop, len(c.Stops))
 	c.patternByID = make(map[string]RoutePattern, len(c.RoutePatterns))
+	c.assignmentByID = make(map[string]RouteAssignment, len(c.Assignments))
 	c.assignmentsByTR = make(map[int64][]RouteAssignment)
 	for _, binding := range c.VehicleBindings {
 		if previous, exists := c.unitToTR[binding.UnitID]; exists && previous != binding.TRID {
@@ -120,6 +122,7 @@ func (c *Catalog) buildIndexes() error {
 		if _, exists := c.patternByID[assignment.RoutePatternID]; !exists {
 			return fmt.Errorf("assignment %s references missing pattern %s", assignment.OccurrenceID, assignment.RoutePatternID)
 		}
+		c.assignmentByID[assignment.OccurrenceID] = assignment
 		c.assignmentsByTR[assignment.TRID] = append(c.assignmentsByTR[assignment.TRID], assignment)
 	}
 	for trID := range c.assignmentsByTR {
@@ -142,4 +145,17 @@ func (c *Catalog) AssignmentsForTR(trID int64) []RouteAssignment {
 func (c *Catalog) Pattern(patternID string) (RoutePattern, bool) {
 	pattern, ok := c.patternByID[patternID]
 	return pattern, ok
+}
+
+// Assignment возвращает рейс с упорядоченными событиями расписания. Online-
+// конвейер использует его для выбора цели ML в окне 10–15 минут.
+func (c *Catalog) Assignment(occurrenceID string) (RouteAssignment, bool) {
+	assignment, ok := c.assignmentByID[occurrenceID]
+	return assignment, ok
+}
+
+// Stop возвращает физическую остановку для читаемого описания прогноза.
+func (c *Catalog) Stop(stopID string) (Stop, bool) {
+	stop, ok := c.stopByID[stopID]
+	return stop, ok
 }

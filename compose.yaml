@@ -1,4 +1,16 @@
 services:
+  ml:
+    build:
+      context: ./ml
+      args:
+        INSTALL_ONNX_RUNTIME: "1"
+    environment:
+      TRANSFORMER_BACKEND: onnx
+      MODEL_DEVICE: cpu
+    ports:
+      - "50051:50051"
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -6,6 +18,8 @@ services:
       - "8080:8080"
       - "9201:9201"
     restart: unless-stopped
+    depends_on:
+      - ml
 
   frontend:
     build:
@@ -30,7 +44,8 @@ services:
       - "8"
       - -speed
       - "50"
-      - -loop
+      - -timestamp-mode
+      - source
     volumes:
       - ../../dataset:/dataset:ro
     depends_on:

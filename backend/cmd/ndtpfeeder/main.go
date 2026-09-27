@@ -41,13 +41,14 @@ import (
 
 func main() {
 	var (
-		addr     = flag.String("addr", "127.0.0.1:9201", "NDTP receiver address")
-		file     = flag.String("file", "", "path to traffic.csv (required)")
-		speed    = flag.Float64("speed", 60, "replay rate multiplier; 0 sends as fast as possible")
-		vehicles = flag.Int("vehicles", 11, "how many vehicles to replay; 0 replays every vehicle with a real trajectory")
-		limit    = flag.Int("limit", 0, "stop after this many points per vehicle; 0 replays everything")
-		loop     = flag.Bool("loop", false, "restart the replay when it ends")
-		verbose  = flag.Bool("v", false, "log every point")
+		addr          = flag.String("addr", "127.0.0.1:9201", "NDTP receiver address")
+		file          = flag.String("file", "", "path to traffic.csv (required)")
+		speed         = flag.Float64("speed", 60, "replay rate multiplier; 0 sends as fast as possible")
+		vehicles      = flag.Int("vehicles", 11, "how many vehicles to replay; 0 replays every vehicle with a real trajectory")
+		limit         = flag.Int("limit", 0, "stop after this many points per vehicle; 0 replays everything")
+		loop          = flag.Bool("loop", false, "restart the replay when it ends")
+		timestampMode = flag.String("timestamp-mode", "rebased", "device timestamp: rebased or source")
+		verbose       = flag.Bool("v", false, "log every point")
 	)
 	flag.Parse()
 
@@ -62,13 +63,14 @@ func main() {
 		os.Exit(2)
 	}
 	if err := run(runConfig{
-		Addr:     *addr,
-		File:     *file,
-		Speed:    *speed,
-		Vehicles: *vehicles,
-		Limit:    *limit,
-		Loop:     *loop,
-		Logger:   logger,
+		Addr:          *addr,
+		File:          *file,
+		Speed:         *speed,
+		Vehicles:      *vehicles,
+		Limit:         *limit,
+		Loop:          *loop,
+		TimestampMode: *timestampMode,
+		Logger:        logger,
 	}); err != nil {
 		logger.Error("feeder stopped", "error", err)
 		os.Exit(1)
@@ -76,13 +78,14 @@ func main() {
 }
 
 type runConfig struct {
-	Addr     string
-	File     string
-	Speed    float64
-	Vehicles int
-	Limit    int
-	Loop     bool
-	Logger   *slog.Logger
+	Addr          string
+	File          string
+	Speed         float64
+	Vehicles      int
+	Limit         int
+	Loop          bool
+	TimestampMode string
+	Logger        *slog.Logger
 }
 
 // signalContext cancels on Ctrl-C so a long replay stops cleanly.
@@ -94,10 +97,21 @@ func signalContext() (context.Context, context.CancelFunc) {
 type sample struct {
 	// offset is the delay relative to the first point of the vehicle.
 	offset time.Duration
-	nav    ndtp.NavCell
+	// sourceTime сохраняет event_time CSV для строгого сопоставления с расписанием.
+	sourceTime time.Time
+	nav        ndtp.NavCell
 }
 
 func run(cfg runConfig) error {
+	if cfg.TimestampMode == "" {
+		cfg.TimestampMode = "rebased"
+	}
+	if cfg.TimestampMode != "rebased" && cfg.TimestampMode != "source" {
+		return fmt.Errorf("unknown timestamp mode %q", cfg.TimestampMode)
+	}
+	if cfg.TimestampMode == "source" && cfg.Loop {
+		return errors.New("timestamp-mode=source cannot be combined with loop: event_time must stay monotonic")
+	}
 	tracks, err := loadTracks(cfg.File, cfg.Vehicles, cfg.Limit, cfg.Logger)
 	if err != nil {
 		return err
@@ -111,7 +125,7 @@ func run(cfg runConfig) error {
 	}
 	cfg.Logger.Info("loaded telemetry",
 		"file", cfg.File, "vehicles", len(tracks), "points", total,
-		"speed", cfg.Speed, "loop", cfg.Loop)
+		"speed", cfg.Speed, "loop", cfg.Loop, "timestamp_mode", cfg.TimestampMode)
 
 	ctx, stop := signalContext()
 	defer stop()
@@ -188,8 +202,13 @@ func feedVehicle(ctx context.Context, cfg runConfig, start time.Time, unit uint3
 		}
 		requestID++
 		nav := s.nav
-		// The device clock follows the replayed timeline, not the wall clock.
-		nav.Timestamp = sentAt
+		if cfg.TimestampMode == "source" {
+			// ML-demo должен оставаться в календаре исторического расписания.
+			nav.Timestamp = s.sourceTime
+		} else {
+			// Обычный replay выглядит как текущий live-поток.
+			nav.Timestamp = sentAt
+		}
 
 		body := ndtp.AppendCell(nil, ndtp.CellNav00, 0, ndtp.EncodeNavCell(nav))
 		body = ndtp.AppendCell(body, ndtp.CellUsi08, 0, make([]byte, 6))
@@ -321,7 +340,7 @@ func loadTracks(path string, wantVehicles, limit int, logger *slog.Logger) (map[
 		origin := rows[0].at
 		track := make([]sample, 0, len(rows))
 		for _, r := range rows {
-			track = append(track, sample{offset: r.at.Sub(origin), nav: r.nav})
+			track = append(track, sample{offset: r.at.Sub(origin), sourceTime: r.at, nav: r.nav})
 		}
 		tracks[unit] = track
 	}

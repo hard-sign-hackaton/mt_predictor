@@ -1,19 +1,90 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { RiskBadge } from '../components/StatusBadge'
-import { useDashboard } from '../store'
-import type { IncidentStatus } from '../types'
-import { formatDelay, formatTime, incidentStatusLabel } from '../utils'
+import { riskFromDelaySeconds, type RiskLevel } from '../api/risk'
+import type { DelayPrediction, Incident } from '../api/types'
+import { useLiveMap } from '../live/liveMapContext'
+
+type RiskFilter = 'all' | RiskLevel
+
+const riskLabel: Record<RiskLevel, string> = {
+  normal: 'Низкая',
+  watch: 'Средняя · WATCH',
+  high: 'Высокая · HIGH',
+}
+
+function formatDelay(value: number) {
+  const sign = value >= 0 ? '+' : '−'
+  const absolute = Math.round(Math.abs(value))
+  const minutes = Math.floor(absolute / 60)
+  const seconds = absolute % 60
+  return `${sign}${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+  }).format(new Date(value))
+}
+
+function horizonMinutes(prediction?: DelayPrediction) {
+  if (!prediction) return '—'
+  return `${Math.round((new Date(prediction.targetPlannedAt).getTime() - new Date(prediction.predictionTime).getTime()) / 60_000)} мин`
+}
+
+function searchable(incident: Incident) {
+  return `${incident.id} ${incident.unitId} ${incident.trId} ${incident.routePatternId} ${incident.targetStop.id} ${incident.targetStop.address}`.toLowerCase()
+}
 
 export function IncidentsPage() {
-  const { state } = useDashboard()
-  const navigate = useNavigate()
+  const { catalog, incidents, predictions, connection } = useLiveMap()
   const [query, setQuery] = useState('')
-  const [status, setStatus] = useState<IncidentStatus | 'all'>('all')
-  const [group, setGroup] = useState<'none' | 'route' | 'risk'>('none')
-  const filtered = useMemo(() => state.incidents.filter((incident) => (status === 'all' || incident.status === status) && `${incident.id} ${incident.routeId} ${incident.vehicleId} ${incident.reason}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => group === 'route' ? a.routeId.localeCompare(b.routeId) : group === 'risk' ? Number(b.risk === 'high') - Number(a.risk === 'high') : b.updatedAt.localeCompare(a.updatedAt)), [group, query, state.incidents, status])
-  return <div className="page"><header className="page-header"><div><p className="eyebrow">Контроль ситуаций</p><h1>Инциденты</h1></div><Link className="button-link" to="/journal">Журнал действий →</Link></header>
-    <section className="filterbar"><input aria-label="Поиск инцидентов" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск: ID / маршрут / ТС / причина" /><div className="tabs">{(['all', 'new', 'in_progress', 'closed'] as const).map((value) => <button className={status === value ? 'active' : ''} key={value} onClick={() => setStatus(value)}>{value === 'all' ? 'Все' : incidentStatusLabel[value]}</button>)}</div><label>Группировка<select value={group} onChange={(event) => setGroup(event.target.value as typeof group)}><option value="none">Нет</option><option value="route">Маршрут</option><option value="risk">Риск</option></select></label></section>
-    <section className="panel table-panel"><table><thead><tr><th>ID / статус</th><th>Приоритет</th><th>Маршрут / ТС</th><th>Прогноз</th><th>Цель</th><th>Причина</th><th>Ответственный</th><th>Обновлён</th></tr></thead><tbody>{filtered.map((incident) => <tr key={incident.id} onClick={() => navigate(`/incidents?incident=${incident.id}`)}><td><b>{incident.id}</b><br /><small>{incidentStatusLabel[incident.status]}</small></td><td><RiskBadge risk={incident.risk} />{incident.repeatedHighCount > 1 && <small className="repeat-flag">×{incident.repeatedHighCount} HIGH</small>}</td><td><Link onClick={(event) => event.stopPropagation()} to={`/routes/${incident.routeId}`}>{incident.routeId}</Link> / {incident.vehicleId}</td><td>{formatDelay(incident.predictedDelaySeconds)}<br /><small>через {incident.horizonMinutes} мин. · {Math.round(incident.confidence * 100)}%</small></td><td>{incident.targetStop}</td><td>{incident.reason}</td><td>{incident.owner}</td><td>{formatTime(incident.updatedAt)}</td></tr>)}</tbody></table>{!filtered.length && <div className="empty-state"><strong>Ничего не найдено</strong><span>Измените поиск или фильтр состояния.</span></div>}</section>
-  </div>
+  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all')
+
+  const predictionsByID = useMemo(() => new Map(predictions.map((prediction) => [prediction.id, prediction])), [predictions])
+  const rows = useMemo(() => {
+    if (!catalog) return []
+    return incidents
+      .filter((incident) => searchable(incident).includes(query.trim().toLowerCase()))
+      .filter((incident) => riskFilter === 'all' || riskFromDelaySeconds(incident.predictedDelaySeconds, catalog.riskThresholds) === riskFilter)
+      .sort((left, right) => right.predictedDelaySeconds - left.predictedDelaySeconds)
+  }, [catalog, incidents, query, riskFilter])
+
+  if (!catalog) return <div className="incidents-loading">Загрузка данных инцидентов…</div>
+
+  return <main className="incidents-page">
+    <header className="incidents-heading">
+      <div><h1>Инциденты прогнозируемых задержек</h1><p>Только активные прогнозы первой остановки в горизонте 10–15 минут. Управляющие действия пока отключены.</p></div>
+      <div><strong>{incidents.length}</strong><span>активных</span><small>{connection === 'live' ? 'LIVE' : connection}</small></div>
+    </header>
+
+    <section className="incidents-filters" aria-label="Фильтры инцидентов">
+      <input aria-label="Поиск инцидентов" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="ТС, tr_id, остановка или ID паттерна" />
+      <label>Критичность<select value={riskFilter} onChange={(event) => setRiskFilter(event.target.value as RiskFilter)}>
+        <option value="all">Все активные</option>
+        <option value="normal">Низкая</option>
+        <option value="watch">Средняя · WATCH</option>
+        <option value="high">Высокая · HIGH</option>
+      </select></label>
+      {(query || riskFilter !== 'all') && <button onClick={() => { setQuery(''); setRiskFilter('all') }}>Сбросить</button>}
+    </section>
+
+    <section className="incidents-table-wrap">
+      <table className="incidents-table">
+        <thead><tr><th>Критичность</th><th>Транспорт</th><th>Маршрутный контекст</th><th>Целевая остановка</th><th>Прогноз</th><th>Горизонт / план</th><th>Обновлено</th></tr></thead>
+        <tbody>{rows.map((incident) => {
+          const prediction = predictionsByID.get(incident.predictionId)
+          const risk = riskFromDelaySeconds(incident.predictedDelaySeconds, catalog.riskThresholds)
+          return <tr key={incident.id}>
+            <td><span className={`incident-risk incident-risk--${risk}`}>{riskLabel[risk]}</span></td>
+            <td><strong>ТС {incident.unitId}</strong><small>tr_id {incident.trId}</small></td>
+            <td><strong>{incident.routePatternId.replace('route_pattern_', 'pattern ')}</strong><small>вычисленный паттерн, не официальный номер</small></td>
+            <td><strong>{incident.targetStop.address || 'Адрес не указан'}</strong><small>stop {incident.targetStop.id} · action {incident.targetActionItemId}</small></td>
+            <td><strong className="incident-delay">{formatDelay(incident.predictedDelaySeconds)}</strong><small>прогноз задержки</small></td>
+            <td><strong>{horizonMinutes(prediction)}</strong><small>{prediction ? `план ${formatDateTime(prediction.targetPlannedAt)}` : 'план недоступен'}</small></td>
+            <td><strong>{formatDateTime(incident.updatedAt)}</strong><small>создан {formatDateTime(incident.createdAt)}</small></td>
+          </tr>
+        })}</tbody>
+      </table>
+      {!rows.length && <div className="incidents-empty"><strong>{incidents.length ? 'Нет инцидентов по выбранным фильтрам' : 'Активных инцидентов пока нет'}</strong><span>{incidents.length ? 'Измените поиск или критичность.' : 'Инцидент появится после подтверждения текущей задержки и ML-прогноза больше 120 секунд.'}</span></div>}
+    </section>
+  </main>
 }

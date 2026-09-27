@@ -21,6 +21,7 @@ func NewAPI(init models.DashboardInit, runtime *Runtime) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/map/init", api.handleInit)
 	mux.HandleFunc("GET /api/v1/map/snapshot", api.handleSnapshot)
+	mux.HandleFunc("GET /api/v1/dashboard/snapshot", api.handleDashboardSnapshot)
 	mux.HandleFunc("GET /api/v1/map/events", api.handleEvents)
 	mux.HandleFunc("GET /health", api.handleHealth)
 	return withCORS(mux)
@@ -34,11 +35,16 @@ func (a *API) handleSnapshot(response http.ResponseWriter, _ *http.Request) {
 	writeJSON(response, http.StatusOK, a.runtime.Snapshot(time.Now()))
 }
 
+func (a *API) handleDashboardSnapshot(response http.ResponseWriter, _ *http.Request) {
+	writeJSON(response, http.StatusOK, a.runtime.DashboardSnapshot(time.Now()))
+}
+
 func (a *API) handleHealth(response http.ResponseWriter, _ *http.Request) {
-	snapshot := a.runtime.Snapshot(time.Now())
+	snapshot := a.runtime.DashboardSnapshot(time.Now())
 	writeJSON(response, http.StatusOK, map[string]any{
 		"status": "ok", "catalogVersion": a.init.CatalogVersion,
 		"streamVersion": snapshot.Version, "vehicles": len(snapshot.Vehicles),
+		"predictions": len(snapshot.Predictions), "incidents": len(snapshot.Incidents),
 	})
 }
 
@@ -54,7 +60,7 @@ func (a *API) handleEvents(response http.ResponseWriter, request *http.Request) 
 
 	events, unsubscribe := a.runtime.Subscribe()
 	defer unsubscribe()
-	if err := writeSSE(response, "snapshot", a.runtime.Snapshot(time.Now())); err != nil {
+	if err := writeSSE(response, "snapshot", a.runtime.DashboardSnapshot(time.Now())); err != nil {
 		return
 	}
 	flusher.Flush()

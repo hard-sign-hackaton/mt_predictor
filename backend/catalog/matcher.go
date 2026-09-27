@@ -49,6 +49,11 @@ type MatchResult struct {
 	NextActionItemID    int64       `json:"next_action_item_id,omitempty"`
 	DistanceToRouteM    float64     `json:"distance_to_route_m,omitempty"`
 	GeometryQuality     string      `json:"geometry_quality,omitempty"`
+	// Поля ниже нужны feature pipeline и намеренно не сериализуются наружу.
+	SegmentIndex         int       `json:"-"`
+	PreviousActionItemID int64     `json:"-"`
+	PreviousPlannedAt    time.Time `json:"-"`
+	NextPlannedAt        time.Time `json:"-"`
 }
 
 type Matcher struct{ catalog *Catalog }
@@ -115,6 +120,10 @@ func (m *Matcher) Match(telemetry Telemetry) MatchResult {
 	}
 	previous, next := best.Events[segment], best.Events[segment+1]
 	result.Status = MatchMatched
+	result.SegmentIndex = segment
+	result.PreviousActionItemID = previous.ActionItemID
+	result.PreviousPlannedAt = previous.PlannedAt
+	result.NextPlannedAt = next.PlannedAt
 	result.PreviousStopID = previous.StopID
 	result.NextStopID = next.StopID
 	result.NextActionItemID = next.ActionItemID
@@ -177,6 +186,10 @@ func (m *Matcher) matchSpatial(telemetry Telemetry, trID int64) MatchResult {
 	}
 	previous, next := best.Events[segment], best.Events[segment+1]
 	result.Status = MatchMatchedSpatial
+	result.SegmentIndex = segment
+	result.PreviousActionItemID = previous.ActionItemID
+	result.PreviousPlannedAt = previous.PlannedAt
+	result.NextPlannedAt = next.PlannedAt
 	result.PreviousStopID = previous.StopID
 	result.NextStopID = next.StopID
 	result.NextActionItemID = next.ActionItemID

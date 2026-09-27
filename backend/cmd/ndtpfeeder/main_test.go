@@ -431,6 +431,31 @@ func TestRunStampsDeviceTimeOnTheReplayedTimeline(t *testing.T) {
 		"the replayed timeline is re-based onto the current clock")
 }
 
+func TestSourceTimestampModePreservesDatasetEventTime(t *testing.T) {
+	points := make(chan ndtp.TelemetryPoint, 8)
+	receiver := ndtp.NewServer(ndtp.Options{Addr: "127.0.0.1:0", OnTelemetry: func(p ndtp.TelemetryPoint) { points <- p }, Logger: quietLogger()})
+	require.NoError(t, receiver.Listen())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go receiver.Serve(ctx)
+	defer receiver.Close()
+
+	path := writeCSV(t,
+		"p1,1,893159,2026-01-06 12:30:31,0,True,,37.6,55.7,150,24.0,180.0,,False",
+		"p2,1,893159,2026-01-06 12:30:33,0,True,,37.6,55.7,150,24.0,180.0,,False",
+	)
+	feeder := startFeeder(runConfig{Addr: receiver.Addr().String(), File: path, Speed: 0, Vehicles: 0, TimestampMode: "source", Logger: quietLogger()})
+	got := collectPoints(t, points, feeder, 2, receiver.Stats)
+	feeder.wait(t, 10*time.Second)
+	assert.Equal(t, time.Date(2026, 1, 6, 12, 30, 31, 0, time.UTC), got[0].Nav.Timestamp)
+	assert.Equal(t, time.Date(2026, 1, 6, 12, 30, 33, 0, time.UTC), got[1].Nav.Timestamp)
+}
+
+func TestSourceTimestampModeRejectsLoop(t *testing.T) {
+	err := run(runConfig{TimestampMode: "source", Loop: true, Logger: quietLogger()})
+	require.EqualError(t, err, "timestamp-mode=source cannot be combined with loop: event_time must stay monotonic")
+}
+
 func TestReplayReportsDialFailure(t *testing.T) {
 	// Port 1 on loopback refuses connections.
 	err := replay(context.Background(), runConfig{

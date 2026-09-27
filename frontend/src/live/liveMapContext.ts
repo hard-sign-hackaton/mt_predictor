@@ -1,11 +1,13 @@
 import { createContext, useContext } from 'react'
-import type { DashboardInit, VehicleState } from '../api/types'
+import type { DashboardInit, DelayPrediction, Incident, VehicleState } from '../api/types'
 
 export type ConnectionState = 'loading' | 'live' | 'reconnecting' | 'error'
 
 export interface LiveMapState {
   catalog?: DashboardInit
   vehicles: VehicleState[]
+  predictions: DelayPrediction[]
+  incidents: Incident[]
   version: number
   connection: ConnectionState
   error?: string
